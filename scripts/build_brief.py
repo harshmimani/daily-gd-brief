@@ -563,7 +563,9 @@ class GeminiClient:
             return None
         if self.candidates is None:
             self.candidates = self.discover_models()
-        models = [self.model_used] if self.model_used else self.candidates
+        # Prefer the model that last worked, but keep the others as fallbacks
+        # (a brand-new model is often overloaded and returns 503 for a while).
+        models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
         for model in models:
             for attempt in range(GEMINI_MAX_RETRIES):
                 if self.calls:
@@ -579,10 +581,10 @@ class GeminiClient:
                                 "responseMimeType": "application/json",
                             },
                         },
-                        timeout=90,
+                        timeout=120,
                     )
                 except Exception as exc:  # noqa: BLE001
-                    log(f"  Gemini network error ({type(exc).__name__}), retrying")
+                    log(f"  Gemini {model}: network error ({type(exc).__name__})")
                     continue
                 if r.status_code == 200:
                     try:
@@ -600,6 +602,12 @@ class GeminiClient:
                     log(f"  Gemini rate limit on {model}; waiting {wait}s")
                     time.sleep(wait)
                     continue
+                if r.status_code >= 500:
+                    log(f"  Gemini {model}: HTTP {r.status_code} (overloaded)")
+                    if attempt >= 1:
+                        break  # two failures in a row: try the next model instead
+                    time.sleep(5)
+                    continue
                 if r.status_code in (404, 400, 403):
                     detail = ""
                     try:
@@ -608,9 +616,9 @@ class GeminiClient:
                         pass
                     log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
                     break
-                log(f"  Gemini HTTP {r.status_code}; retrying")
-            if self.model_used == model:
-                break
+                log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
+            if model != models[-1]:
+                log(f"  Switching to next model")
         self.failures += 1
         return None
 
