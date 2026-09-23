@@ -144,6 +144,78 @@ class TestFallbackTopic(unittest.TestCase):
         self.assertTrue(topic["fallback"])
 
 
+class FakeResponse:
+    def __init__(self, status, payload=None, text=""):
+        self.status_code = status
+        self._payload = payload or {}
+        self.text = text
+
+    def json(self):
+        return self._payload
+
+
+def ok_payload(obj):
+    return {"candidates": [{"content": {"parts": [{"text": __import__("json").dumps(obj)}]}}]}
+
+
+class TestGeminiFailover(unittest.TestCase):
+    """The 23 Sep failure mode: newest models 503, one model rate limits."""
+
+    def setUp(self):
+        self.calls = []
+        bb.GEMINI_DELAY_SECONDS_ORIG = bb.GEMINI_DELAY_SECONDS
+        bb.GEMINI_DELAY_SECONDS = 0
+
+    def tearDown(self):
+        bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+
+    def client(self, responder):
+        client = bb.GeminiClient("fake-key")
+        client.candidates = ["m-new", "m-mid", "m-old"]
+
+        def fake_post(url, **kwargs):
+            model = url.split("/models/")[1].split(":")[0]
+            self.calls.append(model)
+            return responder(model)
+
+        bb.requests.post = fake_post
+        return client
+
+    def test_overloaded_model_is_dropped_for_the_whole_run(self):
+        def responder(model):
+            if model == "m-new":
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, ok_payload([{"index": 0}]))
+
+        client = self.client(responder)
+        self.assertIsNotNone(client.generate_json("p", "one"))
+        self.assertIsNotNone(client.generate_json("p", "two"))
+        self.assertEqual(self.calls.count("m-new"), 1, "503 model must not be retried")
+        self.assertIn("m-new", client.bad_models)
+
+    def test_daily_quota_switches_model_instead_of_stopping(self):
+        payload = {"error": {"message": "Quota exceeded for GenerateRequestsPerDayPerProject",
+                             "details": [{"@type": "type.googleapis.com/google.rpc.QuotaFailure"}]}}
+
+        def responder(model):
+            if model == "m-new":
+                return FakeResponse(429, payload)
+            return FakeResponse(200, ok_payload({"ok": True}))
+
+        client = self.client(responder)
+        self.assertEqual(client.generate_json("p", "one"), {"ok": True})
+        self.assertEqual(client.bad_models.get("m-new"), "daily quota exhausted")
+        self.assertFalse(client.stopped)
+
+    def test_parse_quota_error_reads_retry_delay(self):
+        payload = {"error": {"message": "Quota exceeded",
+                             "details": [{"retryDelay": "27s"}]}}
+        msg, delay, per_day = bb.parse_quota_error(FakeResponse(429, payload))
+        self.assertIn("Quota", msg)
+        self.assertGreater(delay, 27)
+        self.assertFalse(per_day)
+
+
 class TestMisc(unittest.TestCase):
     def test_safe_url(self):
         self.assertTrue(bb.safe_url("https://example.com/a"))
