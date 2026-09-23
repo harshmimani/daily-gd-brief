@@ -356,3 +356,139 @@ li + li { margin-top: .35rem; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* =======================================================================
+   v2 additions: notices, jump chips, story actions, saved view, search
+   ======================================================================= */
+
+/* Stale-brief warning ---------------------------------------------------- */
+.notice {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius);
+  padding: .75rem .9rem;
+  font-size: .92rem;
+  line-height: 1.45;
+  margin-bottom: 1rem;
+}
+
+/* Hero actions ----------------------------------------------------------- */
+.hero-actions { margin-top: 1rem; }
+
+/* Category jump chips ---------------------------------------------------- */
+.chips {
+  display: flex;
+  gap: .45rem;
+  overflow-x: auto;
+  padding-bottom: .4rem;
+  margin: 0 0 .75rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: .35rem .8rem;
+  font-size: .85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip:hover { background: var(--surface-2); }
+.chip span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-left: .25rem;
+}
+
+/* Multi-source pill ------------------------------------------------------ */
+.pill {
+  display: inline-block;
+  font-size: .72rem;
+  padding: .05rem .45rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  margin-left: .25rem;
+  vertical-align: 1px;
+}
+
+/* Per-story actions ------------------------------------------------------ */
+.story-actions {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin-top: .5rem;
+}
+.chip-btn {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: .28rem .7rem;
+  font-size: .82rem;
+  cursor: pointer;
+}
+.chip-btn:hover { background: var(--surface-2); }
+.story.is-read { opacity: .55; }
+.story.is-read:hover { opacity: 1; }
+
+/* A "Context:" fact is background, not something from the article --------- */
+.fact.context {
+  background: transparent;
+  border: 1px dashed var(--rule);
+  color: var(--muted);
+}
+.fact.context strong { color: var(--ink-2); }
+
+/* Saved view ------------------------------------------------------------- */
+.saved-view h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin: 0 0 .8rem;
+}
+.saved-view .category { padding: 0 0 .5rem; }
+.saved-view .toolbar { justify-content: flex-start; margin-top: .8rem; }
+
+/* Archive search --------------------------------------------------------- */
+.search { margin-top: 1.75rem; }
+.search input {
+  width: 100%;
+  font: inherit;
+  font-size: .95rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: .55rem .75rem;
+}
+.search-results { margin-top: .5rem; display: grid; gap: .4rem; }
+.search-hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: .55rem .7rem;
+  cursor: pointer;
+  font-size: .9rem;
+}
+.search-hit:hover { background: var(--surface-2); }
+.search-hit strong { display: block; font-weight: 600; }
+.search-hit span { display: block; color: var(--ink-2); }
+.search-hit span.dim { color: var(--muted); font-size: .85rem; }
+
+/* Print: a clean one-pager for revision ---------------------------------- */
+@media print {
+  .topbar, .toolbar, .chips, .search, .story-actions, .sources, .footer { display: none !important; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .category { break-inside: avoid; border: 0; box-shadow: none; }
+  .category .body { display: block !important; }
+  .hero { border: 1px solid #ccc; }
+}

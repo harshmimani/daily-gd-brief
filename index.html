@@ -8,7 +8,11 @@
   <meta name="theme-color" content="#0F1620" media="(prefers-color-scheme: dark)">
   <meta name="description" content="A daily, curated news brief with GD angles for MBA placement preparation.">
   <title>Daily GD Brief</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23E5A11B'/%3E%3C/svg%3E">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="GD Brief">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -47,9 +51,17 @@
   </main>
 
   <footer class="footer">
-    <p>Built from free RSS feeds, refreshed every morning by GitHub Actions. Headlines link to the original publishers. AI-written commentary is a study aid, not a substitute for reading the source.</p>
+    <p>Built from free RSS feeds, refreshed every morning by GitHub Actions. At most 25 stories a day. Headlines link to the original publishers. AI-written commentary is a study aid, not a substitute for reading the source.</p>
   </footer>
 
   <script src="app.js"></script>
+  <script>
+    // Offline reading: cache the shell and the latest brief.
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>
