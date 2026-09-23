@@ -2,8 +2,10 @@ name: Build Daily GD Brief
 
 on:
   schedule:
-    # 01:00 UTC = 06:30 IST, every day. (GitHub may start it a few minutes late.)
-    - cron: "0 1 * * *"
+    # 00:17 UTC = 05:47 IST. Deliberately NOT on the hour: GitHub's scheduler is
+    # busiest at :00 and can delay (or drop) runs queued then. The early start
+    # also leaves slack, so a late run still lands before you read the brief.
+    - cron: "17 0 * * *"
   workflow_dispatch:      # adds the manual "Run workflow" button in the Actions tab
 
 # Lets the workflow push the new JSON files back to the repository.
@@ -18,7 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Check out the repository
@@ -33,13 +35,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Run tests
+        run: python -u scripts/test_build_brief.py
+
       - name: Build today's brief
+        timeout-minutes: 20
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}   # optional repository variable
-        run: python scripts/build_brief.py
+          AI_DEADLINE: "480"                        # seconds for the whole Gemini phase
+        run: python -u scripts/build_brief.py
 
+      # always() so that a failed or cancelled build still publishes whatever the
+      # script managed to write before it stopped (it writes a headlines-only
+      # brief before calling Gemini).
       - name: Commit and push the new data
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -48,6 +59,6 @@ jobs:
             echo "Nothing changed, nothing to commit."
           else
             git commit -m "Daily brief: $(TZ=Asia/Kolkata date +%Y-%m-%d)"
-            git pull --rebase origin ${GITHUB_REF_NAME}
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
