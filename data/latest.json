@@ -1,22 +1,22 @@
 {
-  "date": "2026-09-23",
-  "date_label": "Wednesday, 23 September 2026",
-  "generated_at": "2026-09-23T12:00:25.735770+05:30",
+  "date": "2026-09-24",
+  "date_label": "Thursday, 24 September 2026",
+  "generated_at": "2026-09-24T10:27:33.658078+05:30",
   "ai_enabled": true,
-  "ai_model": null,
-  "ai_story_count": 0,
+  "ai_model": "gemini-3.5-flash",
+  "ai_story_count": 18,
   "ai_errors": [
-    "curation: 429 on gemini-3.7-flash (You exceeded your current quota, please check your plan and )",
-    "curation: HTTP 404 on gemini-2.5-flash",
-    "curation: HTTP 503 on gemini-3.5-flash",
-    "curation: HTTP 503 on gemini-3.6-flash",
+    "batch 3/3: HTTP 404 on gemini-2.5-flash",
+    "batch 3/3: HTTP 503 on gemini-3.5-flash",
+    "batch 3/3: all models failed",
+    "curation: HTTP 503 on gemini-3.7-flash",
     "curation: HTTP 503 on gemini-3.8-flash",
-    "curation: all models failed",
-    "every candidate model is unavailable (gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: daily quota exhausted, gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))"
+    "every candidate model is unavailable (gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))",
+    "topic+concept: HTTP 503 on gemini-3.6-flash"
   ],
   "ai_models_dropped": [
     "gemini-3.8-flash: HTTP 503 (overloaded)",
-    "gemini-3.7-flash: daily quota exhausted",
+    "gemini-3.7-flash: HTTP 503 (overloaded)",
     "gemini-3.6-flash: HTTP 503 (overloaded)",
     "gemini-3.5-flash: HTTP 503 (overloaded)",
     "gemini-2.5-flash: HTTP 404"
@@ -24,102 +24,146 @@
   "story_count": 25,
   "story_cap": 25,
   "gd_topic": {
-    "topic": "Gold Rate Today, September 23: Check 18, 22 and 24 carat gold prices in Chennai, Mumbai, Delhi, Kolkata and other cities",
-    "why_now": "Chosen automatically from today's most-covered India-relevant stories, because AI commentary was unavailable for this brief.",
-    "opening_line": "Let me frame the discussion. This issue matters because it affects policy, industry and ordinary citizens at the same time, so it is worth separating the short-term impact from the long-term implications before we take sides.",
-    "closing_line": "To sum up, the group has surfaced both the opportunities and the risks. A balanced view would be to support the direction while insisting on safeguards, clear timelines and accountability.",
-    "perspectives": [],
-    "fallback": true
+    "topic": "Can India sustain 7%+ growth amidst rising global trade barriers and volatile capital?",
+    "why_now": "The OECD recently upgraded India's growth forecast to 7.1% citing resilient demand, yet Indian policymakers have simultaneously warned of mounting risks from global protectionism and hot money. This highlights the growing friction between India's domestic economic momentum and external geopolitical headwinds.",
+    "opening_line": "As we initiate this discussion, we must reconcile the OECD's optimistic 7.1% GDP growth forecast for India with the rising tide of global trade barriers. While domestic demand remains resilient, the critical question is whether India can successfully insulate its financial markets and supply chains from volatile global capital flows.",
+    "closing_line": "To summarize, while India's domestic consumption engine offers a strong safety net, complete decoupling from global macro shocks is highly improbable. A sustainable strategy requires India to aggressively pursue bilateral trade agreements to diversify export risks while simultaneously strengthening domestic manufacturing to reduce vulnerability to external supply chain disruptions.",
+    "perspectives": [
+      "Government: Focuses on maintaining fiscal prudence and infrastructure spending, while trying to manage volatile capital by promoting domestic manufacturing and bilateral FTAs.",
+      "Domestic Industry: Faces the dual challenge of seizing local market opportunities while battling rising input costs caused by global trade barriers and tariff disputes.",
+      "Global Investors: View India as a resilient 'China+1' investment destination but remain highly sensitive to regulatory shifts, tariff policies, and currency fluctuations."
+    ]
   },
-  "concept": null,
+  "concept": {
+    "name": "The Impossible Trinity (The Policy Trilemma)",
+    "explanation": "The Impossible Trinity is a macroeconomic concept stating that a country cannot simultaneously maintain three policy options: a fixed foreign exchange rate, free capital movement, and an independent monetary policy. A nation must choose to implement any two of these options while sacrificing the third. For example, if a central bank wants to control its domestic interest rates to fight inflation and allows capital to flow freely across borders, it must allow its currency's exchange rate to float freely. Attempting to control all three simultaneously forces the central bank into unsustainable market interventions and reserves depletion.",
+    "indian_example": "The Reserve Bank of India (RBI) operates a 'managed float' to navigate this trilemma. It prioritizes maintaining an independent monetary policy to manage domestic inflation and permits relatively free capital flows, meaning it must allow the Indian Rupee to find its market value, intervening only to curb extreme, speculative volatility rather than fixing the exchange rate.",
+    "use_in_gd": "Use this concept when discussing rupee appreciation, foreign capital flows, or RBI interest rate policies to explain why the central bank cannot arbitrarily peg the rupee's value without losing control over domestic interest rates."
+  },
   "categories": [
     {
       "key": "geopolitics",
       "title": "Geopolitics & International Relations",
       "stories": [
         {
-          "title": "Trump says U.S. will henceforth call AI ‘super intelligence’",
-          "url": "https://www.thehindu.com/news/international/super-intelligence-trump-unga-speech-ai/article71496593.ece",
+          "title": "Donald Trump voices strong support for India-Middle East-Europe economic corridor",
+          "url": "https://www.thehindu.com/news/international/donald-trump-voices-strong-support-for-india-middle-east-europe-economic-corridor/article71498530.ece",
           "source": "The Hindu",
-          "published": "2026-09-22T21:01:10+05:30",
-          "sources_count": 2,
-          "summary": "Trump declares the U.S. will refer to AI as \"super intelligence\" in official documents during a UN speech.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "published": "2026-09-23T13:37:41+05:30",
+          "sources_count": 1,
+          "summary": "US President Donald Trump has voiced strong support for the India-Middle East-Europe Economic Corridor. He emphasized the need to shift West Asian energy infrastructure away from Iranian checkpoints due to attacks on commercial shipping. The corridor aims to enhance trade and energy infrastructure amid ongoing regional tensions.",
+          "why_it_matters": "For India, strong US backing for this corridor helps counter China's Belt and Road Initiative and secures alternative, safer energy and trade trade routes through West Asia.",
+          "gd_for": [
+            "Secures international maritime trade routes from unilateral disruptions by hostile regional actors like Iran.",
+            "Strengthens India's strategic partnership with the US and Middle Eastern nations, opening massive trade opportunities."
+          ],
+          "gd_against": [
+            "High geopolitical volatility in West Asia presents continuous execution and security risks for the corridor.",
+            "Bypassing existing channels completely may alienate other regional players and complicate India's diplomatic balance."
+          ],
+          "key_fact": "Context: The India-Middle East-Europe Economic Corridor (IMEC) was first signed as a multilateral memorandum of understanding at the G20 Delhi Summit in September 2023.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Trump warns in UN speech he could 'annihilate' Iran without peace deal",
-          "url": "https://www.reuters.com/world/americas/trump-set-whirlwind-un-meetings-with-wars-iran-ukraine-agenda-2026-09-22/",
-          "source": "Reuters",
-          "published": "2026-09-23T02:37:29+05:30",
-          "sources_count": 2,
-          "summary": "Open the source link to read the full story.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Trump praises new British PM Andy Burnham but slams U.K. deal on Indian Ocean islands",
-          "url": "https://www.thehindu.com/news/international/trump-praises-new-british-pm-andy-burnham-but-slams-uk-deal-on-indian-ocean-islands/article71498109.ece",
+          "title": "Trump-Xi Summit in Washington: Key topics of discussion, schedule and more",
+          "url": "https://www.thehindu.com/news/international/trump-xi-summit-washington-visit-2026-key-agenda-itinerary-everything-to-know/article71494934.ece",
           "source": "The Hindu",
-          "published": "2026-09-23T09:04:09+05:30",
-          "sources_count": 1,
-          "summary": "Trump praises UK PM Andy Burnham's leadership while criticizing the controversial Chagos Islands sovereignty deal with Mauritius.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "US to build two military bases in Greenland under new deal with Denmark",
-          "url": "https://www.bbc.co.uk/news/articles/c9dr74g32g8go?at_medium=RSS&at_campaign=rss",
-          "source": "BBC World",
-          "published": "2026-09-23T03:06:55+05:30",
+          "published": "2026-09-23T16:03:01+05:30",
           "sources_count": 2,
-          "summary": "The defence deal signed at the UN General Assembly also re-affirms Denmark's sovereignty over its semi-autonomous Arctic territory.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Chinese President Xi Jinping is scheduled to visit Washington for a high-stakes state visit with US President Donald Trump. Their discussions will focus on critical global issues including trade, artificial intelligence, Iran, and Taiwan. The summit itinerary is set to address key geopolitical tensions.",
+          "why_it_matters": "Stable US-China relations are critical for India, as any sudden trade war escalation or military tension near Taiwan directly disrupts global supply chains and regional security.",
+          "gd_for": [
+            "Provides a formal platform to de-escalate trade wars and foster global economic stability between the two largest economies.",
+            "Establishes a critical dialogue to manage dangerous tech rivalries, particularly around artificial intelligence."
+          ],
+          "gd_against": [
+            "Direct bilateral agreements between the US and China might sideline the strategic and economic interests of emerging economies like India.",
+            "Summits often result in temporary diplomatic truces without resolving the deep-rooted structural conflicts between the two superpowers."
+          ],
+          "key_fact": "Context: US-China bilateral trade was valued at over $570 billion in 2023, reflecting the deep economic interdependence of both nations.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "US and Iran hold first talks since June after Trump's 'annihilation' threat",
-          "url": "https://www.bbc.co.uk/news/articles/ck62m1631d7po?at_medium=RSS&at_campaign=rss",
+          "title": "Iran's president tells Trump it will never 'bend the knee'",
+          "url": "https://www.bbc.co.uk/news/articles/cqvgyjy23ggjo?at_medium=RSS&at_campaign=rss",
           "source": "BBC World",
-          "published": "2026-09-23T11:42:56+05:30",
-          "sources_count": 1,
-          "summary": "The talks are the first since a ceasefire collapsed in June, with the sides exchanging fire intermittently.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "published": "2026-09-23T23:45:31+05:30",
+          "sources_count": 3,
+          "summary": "Iranian President Masoud Pezeshkian delivered a defiant speech at the United Nations, declaring that Iran will never bend the knee. This statement follows threats from US President Trump to annihilate Iran if a peace deal is not reached soon. This interaction highlights the rising tensions between the two nations.",
+          "why_it_matters": "Escalating hostility between the US and Iran threatens Middle Eastern stability, directly risking India's energy imports and the safety of the massive Indian diaspora working in the Gulf.",
+          "gd_for": [
+            "Asserting national sovereignty prevents foreign powers from dictating regional policies through military intimidation.",
+            "Strong rhetoric can signal deterrence and force international bodies to intervene and mediate a diplomatic solution."
+          ],
+          "gd_against": [
+            "Aggressive and defiant posturing shuts down peaceful diplomatic avenues, increasing the risk of an actual devastating war.",
+            "Refusal to negotiate prolongs crippling economic sanctions, severely impacting the livelihoods of ordinary citizens."
+          ],
+          "key_fact": "Context: India is historically a major importer of Iranian crude oil, though imports dropped significantly due to US secondary sanctions.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Zelenskyy says Ukraine ready for energy truce with Russia after Trump talks",
-          "url": "https://www.aljazeera.com/news/2026/9/23/zelenskyy-says-ukraine-ready-for-energy-truce-with-russia-after-trump-talks?traffic_source=rss",
+          "title": "AI superpower ambitions take centre stage as Trump and Xi meet",
+          "url": "https://www.bbc.co.uk/news/articles/c6gqdgg8w59xo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC World",
+          "published": "2026-09-24T03:31:17+05:30",
+          "sources_count": 1,
+          "summary": "The competition for artificial intelligence supremacy is a central focus of the meeting between Donald Trump and Xi Jinping. Both the United States and China are vying to become the leading AI superpower. Simultaneously, both nations are seeking to ensure that AI remains under human control.",
+          "why_it_matters": "The outcome of this technology race will dictate global standards, impacting India's massive IT sector, digital sovereignty, and its own national AI mission.",
+          "gd_for": [
+            "Intense technological competition accelerates innovation, benefiting global fields such as healthcare, education, and logistics.",
+            "A mutual commitment to keeping AI under human control could lead to necessary international safety guardrails."
+          ],
+          "gd_against": [
+            "An AI cold war could divide the world into exclusive tech ecosystems, forcing developing countries like India to choose sides.",
+            "The militarization of AI in superpower rivalries could lead to unpredictable, high-tech global security threats."
+          ],
+          "key_fact": "Context: The global artificial intelligence market size was estimated at approximately $196 billion in 2023 and is projected to expand rapidly.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "The China-Russia Factor in the Iran War",
+          "url": "https://thediplomat.com/2026/09/the-china-russia-factor-in-the-iran-war/",
+          "source": "The Diplomat",
+          "published": "2026-09-23T18:44:00+05:30",
+          "sources_count": 1,
+          "summary": "Stephen J. Blank has provided insights on the geopolitical dynamics of the conflict involving Iran. The analysis focuses on how China and Russia act as key factors in this situation.",
+          "why_it_matters": "A growing strategic alliance between Russia, China, and Iran complicates India's foreign policy, as India must balance its ties with Western nations and its historical partner, Russia.",
+          "gd_for": [
+            "A multipolar alliance can act as a strategic check against unilateral Western military interventions in the Middle East.",
+            "Stronger regional coalitions can force more comprehensive, inclusive peace negotiations that respect national sovereignty."
+          ],
+          "gd_against": [
+            "The involvement of major global powers like Russia and China can escalate a regional conflict into a broader global proxy war.",
+            "It polarizes international diplomacy, making it difficult for neutral nations to maintain balanced relations and trade."
+          ],
+          "key_fact": "Context: Russia, China, and Iran have conducted multiple joint naval drills in the Gulf of Oman to demonstrate their defense cooperation.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Trump administration invites Putin to attend G20 summit in Miami",
+          "url": "https://www.aljazeera.com/news/2026/9/23/trump-administration-invites-putin-to-attend-g20-summit-in-miami?traffic_source=rss",
           "source": "Al Jazeera",
-          "published": "2026-09-23T06:50:39+05:30",
-          "sources_count": 2,
-          "summary": "Ukraine leader says Kyiv is ready to stop strikes on Russian facilities if Moscow halts attacks on its energy system.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "published": "2026-09-24T01:53:31+05:30",
+          "sources_count": 1,
+          "summary": "The Trump administration has invited Russian President Vladimir Putin to attend the G20 summit in Miami. US Secretary of State Marco Rubio stated that the summit would provide an opportunity for the Russian president to engage with global leaders.",
+          "why_it_matters": "Direct dialogue between the US and Russia could ease global geopolitical polarization, helping India maintain its strategic autonomy and smooth trade relations with both powers.",
+          "gd_for": [
+            "Re-engaging Russia at major global forums like the G20 opens up direct channels to negotiate peace in ongoing European conflicts.",
+            "Promotes global economic stability by ensuring all major global players are present to discuss systemic financial issues."
+          ],
+          "gd_against": [
+            "Inviting a leader facing international warrants and sanctions could be seen as normalizing territorial aggression.",
+            "It risks causing massive diplomatic friction and protests among Western G20 members, overshadowing the economic agenda."
+          ],
+          "key_fact": "Context: The G20 represents around 85% of global GDP, 75% of global trade, and about two-thirds of the world's population.",
+          "fact_is_context": true,
+          "ai": true
         }
       ]
     },
@@ -128,74 +172,104 @@
       "title": "Indian Economy, Policy, Budget & RBI",
       "stories": [
         {
-          "title": "Fitch raises India's FY27 GDP growth projections to 6.9% on strong growth",
-          "url": "https://www.business-standard.com/economy/news/fitch-raises-india-s-fy27-gdp-growth-projections-to-6-9-on-strong-growth-126092300274_1.html",
+          "title": "OECD raises India's GDP growth forecast to 7.1% citing resilient demand",
+          "url": "https://www.business-standard.com/economy/news/oecd-raises-india-s-gdp-growth-forecast-to-7-1-citing-resilient-demand-126092300674_1.html",
           "source": "Business Standard",
-          "published": "2026-09-23T10:27:47+05:30",
-          "sources_count": 6,
-          "summary": "According to Fitch, India's economic momentum is likely to moderate over the remaining fiscal year, prompting the Reserve Bank of India (RBI) to increase interest rates by 0.25 per cent",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-09-23T15:21:39+05:30",
+          "sources_count": 9,
+          "summary": "The OECD has raised India's GDP growth projection for the current fiscal year to 7.1 percent, up from its June estimate of 6.3 percent. This 80 basis points upgrade is due to resilient domestic demand. Additionally, government policies successfully shielded households and firms from high energy prices.",
+          "why_it_matters": "A higher growth forecast cements India's position as a global economic bright spot, attracting foreign direct investment and boosting domestic industry confidence.",
+          "gd_for": [
+            "Reflects the strong resilience of India's domestic consumption and the efficacy of government policies against global energy shocks.",
+            "Boosts global investor confidence, encouraging higher foreign direct investment and job creation in key sectors."
+          ],
+          "gd_against": [
+            "An over-reliance on domestic demand can make the economy vulnerable if domestic household debt rises or consumption slows down.",
+            "Strong GDP growth figures might overshadow persistent structural issues like uneven wealth distribution and youth unemployment."
+          ],
+          "key_fact": "The OECD raised India's GDP growth projection for the current fiscal by 80 basis points to 7.1 per cent from its June projection of 6.3 per cent.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "India flash PMI rises to 56.5 in September as output, orders recover",
-          "url": "https://www.business-standard.com/economy/news/india-flash-pmi-september-manufacturing-services-output-orders-126092300359_1.html",
-          "source": "Business Standard",
-          "published": "2026-09-23T11:32:08+05:30",
-          "sources_count": 2,
-          "summary": "India's private sector activity rose to a three-month high in September as manufacturing and services output improved, while new orders and hiring also gained momentum",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "India business activity rebounds in September to 3-month high, PMI shows",
-          "url": "https://economictimes.indiatimes.com/news/economy/indicators/india-business-activity-rebounds-in-september-to-3-month-high-pmi-shows/articleshow/134426841.cms",
+          "title": "Rupee may not just stabilise, but appreciate from current levels: RBI Dy Guv Poonam Gupta",
+          "url": "https://economictimes.indiatimes.com/news/economy/finance/rupee-may-not-just-stabilise-but-appreciate-from-current-levels-rbi-dy-guv-poonam-gupta/articleshow/134442756.cms",
           "source": "Economic Times",
-          "published": "2026-09-23T11:18:32+05:30",
-          "sources_count": 1,
-          "summary": "India experienced accelerated business growth in September due to increased demand in manufacturing and services sectors. The HSBC flash India Composite Purchasing Managers",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "published": "2026-09-23T22:19:15+05:30",
+          "sources_count": 3,
+          "summary": "RBI Deputy Governor Poonam Gupta stated that the Indian rupee could stabilize or appreciate following its recent depreciation. She noted that India can reduce its current account deficit through remittances and services exports. Gupta also emphasized that the RBI has the capacity to manage external pressures and support foreign investments.",
+          "why_it_matters": "A stable or stronger rupee helps keep India's massive energy import bills in check, controls imported inflation, and maintains foreign investor confidence in Indian markets.",
+          "gd_for": [
+            "An appreciating rupee reduces the cost of critical imports like crude oil, helping to keep domestic inflation under control.",
+            "Reflects strong fundamentals, driven by resilient services exports and steady inward remittances from the Indian diaspora."
+          ],
+          "gd_against": [
+            "A stronger rupee can make Indian manufacturing and software exports less price-competitive in highly contested global markets.",
+            "Over-reliance on services and remittances can leave the currency vulnerable to sudden macroeconomic shifts in destination countries."
+          ],
+          "key_fact": "Context: India is the world's top recipient of remittances, receiving over $110 billion in 2023 according to World Bank data.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Strong pace of economic growth seen in June quarter to continue, says FM",
-          "url": "https://www.livemint.com/economy/strong-pace-of-economic-growth-seen-in-june-quarter-to-continue-says-fm-11790096136154.html",
-          "source": "Mint",
-          "published": "2026-09-23T00:48:29+05:30",
-          "sources_count": 1,
-          "summary": "The budget, presented on 1 February, will take India through 2026 with growth comparable to that seen in the first quarter, says Union finance minister Nirmala Sitharaman.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "title": "India-New Zealand FTA ratified, to come into effect on October 20",
+          "url": "https://www.thehindu.com/business/Economy/india-new-zealand-fta-ratified-will-enter-into-force-from-october-20/article71490545.ece",
+          "source": "The Hindu",
+          "published": "2026-09-23T11:50:58+05:30",
+          "sources_count": 2,
+          "summary": "The Free Trade Agreement between India and New Zealand has been ratified and will take effect on October 20, 2026. The deal aims to double bilateral trade as New Zealand eliminates all tariffs on Indian goods, while India will reduce or remove tariffs on 95% of imports. India's sensitive dairy and agricultural sectors are protected under the agreement.",
+          "why_it_matters": "This agreement provides Indian exporters tariff-free access to a developed market while safeguarding vulnerable domestic sectors like dairy from foreign competition.",
+          "gd_for": [
+            "Boosts Indian export volumes and competitiveness by eliminating all tariffs on Indian goods entering New Zealand.",
+            "Protects livelihoods of millions of Indian farmers by keeping sensitive agricultural and dairy sectors out of the tariff-reduction list."
+          ],
+          "gd_against": [
+            "Removing or reducing tariffs on 95% of imports from New Zealand may pressure other domestic manufacturing and processing industries.",
+            "Friction over non-tariff barriers and stringent sanitary standards could still limit the actual volume of Indian exports."
+          ],
+          "key_fact": "India and New Zealand's Free Trade Agreement, effective October 20, 2026, aims to double bilateral trade by eliminating tariffs on all Indian imports and reducing/removing tariffs on 95% of imports from New Zealand.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "GST on MDR will not impose additional burden on merchants: NPCI explains how they can adjust it against tax liability",
-          "url": "https://www.livemint.com/economy/gst-on-mdr-will-not-impose-additional-burden-on-merchants-npci-explains-how-they-can-adjust-it-against-tax-liability-11790074654067.html",
+          "title": "PM’s principal secretary flags risks from trade barriers, volatile capital",
+          "url": "https://www.livemint.com/economy/pms-principal-secretary-flags-risks-from-trade-barriers-volatile-capital-11790173013662.html",
           "source": "Mint",
-          "published": "2026-09-22T17:34:40+05:30",
+          "published": "2026-09-23T21:09:39+05:30",
           "sources_count": 1,
-          "summary": "UPI MDR of 0.4% will apply to P2M transactions above ₹2,000 from 15 October. NPCI says GST paid on MDR can be adjusted against GST payable on sales through input tax credit. Small merchants with monthly UPI receipts up to ₹1 lakh will continue to have zero MDR.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Pramod Kumar Mishra, the PM's principal secretary, warned that India cannot rely on favourable global conditions. This caution comes despite the country's macroeconomic stability and sustained economic growth.",
+          "why_it_matters": "For India, building long-term domestic economic resilience is crucial because external global environments and capital flows remain highly volatile and unpredictable.",
+          "gd_for": [
+            "Focusing on domestic economic buffers reduces India's vulnerability to global trade wars and supply chain shocks.",
+            "Acknowledging external risks early allows policymakers to design proactive safety nets for domestic industries."
+          ],
+          "gd_against": [
+            "Overemphasizing global risks might encourage protectionist trade policies that limit India's integration into global markets.",
+            "Excessive caution could unintentionally lower investor confidence regarding India's medium-term economic prospects."
+          ],
+          "key_fact": "Context: India's GDP growth rate has consistently hovered around 6% to 7% in recent years, making it one of the fastest-growing major economies globally.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "India tops EMs again in August, but market risks persist",
+          "url": "https://www.livemint.com/economy/india-tops-ems-again-in-august-but-market-risks-persist-11790143437593.html",
+          "source": "Mint",
+          "published": "2026-09-23T12:24:44+05:30",
+          "sources_count": 1,
+          "summary": "India has secured the top spot in Mint’s Emerging Markets Tracker, placing ahead of second-ranked Vietnam. This position is supported by robust exports, strong GDP growth, and solid import cover. However, market risks like geopolitical issues and an impending rate-hike cycle present future challenges.",
+          "why_it_matters": "Retaining the top rank among emerging markets enhances India's appeal as a destination for foreign direct investment, but domestic markets must remain guarded against global monetary tightening.",
+          "gd_for": [
+            "Strong import cover and robust exports demonstrate that India's macroeconomic foundations are highly resilient compared to other emerging peers.",
+            "Topping the tracker validates the effectiveness of India's current economic policies and structural reforms."
+          ],
+          "gd_against": [
+            "Being at the top can create complacency, whereas an imminent interest rate-hike cycle could quickly trigger capital flight.",
+            "External geopolitical risks are beyond domestic control and can abruptly disrupt India's trade and energy supply chains."
+          ],
+          "key_fact": "India retained the top spot in Mint’s Emerging Markets Tracker, ranking ahead of second-ranked Vietnam.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         }
       ]
     },
@@ -204,74 +278,64 @@
       "title": "Business & Corporate",
       "stories": [
         {
-          "title": "Samsung India profit falls 36% to ₹7,228 crore; mobile revenue declines",
-          "url": "https://www.business-standard.com/companies/news/samsung-india-profit-falls-36-to-7-228-crore-mobile-revenue-declines-126092200858_1.html",
-          "source": "Business Standard",
-          "published": "2026-09-22T22:32:12+05:30",
-          "sources_count": 3,
-          "summary": "Samsung India Electronics profit declined 36 per cent to Rs 7,228.10 crore for the financial year ended March 31, 2026, according to a RoC filing by the consumer electronics major.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "title": "India probes LG, Samsung over alleged tariff evasion on imported OLED TV parts",
+          "url": "https://economictimes.indiatimes.com/industry/cons-products/electronics/india-probes-lg-samsung-over-alleged-tariff-evasion-on-imported-oled-tv-parts/articleshow/134431170.cms",
+          "source": "Economic Times",
+          "published": "2026-09-23T15:15:24+05:30",
+          "sources_count": 4,
+          "summary": "India is investigating South Korean technology giants LG Electronics and Samsung over import practices. The companies are accused of paying lower tariffs on imported display parts used in high-end TVs. This probe places the premium entertainment devices of both brands under official scrutiny.",
+          "why_it_matters": "Strict tariff enforcement prevents tax evasion and ensures that multinational companies do not bypass local manufacturing policies like the Make in India initiative.",
+          "gd_for": [
+            "Ensuring compliance prevents unfair tax advantages and protects domestic manufacturers who pay correct tariffs.",
+            "Rigorous audits encourage global electronics giants to set up deep, localized component manufacturing in India."
+          ],
+          "gd_against": [
+            "Aggressive tax and tariff investigations could hurt foreign direct investment sentiment and complicate trade relations with South Korea.",
+            "Higher tariffs on high-end components ultimately raise prices for Indian consumers looking to purchase premium technology."
+          ],
+          "key_fact": "Five sources told Reuters that India is investigating LG Electronics and Samsung for allegedly paying lower tariffs on imported display parts of high-end TVs.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Weak core show takes a big toll on Samsung India as net profit plunges 36% to ₹7,228 cr in FY26",
-          "url": "https://economictimes.indiatimes.com/industry/cons-products/electronics/weak-core-show-takes-a-big-toll-on-samsung-india-as-net-profit-plunges-36-to-7228-cr-in-fy26/articleshow/134419391.cms",
-          "source": "Economic Times",
-          "published": "2026-09-23T00:27:18+05:30",
+          "title": "Hurun Rich List 2026: Gautam Adani reclaims top spot as AI adds 15 new entrants, India gets 27 billionaires",
+          "url": "https://www.livemint.com/companies/people/hurun-rich-list-2026-gautam-adani-reclaims-top-spot-as-ai-adds-15-new-entrants-india-gets-27-billionaires-11790153652856.html",
+          "source": "Mint",
+          "published": "2026-09-23T14:35:56+05:30",
           "sources_count": 2,
-          "summary": "Samsung India reported a 36% drop in net profit driven by declining smartphone sales and increased costs. Revenue from operations experienced a slight 1.2% growth, but profitability remained under pressure. The smartphone business faced challenges with a 1.4% revenue decrease and a significant decline in exports. Despite the tough conditions, retained earnings improved compared to the previous yea",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Gautam Adani and his family have reclaimed the top position on the M3M Hurun India Rich List 2026. The total number of dollar billionaires in India has reached a record high of 391. Artificial intelligence emerged as a major sector for wealth creation, contributing 15 new entrants to the list.",
+          "why_it_matters": "The rapid growth of dollar billionaires and AI-driven wealth highlights India's expanding role as a global hub for technological innovation and high-value entrepreneurship.",
+          "gd_for": [
+            "The addition of 15 new AI-driven wealth creators proves that Indian entrepreneurs are successfully capturing value in next-generation global technologies.",
+            "A growing billionaire count reflects a vibrant business ecosystem capable of generating immense wealth and capital."
+          ],
+          "gd_against": [
+            "The rapid rise in billionaire wealth alongside sluggish wage growth for the masses can worsen economic inequality in India.",
+            "Wealth concentration in a few technology sectors like AI might lead to monopolies, potentially limiting competitive opportunities for smaller startups."
+          ],
+          "key_fact": "India’s dollar billionaire count rose to a record 391 on the M3M Hurun India Rich List 2026.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Government brings smartphone screen protectors under mandatory BIS quality norms",
-          "url": "https://economictimes.indiatimes.com/industry/cons-products/electronics/government-brings-smartphone-screen-protectors-under-mandatory-bis-quality-norms/articleshow/134419226.cms",
-          "source": "Economic Times",
-          "published": "2026-09-23T00:10:27+05:30",
+          "title": "E-2W maker Ultraviolette raises $85 mn to scale production, expand presence",
+          "url": "https://www.business-standard.com/companies/news/e-2w-maker-ultraviolette-raises-85-mn-to-scale-production-expand-presence-126092300517_1.html",
+          "source": "Business Standard",
+          "published": "2026-09-23T13:23:30+05:30",
           "sources_count": 3,
-          "summary": "The Indian government has included smartphone screen protectors under mandatory quality guidelines to improve product standards. Manufacturers now have six months to comply with these new regulations, which take effect in 2027. This initiative aims to protect consumers from low-quality imports, mainly from China, while boosting local production. Industry experts estimate that this move could creat",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Bengaluru-based electric two-wheeler maker Ultraviolette Automotive has secured USD 85 million in a funding round led by Yali Capital and TDK Ventures. The capital will be utilized to scale up production and expand into overseas markets, including a planned launch in the US in 2027. The company currently sells its electric vehicles in India and 20 European nations.",
+          "why_it_matters": "This significant funding highlights the growing international investor confidence in Indian electric vehicle startups and their potential to scale globally.",
+          "gd_for": [
+            "Securing USD 85 million enables a domestic EV startup to establish a global footprint, showcasing Indian engineering prowess in highly competitive Western markets.",
+            "Expanding to 20 European nations and planning a US entry positions India as an emerging global hub for premium electric mobility exports."
+          ],
+          "gd_against": [
+            "Entering highly regulated and mature EV markets like the US and Europe involves high operational costs and intense local competition.",
+            "Rapid international expansion could dilute management focus away from addressing India's own massive, untapped domestic electric two-wheeler market."
+          ],
+          "key_fact": "Ultraviolette Automotive raised USD 85 million in a funding round led by Yali Capital and TDK Ventures.",
           "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "CCI clears L’Oréal India's acquisition of Bare Anatomy maker Innovist: All you need to know",
-          "url": "https://www.livemint.com/companies/news/cci-clears-l-or-al-indias-acquisition-of-bare-anatomy-maker-innovist-all-you-need-to-know-11790081555179.html",
-          "source": "Mint",
-          "published": "2026-09-22T20:47:00+05:30",
-          "sources_count": 1,
-          "summary": "As part of the proposed transaction, Innovist’s founding team will remain responsible for running the business. Its brands will be brought under L’Oréal’s Consumer Products Division.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Who is Venu Srinivasan? TVS Group veteran headlining the Tata Sons row",
-          "url": "https://www.livemint.com/companies/news/who-is-venu-srinivasan-tvs-group-veteran-headlining-the-tata-sons-row-11790140178459.html",
-          "source": "Mint",
-          "published": "2026-09-23T11:24:40+05:30",
-          "sources_count": 1,
-          "summary": "Who is Venu Srinivasan? A look at the TVS Motor chairman emeritus and a lifetime vice-chairman of Tata Trusts, now in the news over the Tata Sons IPO vote.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "ai": true
         }
       ]
     },
@@ -280,40 +344,92 @@
       "title": "Technology, AI & Innovation",
       "stories": [
         {
-          "title": "With new Macs, Apple aims to take on Microsoft, Nvidia in a rush to lower AI costs",
-          "url": "https://economictimes.indiatimes.com/tech/technology/with-new-macs-apple-aims-to-take-on-microsoft-nvidia-in-a-rush-to-lower-ai-costs/articleshow/134424604.cms",
+          "title": "Meta launches camera-free AI glasses amid privacy pushback",
+          "url": "https://economictimes.indiatimes.com/tech/technology/meta-launches-camera-free-ai-glasses-amid-privacy-pushback/articleshow/134449489.cms",
           "source": "Economic Times",
-          "published": "2026-09-23T08:21:38+05:30",
-          "sources_count": 2,
-          "summary": "Apple's upgraded Mac Minis and Mac Studios which can cost nearly $20,000 and handle AI tasks locally will go head-to-head against new desktop machines that Nvidia and PC makers are rolling out, expected to be the focus of a Microsoft Windows event in San Francisco next month.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-09-24T07:42:06+05:30",
+          "sources_count": 3,
+          "summary": "Meta has introduced several new AI-powered wearables, including an audio-only, camera-free version of its smart glasses. This development comes amid widespread global concerns regarding privacy and the unauthorized filming of women and girls. The new audio-only model will be offered alongside other models that retain video recording options.",
+          "why_it_matters": "Tech giants are forced to modify hardware designs in response to privacy backlash, highlighting the tension between rapid technology adoption and personal safety in public spaces.",
+          "gd_for": [
+            "Providing camera-free smart glasses offers a safer alternative that respects public privacy while still delivering AI audio utility.",
+            "The product modification directly acknowledges and addresses serious societal anxieties regarding the non-consensual filming of women."
+          ],
+          "gd_against": [
+            "Releasing dozens of other models that still keep the video filming option means the core privacy threat remains largely unresolved.",
+            "Removing the camera limits the device's technological capability, reducing the overall user experience of true augmented reality."
+          ],
+          "key_fact": "Meta launched an audio-only, camera-free version of its smart glasses alongside dozens of new models that keep the video filming option.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Banks warn AI shopping bots raise scam, fraud and data-privacy risks",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/banks-warn-ai-shopping-bots-raise-scam-fraud-and-data-privacy-risks/articleshow/134424440.cms",
+          "title": "Australia's prime minister criticizes OpenAI over government website security breach",
+          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/australias-prime-minister-criticizes-openai-over-government-website-security-breach/articleshow/134449805.cms",
           "source": "Economic Times",
-          "published": "2026-09-23T08:09:49+05:30",
-          "sources_count": 1,
-          "summary": "Technology companies including OpenAI, Anthropic, Google and Meta are increasingly promoting AI chatbots as shopping tools, envisioning a future in which shoppers use AI agents to select products and make purchases on their behalf. Retailers, meanwhile, are racing to influence chatbots' recommendations.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "published": "2026-09-24T08:13:14+05:30",
+          "sources_count": 3,
+          "summary": "Australian Prime Minister Anthony Albanese has criticized OpenAI over a security breach on a government website. Albanese made the issue public after discussing it over the phone with OpenAI CEO Sam Altman. Both leaders were in New York City to attend and address the United Nations.",
+          "why_it_matters": "This incident emphasizes that AI technologies present critical security challenges, requiring direct diplomatic dialogues between heads of state and top technology executives.",
+          "gd_for": [
+            "Publicly calling out technology firms ensures they are held accountable for the security flaws their systems introduce to public infrastructure.",
+            "Direct communication between world leaders and AI executives helps establish faster response times and collaborative security standards."
+          ],
+          "gd_against": [
+            "Public criticism might strain critical collaborative relationships between governments and leading AI innovators.",
+            "Blaming external AI developers can sometimes act as a shield to hide a government's own weak cybersecurity systems and slow upgrade cycles."
+          ],
+          "key_fact": "Context: Australia is a key member of the Quad alliance with India, and security collaborations increasingly cover critical emerging technologies like AI.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "OpenAI seeks US-led framework for global frontier AI standards; says US “well positioned to lead”",
-          "url": "https://www.livemint.com/technology/openai-seeks-us-led-framework-for-global-frontier-ai-standards-says-us-well-positioned-to-lead-11790131687520.html",
+          "title": "AI leaders warn UN of security risks as systems grow more powerful",
+          "url": "https://www.livemint.com/technology/ai-leaders-warn-un-of-security-risks-as-systems-grow-more-powerful-11790191663170.html",
           "source": "Mint",
-          "published": "2026-09-23T08:18:07+05:30",
+          "published": "2026-09-24T00:57:42+05:30",
+          "sources_count": 2,
+          "summary": "Leaders in the artificial intelligence sector have warned the United Nations about mounting security risks. These warnings are being raised as AI systems become significantly more powerful.",
+          "why_it_matters": "As global bodies debate AI safety, India must actively participate in international policy discussions to secure its domestic digital infrastructure from foreign AI-driven threats.",
+          "gd_for": [
+            "Warnings raised by AI industry leaders themselves emphasize the urgent need for a coordinated, global regulatory framework.",
+            "Using the United Nations as a platform ensures that safety guidelines are developed with the consensus of both developing and developed nations."
+          ],
+          "gd_against": [
+            "Overly strict global regulations driven by fear might stifle innovation, making it harder for developing nations to catch up in AI technology.",
+            "The United Nations may struggle to enforce timely rules given the incredibly fast pace of AI developments compared to bureaucratic international processes."
+          ],
+          "key_fact": "Context: The United Nations has established a high-level Advisory Body on Artificial Intelligence to address global governance and security risks.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "The Download: India’s smart glasses menace and AI’s trillion-dollar gamble",
+          "url": "https://www.technologyreview.com/2026/09/23/1144966/the-download-india-smart-glasses-ai-trillion-dollar-gamble/",
+          "source": "MIT Technology Review",
+          "published": "2026-09-23T17:40:00+05:30",
           "sources_count": 1,
-          "summary": "OpenAI has called on the United States to lead efforts to establish global technical standards for frontier artificial intelligence, including systems capable of recursively improving their own capabilities, the AI giant said in a post.",
+          "summary": "Smart glasses are reportedly causing disruptions in India. This was highlighted when a protester named Shubnam discovered they had been filmed at a Delhi protest by a content creator wearing Meta smart glasses. Additionally, hackers claim to have compromised and stolen data belonging to almost all FBI employees.",
+          "why_it_matters": "The ease of recording others surreptitiously in India's crowded public spaces using smart wearables raises major concerns under the country's privacy laws.",
+          "gd_for": [
+            "Real-world incidents of unauthorized public recording help drive the demand for clear, enforceable personal data protection laws.",
+            "These events raise public awareness about digital consent and the subtle ways modern technology can compromise privacy."
+          ],
+          "gd_against": [
+            "Focusing heavily on isolated incidents of public recording might lead to restrictive bans that discourage the growth of useful wearable technologies.",
+            "Restricting the use of smart glasses in public spaces is practically impossible to enforce, especially in highly populated Indian cities."
+          ],
+          "key_fact": "An individual named Shubnam discovered they were recorded at a Delhi protest by a content creator wearing Meta smart glasses.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "The AI Hype Index: AI loves cheating",
+          "url": "https://www.technologyreview.com/2026/09/23/1144940/ai-hype-index-ai-loves-cheating/",
+          "source": "MIT Technology Review",
+          "published": "2026-09-23T14:30:00+05:30",
+          "sources_count": 1,
+          "summary": "MIT Technology Review’s highly subjective take on the latest buzz about AI",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -328,40 +444,40 @@
       "title": "Science, Climate & Sustainability",
       "stories": [
         {
-          "title": "India is producing more green energy",
-          "url": "https://www.bbc.co.uk/news/articles/c8xkvzlz0x4o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Science",
-          "published": "2026-09-23T04:32:29+05:30",
-          "sources_count": 2,
-          "summary": "India has rapidly decarbonised electricity generation, but its gains are tempered by transmission shortages.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "More than 170,000 respiratory cases recorded in haze-choked Indonesia",
-          "url": "https://www.bbc.co.uk/news/articles/cq62j13gnyrko?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Science",
-          "published": "2026-09-23T09:50:12+05:30",
-          "sources_count": 2,
-          "summary": "More than 40,000 of the cases – which range from mild coughs to pneumonia – involve toddlers.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "As city trees fall, experts point to poor planning and civic apathy",
-          "url": "https://india.mongabay.com/2026/09/as-city-trees-fall-experts-point-to-poor-planning-and-civic-apathy/",
-          "source": "Mongabay India",
-          "published": "2026-09-23T15:53:25+05:30",
+          "title": "Refinery sector must balance energy security with net-zero push: industry experts at The Hindu Sustainability Summit",
+          "url": "https://www.thehindu.com/news/national/tamil-nadu/refinery-sector-must-balance-energy-security-with-net-zero-push-industry-experts-at-the-hindu-sustainability-summit/article71499906.ece",
+          "source": "The Hindu",
+          "published": "2026-09-24T00:40:39+05:30",
           "sources_count": 1,
-          "summary": "India's environmental science and conservation news",
+          "summary": "Industry experts emphasise balancing energy security with net-zero goals at The Hindu Sustainability Summit’s discussion on India's refinery landscape.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "More than half of India under dry or drought conditions as monsoon withdrawal begins",
+          "url": "https://www.downtoearth.org.in/agriculture/more-than-half-of-india-under-dry-or-drought-conditions-as-monsoon-withdrawal-begins",
+          "source": "Down To Earth",
+          "published": "2026-09-23T12:32:31+05:30",
+          "sources_count": 1,
+          "summary": "More than half of India is under dry or drought conditions as the southwest monsoon withdraws, with El Niño strengthening and rainfall 15% below normal. Experts warn of worsening soil moisture stress, kharif crop losses and risks for the upcoming rabi season across key farming states.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "What is needed for regenerative medicine to flourish?",
+          "url": "https://www.nature.com/articles/d41586-026-02854-1",
+          "source": "Nature",
+          "published": "2026-09-23T05:30:00+05:30",
+          "sources_count": 2,
+          "summary": "Although the field’s breakthrough research has the potential to save lives, it requires a more in-depth and equitable foundation of research.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -376,12 +492,26 @@
       "title": "India: Governance & Society",
       "stories": [
         {
-          "title": "Astha Kunj Park gang-rape: LSR suspends classes; students consider leaving Delhi amid safety fears",
-          "url": "https://www.thehindu.com/news/cities/Delhi/astha-kunj-park-gang-rape-lsr-suspends-classes-students-consider-leaving-delhi-amid-safety-fears/article71496925.ece",
-          "source": "The Hindu",
-          "published": "2026-09-23T10:41:30+05:30",
+          "title": "Global South in front row of crises, but back row of decision-making: Jaishankar in US",
+          "url": "https://indianexpress.com/article/india/global-south-crises-decision-making-unga-jaishankar-us-10890961/lite/",
+          "source": "Indian Express",
+          "published": "2026-09-23T18:56:02+05:30",
+          "sources_count": 2,
+          "summary": "Open the source link to read the full story.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "France Warns of Wider Russian Threat in UN Face-Off With Lavrov",
+          "url": "https://www.livemint.com/politics/france-warns-of-wider-russian-threat-in-un-face-off-with-lavrov-11790189058790.html",
+          "source": "Mint Politics",
+          "published": "2026-09-24T00:14:18+05:30",
           "sources_count": 1,
-          "summary": "After a gang-rape incident, LSR College suspends classes amid safety fears, prompting students to consider leaving Delhi.",
+          "summary": "France’s top diplomat warned of the dangers of increasing Kremlin aggression ahead of a tense United Nations Security Council meeting in New York that brought Ukraine and Russia face to face.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -390,26 +520,12 @@
           "ai": false
         },
         {
-          "title": "Gold Rate Today, September 23: Check 18, 22 and 24 carat gold prices in Chennai, Mumbai, Delhi, Kolkata and other cities",
-          "url": "https://indianexpress.com/article/india/gold-rate-today-september-23-check-18-22-and-24-carat-gold-prices-in-chennai-mumbai-delhi-kolkata-and-other-cities-10890062/",
-          "source": "Indian Express",
-          "published": "2026-09-23T10:37:04+05:30",
-          "sources_count": 2,
-          "summary": "Open the source link to read the full story.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "‘Invisible hand running Election Commission’: Opposition on Express report on Election Commissioners objecting to poll panel steps",
-          "url": "https://indianexpress.com/article/india/invisible-hand-running-election-commission-opposition-express-investigation-eci-row-10890040/",
-          "source": "Indian Express",
-          "published": "2026-09-23T09:40:21+05:30",
-          "sources_count": 2,
-          "summary": "Open the source link to read the full story.",
+          "title": "MANUU faces sexual harassment row over ICC report",
+          "url": "https://www.thehindu.com/news/national/telangana/manuu-in-the-thick-of-sexual-harassment-controversy-accused-of-suppressing-icc-report-and-not-implementing-recommendations/article71500998.ece",
+          "source": "The Hindu",
+          "published": "2026-09-24T08:48:33+05:30",
+          "sources_count": 1,
+          "summary": "MANUU faces serious sexual harassment allegations, accused of suppressing an ICC report and failing to implement its recommendations.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -450,5 +566,5 @@
     "Scroll.in (no entries)",
     "The Print (no entries)"
   ],
-  "reading_time_min": 5
+  "reading_time_min": 19
 }
