@@ -1,97 +1,103 @@
 {
-  "date": "2026-10-05",
-  "date_label": "Monday, 05 October 2026",
-  "generated_at": "2026-10-05T11:17:51.195124+05:30",
+  "date": "2026-10-06",
+  "date_label": "Tuesday, 06 October 2026",
+  "generated_at": "2026-10-06T11:57:44.983552+05:30",
   "ai_enabled": true,
-  "ai_model": null,
-  "ai_story_count": 0,
+  "ai_model": "gemini-3.5-flash",
+  "ai_story_count": 25,
   "ai_errors": [
-    "curation: HTTP 404 on gemini-2.5-flash",
-    "curation: HTTP 503 on gemini-3.5-flash",
     "curation: HTTP 503 on gemini-3.6-flash",
     "curation: HTTP 503 on gemini-3.7-flash",
-    "curation: HTTP 503 on gemini-3.8-flash",
-    "curation: all models failed",
-    "every candidate model is unavailable (gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))"
+    "curation: HTTP 503 on gemini-3.8-flash"
   ],
   "ai_models_dropped": [
     "gemini-3.8-flash: HTTP 503 (overloaded)",
     "gemini-3.7-flash: HTTP 503 (overloaded)",
-    "gemini-3.6-flash: HTTP 503 (overloaded)",
-    "gemini-3.5-flash: HTTP 503 (overloaded)",
-    "gemini-2.5-flash: HTTP 404"
+    "gemini-3.6-flash: HTTP 503 (overloaded)"
   ],
   "story_count": 25,
   "story_cap": 25,
   "gd_topic": {
-    "topic": "Next-gen GST: Taking India's reform journey forward",
-    "why_now": "Chosen automatically from today's most-covered India-relevant stories, because AI commentary was unavailable for this brief.",
-    "opening_line": "Let me frame the discussion. This issue matters because it affects policy, industry and ordinary citizens at the same time, so it is worth separating the short-term impact from the long-term implications before we take sides.",
-    "closing_line": "To sum up, the group has surfaced both the opportunities and the risks. A balanced view would be to support the direction while insisting on safeguards, clear timelines and accountability.",
-    "perspectives": [],
-    "fallback": true
+    "topic": "Should India prioritize strategic protectionism or free trade to become a global manufacturing hub?",
+    "why_now": "With India-US trade negotiations plateauing over persistent tariff disputes, India's strategy of using import duties to foster domestic manufacturing is facing critical international resistance.",
+    "opening_line": "Today we are addressing whether India should lean toward protectionism or embrace free trade to drive its manufacturing growth, a debate highlighted by the recent stall in India-US trade talks over tariffs. While high tariffs aim to protect local industries, we must evaluate if they risk alienating us from critical global supply chains.",
+    "closing_line": "In conclusion, while temporary protection can nurture domestic sectors, long-term global leadership requires competitive open markets. India must transition from broad tariff barriers to targeted, efficiency-linked incentives that prepare Indian industries to compete globally without permanent state support.",
+    "perspectives": [
+      "The Government seeks to safeguard domestic industries, encourage local job creation, and reduce the import bill through strategic tariffs.",
+      "Domestic manufacturers often favor protectionism to build scale, while export-oriented industries suffer from the increased costs of imported raw materials.",
+      "Global trading partners view high Indian tariffs as trade barriers, retaliating with duties of their own and stalling mutually beneficial trade agreements."
+    ]
   },
-  "concept": null,
+  "concept": {
+    "name": "Infant Industry Argument",
+    "explanation": "The Infant Industry Argument is an economic rationale suggesting that emerging domestic industries need protection from foreign competitors until they establish economies of scale. Governments implement this protection through temporary tariffs, import quotas, or subsidies. The goal is to allow local firms time to lower their production costs and become globally competitive. Once the industry is mature enough to survive open competition, these protectionist measures are theoretically dismantled.",
+    "indian_example": "India historically protected its domestic automobile industry for decades by levying steep import duties on foreign cars, allowing players like Maruti and Mahindra to establish strong domestic footprints. More recently, the government has applied this concept by placing high basic customs duties on imported solar components to nurture domestic solar manufacturing under the PLI scheme.",
+    "use_in_gd": "You can use this concept to bring nuance to a trade policy GD by saying: 'While the infant industry argument justifies initial tariff protection for our manufacturing sector, we must ensure these protections are strictly time-bound so they do not lead to long-term market inefficiencies.'"
+  },
   "categories": [
     {
       "key": "geopolitics",
       "title": "Geopolitics & International Relations",
       "stories": [
         {
-          "title": "India is discussing agreements on grains and maritime safety with Moscow and Kyiv: Jaishankar",
-          "url": "https://www.thehindu.com/news/national/india-is-going-beyond-advocacy-on-the-russia-ukraine-conflict-jaishankar/article71543379.ece",
-          "source": "The Hindu",
-          "published": "2026-10-04T22:59:51+05:30",
+          "title": "India-US trade talks hit 'plateau', finance minister says, as tariffs narrow room for deal",
+          "url": "https://www.reuters.com/world/india/india-us-have-reached-plateau-trade-talks-indian-finance-minister-says-2026-10-05/",
+          "source": "Reuters",
+          "published": "2026-10-05T10:06:00+05:30",
           "sources_count": 1,
-          "summary": "India shifts from advocacy to action on Russia-Ukraine, seeking dialogue, Black Sea safety, and grain-energy trade solutions.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Trade talks between India and the United States have reached a plateau. The Indian Finance Minister stated that existing tariffs have restricted the room for securing a bilateral trade deal.",
+          "why_it_matters": "The United States is one of India's largest trading partners, and a prolonged stalemate in trade negotiations could impact export-oriented Indian sectors and limit market access.",
+          "gd_for": [
+            "Protects domestic Indian industries from unrestricted foreign competition by maintaining crucial tariff barriers.",
+            "Signals that India will negotiate from a position of strength and will not compromise on its core economic interests."
+          ],
+          "gd_against": [
+            "High tariff barriers can lead to retaliatory measures, reducing the competitiveness of Indian exports in the US market.",
+            "A lack of a trade deal may discourage US companies from relocating their supply chains to India under 'friendshoring' initiatives."
+          ],
+          "key_fact": "Context: The United States was India's largest trading partner in FY24, with bilateral trade valued at approximately $120 billion.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "U.S. Air Force removes all bombers from British air base targeted by a suspected terror attack",
-          "url": "https://www.thehindu.com/news/international/us-air-force-removes-all-bombers-from-british-air-base-targeted-by-a-suspected-terror-attack/article71544899.ece",
-          "source": "The Hindu",
-          "published": "2026-10-05T04:00:39+05:30",
-          "sources_count": 2,
-          "summary": "U.S. forces redeploy bombers from RAF Fairford after a terror plot probe, as tensions rise over potential Iran-related strikes.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Yemen's government announces all-out war to reclaim land from Houthis",
-          "url": "https://www.bbc.co.uk/news/articles/cx8dzj9vpp01o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC World",
-          "published": "2026-10-04T22:21:30+05:30",
-          "sources_count": 2,
-          "summary": "The Yemeni president's announcement comes amid an exchange of strikes between the Houthis and the Saudi-led coalition.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Indian police accused of sexually harassing journalists at protest",
-          "url": "https://www.bbc.co.uk/news/articles/c9e8lvm6nrr3o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC World",
-          "published": "2026-10-04T22:31:19+05:30",
+          "title": "The New Nixon Shock? Why Japan Fears a Trump-Xi Deal",
+          "url": "https://thediplomat.com/2026/10/the-new-nixon-shock-why-japan-fears-a-trump-xi-deal/",
+          "source": "The Diplomat",
+          "published": "2026-10-05T20:46:00+05:30",
           "sources_count": 1,
-          "summary": "The allegations were made after police detained dozens of protesters demanding the resignation of the election chief over changes to voter rolls.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Japan is concerned about the potential geopolitical implications of a diplomatic agreement between Donald Trump and Xi Jinping. Historical events explain why the symbolism of this US-China summit is of high importance to Tokyo.",
+          "why_it_matters": "Any shift in US-China relations directly influences the security and trade dynamics of the Indo-Pacific region, impacting India's strategic positioning within the Quad alliance.",
+          "gd_for": [
+            "A potential US-China diplomatic deal could lower geopolitical tensions and stabilize global trade lines, benefiting global markets.",
+            "The situation encourages regional powers like Japan and India to deepen their bilateral defense and economic ties independently of the US."
+          ],
+          "gd_against": [
+            "An unexpected bilateral deal could sideline regional partners and undermine collective security frameworks in the Indo-Pacific.",
+            "Such diplomatic shifts create unpredictable policy environments, making long-term defense planning difficult for nations like India."
+          ],
+          "key_fact": "Context: The historic 'Nixon Shock' of 1971 involved a surprise US diplomatic pivot to China that caught close ally Japan completely unprepared.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Afghan Taliban says problems with Pakistan can be resolved through diplomacy",
+          "url": "https://www.reuters.com/world/asia-pacific/afghan-taliban-says-problems-with-pakistan-can-be-resolved-through-diplomacy-2026-10-05/",
+          "source": "Reuters",
+          "published": "2026-10-05T20:52:29+05:30",
+          "sources_count": 1,
+          "summary": "The Afghan Taliban has stated that its bilateral issues with Pakistan can be resolved through diplomatic channels. This announcement indicates a willingness to settle neighboring disputes peacefully.",
+          "why_it_matters": "Stability on the Pakistan-Afghanistan border is vital for India's national security, as regional unrest can spill over and impact regional connectivity and security.",
+          "gd_for": [
+            "Prioritizing diplomacy over military confrontation reduces the risk of active conflict and fosters regional stability in South Asia.",
+            "Peaceful dialogue opens up possibilities for structured trade agreements and collaborative regional infrastructure projects."
+          ],
+          "gd_against": [
+            "Diplomatic assurances from the Taliban may not translate into actual crackdowns on cross-border militant operations.",
+            "Persistent trust deficits between the two nations can lead to fragile agreements that fall apart under pressure."
+          ],
+          "key_fact": "Context: Pakistan and Afghanistan share a highly contested, porous 2,640-kilometer border known as the Durand Line.",
+          "fact_is_context": true,
+          "ai": true
         }
       ]
     },
@@ -100,88 +106,104 @@
       "title": "Indian Economy, Policy, Budget & RBI",
       "stories": [
         {
-          "title": "Next-gen GST: Taking India's reform journey forward",
-          "url": "https://economictimes.indiatimes.com/news/economy/policy/next-gen-gst-taking-indias-reform-journey-forward/articleshow/134679928.cms",
+          "title": "RBI likely to hike repo rate by 25 bps to 5.50% in October policy: ET Poll",
+          "url": "https://economictimes.indiatimes.com/news/economy/policy/rbi-likely-to-hike-repo-rate-by-25-bps-to-5-50-in-october-policy-et-poll/articleshow/134679410.cms",
           "source": "Economic Times",
-          "published": "2026-10-05T00:39:20+05:30",
-          "sources_count": 3,
-          "summary": "The new GST framework in India aims to streamline compliance processes while lowering tax rates, contributing to enhanced economic stability. This initiative promises to improve taxpayer satisfaction and bolster revenue generation, encouraging growth across multiple industries. Early data shows a notable increase in taxable supplies after these reforms, positively impacting both businesses and con",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "RBI may hike rates by 0.25% in Oct policy amid inflation: Experts poll",
-          "url": "https://www.business-standard.com/economy/news/rbi-may-hike-rates-by-0-25-in-oct-policy-amid-inflation-experts-poll-126100400302_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-04T15:39:11+05:30",
+          "published": "2026-10-05T05:30:00+05:30",
           "sources_count": 2,
-          "summary": "If the RBI increases the rate in the upcoming policy, it would mark a reversal in the interest rate policy, which has witnessed rate cuts in 2025 and an extended pause thereafter",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "The Reserve Bank of India's Monetary Policy Committee is holding important meetings, with decisions to be announced on October 7. Analysts expect a 25 basis points hike in the key interest rate to 5.50%. This step is urged by economists to combat persistent inflation driven by high crude oil prices and poor agricultural yields.",
+          "why_it_matters": "A rate hike directly influences borrowing costs for Indian consumers and companies, affecting the cost of home loans, business expansion, and overall market liquidity.",
+          "gd_for": [
+            "Raising the repo rate helps curb domestic retail inflation and prevents the economy from overheating due to supply-side shocks.",
+            "Maintaining competitive interest rates helps defend the exchange rate of the Indian Rupee against the US Dollar."
+          ],
+          "gd_against": [
+            "Increased borrowing costs can slow down industrial growth and hurt micro, small, and medium enterprises (MSMEs) trying to recover.",
+            "A rate hike might suppress consumer discretionary spending, which is vital for driving domestic economic expansion."
+          ],
+          "key_fact": "Analysts are anticipating a 25 basis points increase in the key interest rate, raising it to 5.50%.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Weekly policy watch: RBI monetary policy, GST Council meet and PMI in focus",
-          "url": "https://www.business-standard.com/economy/news/weekly-policy-watch-rbi-mpc-gst-reforms-pmi-forex-reserves-october-2026-126100500213_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-05T10:44:17+05:30",
-          "sources_count": 1,
-          "summary": "RBI MPC Meeting: India's policy calendar this week will track RBI's rate decision, GST process reforms and fresh forex reserves data",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "RBI rate hikes back on the table as inflation risks mount",
-          "url": "https://www.livemint.com/economy/rbi-monetary-policy-repo-rate-indian-economy-11791107863686.html",
+          "title": "India’s growth momentum holds, but inflation and weak industrial activity weigh, says BCG report",
+          "url": "https://www.livemint.com/economy/india-growth-momentum-holds-but-inflation-and-industrial-activity-pose-risks-bcg-11791200956716.html",
           "source": "Mint",
-          "published": "2026-10-05T05:30:22+05:30",
+          "published": "2026-10-05T19:25:07+05:30",
           "sources_count": 1,
-          "summary": "The Monetary Policy Committee may raise the key repo rate by 25 basis points to 5.50% on 7 October, according to nine of 10 economists surveyed by Mint, with only one respondent expecting a pause.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "A BCG report from September indicates that India's economic expansion is uneven despite maintaining its growth momentum. Strong investments and a robust services sector are offsetting weaker performances in manufacturing, consumer sentiment, and industrial demand.",
+          "why_it_matters": "For management graduates, this highlights a bifurcated corporate environment where the services sector is thriving, but mass employment-generating sectors like manufacturing face persistent headwinds.",
+          "gd_for": [
+            "Strong performance in services and high investments provide a resilient foundation to shield India's overall GDP from external global shocks.",
+            "The growth in investments signals continued corporate confidence in India's long-term infrastructure and capital capability."
+          ],
+          "gd_against": [
+            "Slower growth in manufacturing can severely restrict job creation for India's vast semi-skilled and low-skilled workforce.",
+            "Weak consumer sentiment can eventually drag down the services sector if household budgets continue to face inflationary pressures."
+          ],
+          "key_fact": "Context: The manufacturing sector contributes around 14% to 15% to India's GDP, far below the government's long-term target of 25%.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "RBI MPC begins 3-day meeting today amid expectations of first rate hike since 2023",
-          "url": "https://economictimes.indiatimes.com/news/economy/indicators/rbi-mpc-begins-3-day-meeting-today-amid-expectations-of-first-rate-hike-since-2023/articleshow/134686230.cms",
-          "source": "Economic Times",
-          "published": "2026-10-05T10:45:15+05:30",
+          "title": "Union Cabinet to take up ₹10,000 crore SME Growth Fund, centralised infra authority",
+          "url": "https://www.thehindu.com/business/Economy/union-cabinet-to-take-up-10000-crore-sme-growth-fund-centralised-infra-authority/article71550009.ece",
+          "source": "The Hindu",
+          "published": "2026-10-06T10:33:39+05:30",
           "sources_count": 1,
-          "summary": "The Reserve Bank of India's Monetary Policy Committee is meeting to discuss potential interest rate hikes. Inflationary pressures and external factors are leading to anticipation of a rate increase. Analysts expect a 25 basis points hike in the upcoming policy announcement. This decision aligns with current inflation trends and economic forecasts for the country. The market is closely monitoring these developments as they will impact future economic stability.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "The Union Cabinet will consider a proposal for a 10,000 crore rupee SME Growth Fund. This fund is aimed at making direct equity investments in Small and Medium Enterprises. The Cabinet will also review a centralized ITLA for integrated transport, logistics planning, and impact assessment.",
+          "why_it_matters": "SMEs form the backbone of the Indian economy; providing direct equity and building centralized logistics infrastructure can sharply boost domestic manufacturing competitiveness.",
+          "gd_for": [
+            "Direct equity investments help promising small businesses scale up without putting the burden of high-interest debt on their balance sheets.",
+            "A centralized authority for transport and logistics planning will reduce overall supply chain friction and lower transport costs for Indian exporters."
+          ],
+          "gd_against": [
+            "Managing direct equity investments across thousands of small businesses is highly complex and poses significant financial risks of bad investments.",
+            "A centralized authority could lead to bureaucratic delays and red tape if the processes are not fully digitized and decentralized for quick execution."
+          ],
+          "key_fact": "Cabinet to consider a ₹10,000 crore SME Growth Fund and a centralized ITLA...",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Rate hikes are coming, but don’t count credit growth out just yet",
-          "url": "https://www.livemint.com/economy/india-credit-growth-rate-hike-rbi-monetary-policy-bank-lending-bank-credit-fcnr-b-deposits-financial-deepening-11791139917638.html",
+          "title": "China’s banking shake-up: 670 lenders vanish as Beijing moves to contain financial risks",
+          "url": "https://www.livemint.com/economy/chinas-banking-shake-up-670-lenders-vanish-as-beijing-moves-to-contain-financial-risks-11791208318054.html",
           "source": "Mint",
-          "published": "2026-10-05T09:00:45+05:30",
+          "published": "2026-10-05T20:06:51+05:30",
           "sources_count": 1,
-          "summary": "Despite imminent rate hikes, strong economic growth, ample liquidity, and structural demand could mean India’s credit upcycle may be able to withstand monetary tightening, at least in the short run.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "In 2025, China closed a record 670 banks as part of an effort to contain financial risks. Beijing consolidated these weaker rural lenders due to an increase in bad loans and slower economic growth.",
+          "why_it_matters": "This serve as a vital case study for Indian policymakers and public sector banks on the critical importance of early regulation and managing bad loans in rural co-operative banks.",
+          "gd_for": [
+            "Consolidating weak lenders prevents systemic contagion and helps stabilize the wider financial ecosystem from collapsing.",
+            "Merging smaller rural banks creates stronger financial institutions with better credit monitoring systems and risk management practices."
+          ],
+          "gd_against": [
+            "Sudden bank closures and consolidations can disrupt rural credit availability, negatively impacting local farmers and micro-businesses.",
+            "Massive bank closures can trigger panic among depositors and severely damage public trust in regional banking institutions."
+          ],
+          "key_fact": "China closed a record 670 banks in 2025 as Beijing consolidated weaker rural lenders...",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
+        },
+        {
+          "title": "Tax-free bonds for infrastructure, large investors",
+          "url": "https://www.thehindu.com/opinion/columns/C_R_L__Narasimhan/tax-free-bonds-for-infrastructure-large-investors/article56846133.ece1",
+          "source": "The Hindu",
+          "published": "2026-10-05T11:58:28+05:30",
+          "sources_count": 1,
+          "summary": "Tax-free bonds are being considered for infrastructure and large investors. This step is designed to channel high-value capital toward financing key national public development projects.",
+          "why_it_matters": "India requires massive long-term investments to modernize its infrastructure, and tax-free bonds are a powerful tool to attract private wealth to fund long-gestation public projects.",
+          "gd_for": [
+            "Provides a secure and highly attractive investment avenue for high-net-worth individuals, directing their capital to nation-building.",
+            "Helps infrastructure developers raise long-term capital at relatively lower borrowing costs due to the tax-exempt status of the interest."
+          ],
+          "gd_against": [
+            "Offering tax exemptions to large investors reduces the overall direct tax collections for the central government.",
+            "It may create unequal competition, crowding out private corporate bond issuers who cannot offer tax-exempt returns to investors."
+          ],
+          "key_fact": "Context: Tax-free bonds in India have historically been issued by state-backed entities like NHAI, PFC, and REC to raise low-cost, long-term capital.",
+          "fact_is_context": true,
+          "ai": true
         }
       ]
     },
@@ -190,88 +212,124 @@
       "title": "Business & Corporate",
       "stories": [
         {
-          "title": "Jio IPO likely by Oct end at enterprise valuation of above ₹12 trillion",
-          "url": "https://www.business-standard.com/markets/ipo/jio-ipo-likely-by-oct-end-at-enterprise-valuation-of-above-12-trillion-126100400146_1.html",
+          "title": "Advanced manufacturing, energy security key to growth: N Chandrasekaran",
+          "url": "https://www.business-standard.com/companies/people/advanced-manufacturing-energy-security-key-to-growth-n-chandrasekaran-126100501027_1.html",
           "source": "Business Standard",
-          "published": "2026-10-04T11:41:44+05:30",
+          "published": "2026-10-05T19:06:36+05:30",
           "sources_count": 1,
-          "summary": "Jio Platforms IPO is touted as India's largest public offer at an estimated size of $3.8 billion",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Tata Sons Chairman N Chandrasekaran has emphasized that India's long-term economic growth depends on continued investment in advanced and precision manufacturing. He also identified energy security and human capital as vital pillars for sustainable development.",
+          "why_it_matters": "This underscores the need for Indian industry to move up the value chain from basic assembly to precision manufacturing, aligning with national programs like 'Make in India'.",
+          "gd_for": [
+            "Investing in advanced and precision manufacturing elevates India's position in global supply chains and boosts high-value exports.",
+            "Focusing on human capital and energy security ensures that India's growth is both sustainable and inclusive over the coming decades."
+          ],
+          "gd_against": [
+            "Advanced precision manufacturing is highly automated and capital-intensive, which might not generate the massive scale of low-skilled jobs India immediately needs.",
+            "Acquiring energy security through green transition requires huge upfront investments that can temporarily strain the financial resources of developing nations."
+          ],
+          "key_fact": "Context: The manufacturing sector currently contributes around 17% of India's GDP, and the country is striving to increase this to help absorb its growing labor force.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Canon in talks with key chip project players, plans India service centres",
-          "url": "https://www.business-standard.com/companies/news/canon-in-talks-with-key-chip-project-players-plans-india-service-centres-126100400128_1.html",
+          "title": "Jio Platforms likely to launch IPO on October 21, seeks to raise $3.8 bn",
+          "url": "https://www.business-standard.com/companies/news/jio-platforms-likely-to-launch-ipo-on-october-21-seeks-to-raise-3-8-bn-126100500424_1.html",
           "source": "Business Standard",
-          "published": "2026-10-04T15:51:40+05:30",
-          "sources_count": 2,
-          "summary": "Canon, a global supplier of lithography systems used in semiconductor manufacturing, said it is looking to support the development of India's semiconductor ecosystem",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-10-05T14:06:26+05:30",
+          "sources_count": 1,
+          "summary": "Jio Platforms is planning to launch an initial public offering (IPO) on October 21 to raise $3.8 billion. This listing is expected to surpass Hyundai Motor India's $2.9 billion IPO in 2024 to become the country's largest to date.",
+          "why_it_matters": "A mega-IPO of this scale reflects the massive valuation of India's telecom and digital services sector, boosting global investor confidence in Indian capital markets.",
+          "gd_for": [
+            "The IPO will unlock massive value for shareholders and provide Jio with capital to fund next-generation digital and 5G infrastructure.",
+            "A successful listing of this size strengthens India's position as a premier global destination for tech and telecom investments."
+          ],
+          "gd_against": [
+            "Such a massive IPO could temporarily suck out liquidity from other sectors in the Indian stock market.",
+            "High market valuations put immense pressure on Jio to maintain rapid growth, which could lead to increased tariff rates for Indian consumers."
+          ],
+          "key_fact": "The country's biggest listing to date is Hyundai Motor India's $2.9 billion listing in 2024.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "L&T wins ₹10,000-15,000 crore power transmission orders in India, Middle East",
-          "url": "https://economictimes.indiatimes.com/industry/energy/power/lt-wins-10000-15000-crore-power-transmission-orders-in-india-middle-east/articleshow/134685525.cms",
+          "title": "Campa vs FSSAI: Reliance sues food safety regulator for preventing it from marketing products as ‘energy drinks'",
+          "url": "https://www.livemint.com/companies/news/campa-vs-fssai-reliance-sues-food-safety-regulator-for-preventing-it-from-marketing-products-as-energy-drinks-11791263546912.html",
+          "source": "Mint",
+          "published": "2026-10-06T10:58:50+05:30",
+          "sources_count": 1,
+          "summary": "Reliance Industries has sued the Food Safety and Standards Authority of India (FSSAI). The legal dispute arises from regulatory restrictions that prevent Reliance from marketing its Campa-brand products as energy drinks.",
+          "why_it_matters": "This conflict highlights the tension between India's FMCG giants trying to capture premium beverage markets and regulators enforcing strict health and labeling standards.",
+          "gd_for": [
+            "Clearer categorization helps businesses innovate and introduce products without facing arbitrary marketing hurdles.",
+            "Challenging the regulator promotes a transparent, rule-based environment where corporate brand definitions are legally clarified."
+          ],
+          "gd_against": [
+            "Strict regulations on energy drinks are vital to protect consumer health from high caffeine or sugar levels marketed deceptively.",
+            "Conglomerates using litigation to bypass health regulators could set a dangerous precedent, undermining public health guidelines in India."
+          ],
+          "key_fact": "Context: Reliance acquired the iconic beverage brand Campa Cola in 2022 for approximately ₹22 crore to challenge global giants in the Indian beverage market.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Noel, three SDTT trustees slam Venu, Vijay over listing ‘epiphanies’, accuse them of breaching fiduciary duties",
+          "url": "https://www.livemint.com/companies/tata-trusts-vs-venu-srinivasan-vijay-singh-tata-sons-listing-11791209202245.html",
+          "source": "Mint",
+          "published": "2026-10-06T06:00:53+05:30",
+          "sources_count": 1,
+          "summary": "A deep rift has emerged at the Sir Dorabji Tata Trust (SDTT) as four trustees, including Noel Tata, have criticized two other trustees. They have accused them of breaching fiduciary duties over discussions regarding the potential listing of Tata Sons.",
+          "why_it_matters": "As SDTT is the largest shareholder of Tata Sons, governance disputes within the trust can impact market stability and investor sentiment across multiple publicly listed Tata group companies.",
+          "gd_for": [
+            "Calling out potential breaches of fiduciary duty ensures long-term corporate governance and preserves the trust's core values.",
+            "Addressing the internal conflict openly prevents unauthorized decisions that could disrupt the entire conglomerate's holding structure."
+          ],
+          "gd_against": [
+            "Public infighting among trustees damages the reputation of the Tata brand, which is traditionally known for corporate stability and integrity.",
+            "Internal rifts could delay strategic decision-making and create market uncertainty for India's largest conglomerate."
+          ],
+          "key_fact": "SDTT is the largest shareholder of Tata Sons, owning 27.98% in the holding company of India's largest conglomerate.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Your phone says “spam” before you answer. How AI spots suspect calls",
+          "url": "https://economictimes.indiatimes.com/industry/telecom/telecom-news/your-phone-says-spam-before-you-answer-how-ai-spots-suspect-calls/articleshow/134725067.cms",
           "source": "Economic Times",
-          "published": "2026-10-05T09:46:31+05:30",
-          "sources_count": 2,
-          "summary": "Larsen & Toubros Power Transmission & Distribution business has won multiple EPC orders worth ₹10,000-15,000 crore across India, Saudi Arabia and the UAE. The projects include 380 kV transmission and substation works in Saudi Arabia, 132/11 kV substations and cabling in the UAE, and a transmission system of lines and substations in Visakhapatnam.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Lockheed Martin’s India expansion plan hinges on $10.5bn military aircraft bid: Which firms are competing for project?",
-          "url": "https://www.livemint.com/companies/news/lockheed-martin-s-india-expansion-plan-hinges-on-10-5bn-military-aircraft-bid-which-firms-are-competing-for-project-11791107461403.html",
-          "source": "Mint",
-          "published": "2026-10-04T16:24:57+05:30",
+          "published": "2026-10-06T11:41:46+05:30",
           "sources_count": 1,
-          "summary": "Lockheed Martin plans to expand its manufacturing in India if it wins a $10.5 billion contract for 60 medium transport aircraft. It has partnered with Tata Advanced Systems and aims to deliver 12 aircraft initially, while 48 will be produced locally, enhancing India's aviation capabilities.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Telecom operators in India like Airtel and Vodafone Idea are deploying artificial intelligence to detect and flag spam calls and messages. Additionally, apps like Truecaller and Google's Phone are improving caller identification capabilities to warn users.",
+          "why_it_matters": "With cyber fraud and spam calls rising exponentially in India, AI-based real-time detection is critical to safeguarding millions of mobile users from financial scams.",
+          "gd_for": [
+            "AI-driven filtering proactively protects vulnerable citizens from sophisticated phishing scams and unsolicited marketing.",
+            "Real-time spam labeling saves productive time and enhances overall trust in digital communication networks."
+          ],
+          "gd_against": [
+            "Algorithmic spam detection could lead to false positives, blocking legitimate emergency or business calls.",
+            "Mass scanning of communication trends by telecom operators raises data privacy and surveillance concerns among citizens."
+          ],
+          "key_fact": "Context: India is one of the worst-affected countries by spam, with telecom operators flagging billions of suspicious communications using AI trend analysis.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Accenture to return less to shareholders as acquisition spending rises",
-          "url": "https://www.livemint.com/companies/news/accenture-dividend-share-buyback-11791124709181.html",
-          "source": "Mint",
-          "published": "2026-10-05T06:18:22+05:30",
-          "sources_count": 1,
-          "summary": "Accenture’s capital-allocation decisions matter to Indian IT services firms, which tend to track the company’s strategy. Local IT services firms also returned less to shareholders last fiscal.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Indian Startup IPO Tracker 2026",
-          "url": "https://inc42.com/features/indian-startup-ipo-tracker-2026/",
+          "title": "Flipkart Acquires Minority Stake In Travel Tech Startup TravClan To Scale Offerings",
+          "url": "https://inc42.com/buzz/flipkart-acquires-minority-stake-in-travel-tech-startup-travclan-to-scale-offerings/",
           "source": "Inc42",
-          "published": "2026-10-04T12:30:54+05:30",
-          "sources_count": 1,
-          "summary": "As per Inc42 data, 29 startups have already filed their DRHPs, while another 25 are in various stages of finalising their IPO plans.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-10-05T18:51:47+05:30",
+          "sources_count": 2,
+          "summary": "Flipkart has acquired a minority stake in Delhi-based B2B travel tech startup TravClan. The acquisition is intended to help Flipkart scale its international leisure travel offerings by leveraging TravClan's technology and agent network.",
+          "why_it_matters": "This move highlights the consolidation in the Indian e-commerce space as platforms transition into super-apps, offering diversified services like travel, fintech, and retail under one roof.",
+          "gd_for": [
+            "The partnership enables Flipkart to rapidly scale its travel ecosystem, offering consumers seamless booking experiences backed by a large network.",
+            "It provides B2B startups like TravClan with capital and massive market reach, fostering growth in the domestic travel-tech ecosystem."
+          ],
+          "gd_against": [
+            "Increased dominance of e-commerce giants in travel booking could squeeze out independent, smaller travel agencies and operators.",
+            "Focusing heavily on expansion into high-end leisure travel might distract Flipkart from addressing core e-commerce logistics and rural market penetration."
+          ],
+          "key_fact": "Flipkart aims to scale its own international leisure offerings by tapping into TravClan’s tech and network of over 15,000 travel agents.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         }
       ]
     },
@@ -280,46 +338,84 @@
       "title": "Technology, AI & Innovation",
       "stories": [
         {
-          "title": "OpenAI's Sam Altman says AI benefits warrant accepting some risks",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/openais-sam-altman-says-ai-benefits-warrant-accepting-some-risks/articleshow/134684200.cms",
-          "source": "Economic Times",
-          "published": "2026-10-05T08:02:51+05:30",
-          "sources_count": 3,
-          "summary": "OpenAI Chief Executive Sam Altman said the benefits of artificial intelligence justify accepting some risks and argued the technology should remain broadly accessible to the public \"",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "India needs its own AI safety framework, not a copy of US pact: Industry experts",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/india-needs-its-own-ai-safety-framework-not-a-copy-of-us-pact-industry-experts/articleshow/134675884.cms",
-          "source": "Economic Times",
-          "published": "2026-10-04T19:21:02+05:30",
-          "sources_count": 2,
-          "summary": "India should build its own artificial intelligence (AI) safety framework suited to its languages, scale, and application-led AI ecosystem rather than replicate a voluntary pact signed by US President Donald Trump and top technology firms last week, industry experts said.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "EmTech Future 2026: When AI Meets Everything",
-          "url": "https://www.technologyreview.com/2026/10/05/1145413/emtech-future-2026-when-ai-meets-everything/",
-          "source": "MIT Technology Review",
-          "published": "2026-10-05T09:30:00+05:30",
+          "title": "OpenAI will start watermarking ChatGPT’s text in the EU",
+          "url": "https://techcrunch.com/2026/10/05/openai-will-start-watermarking-chatgpts-text-in-the-eu/",
+          "source": "TechCrunch",
+          "published": "2026-10-06T02:06:48+05:30",
           "sources_count": 1,
-          "summary": "Yossi Matias, Vice President &amp; Head of Google Research, explores how AI is beginning to reshape biology, infrastructure, manufacturing, and science, and why its greatest impact may come when it intersects with other fields. Step inside the newsroom with our MIT Technology Review editors for sharp analysis and unpublished insights from the team that researches…",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "OpenAI has announced that it will start watermarking ChatGPT and Codex text within the European Union to comply with the AI Act. The company noted that editing the output text can make these invisible marks harder to detect.",
+          "why_it_matters": "This sets a global regulatory precedent that might soon influence Indian policy, where deepfakes and AI-generated misinformation are growing challenges.",
+          "gd_for": [
+            "Watermarking is essential for combatting academic dishonesty, automated spam, and the spread of AI-generated misinformation.",
+            "It establishes a clear framework for intellectual property accountability, helping creators distinguish human-made content from AI-generated work."
+          ],
+          "gd_against": [
+            "Watermarks can easily be bypassed by paraphrasing or editing the output, making the compliance measure largely ineffective against determined bad actors.",
+            "Mandatory watermarking might put EU-compliant AI models at a competitive disadvantage compared to unregulated open-source models globally."
+          ],
+          "key_fact": "Context: The European Union AI Act, passed in 2024, is the world's first comprehensive horizontal regulation on artificial intelligence.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Meta, TikTok, X challenge UK watchdog over online safety data demands",
+          "url": "https://indianexpress.com/article/technology/tech-news-technology/meta-tiktok-x-challenge-uk-watchdog-over-online-safety-data-demands-10908387/lite/",
+          "source": "Indian Express",
+          "published": "2026-10-06T09:10:51+05:30",
+          "sources_count": 1,
+          "summary": "Global social media platforms Meta, TikTok, and X are challenging the UK's online safety watchdog. The dispute centers on the regulator's demands for online safety data from these companies.",
+          "why_it_matters": "As India drafts its own Digital India Act, the tension between sovereign safety watchdogs and global big tech firms over data sharing will directly shape domestic policy.",
+          "gd_for": [
+            "Challenging overreaching demands protects user privacy and prevents regulatory overreach that could compromise sensitive proprietary data.",
+            "It forces regulators to define clear, standardized, and secure frameworks for data sharing rather than making arbitrary demands."
+          ],
+          "gd_against": [
+            "Big tech's resistance to sharing safety data hampers regulators' ability to protect minors and curb online harms like hate speech and cyberbullying.",
+            "It suggests that social media giants prioritize corporate secrecy and profit over public accountability and digital safety."
+          ],
+          "key_fact": "Context: Under the UK Online Safety Act, tech firms can face fines of up to 10% of their global annual revenue for failing to protect users and comply with safety investigations.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Nvidia-backed Reflection unveils first AI model to take on Chinese open models",
+          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/nvidia-backed-reflection-unveils-first-ai-model-to-take-on-chinese-open-models/articleshow/134721941.cms",
+          "source": "Economic Times",
+          "published": "2026-10-06T08:47:24+05:30",
+          "sources_count": 2,
+          "summary": "Nvidia-backed startup Reflection AI has launched its first open-weight AI model named Beam. The model is designed to compete directly with lower-cost Chinese open models like DeepSeek and Kimi in coding and agentic tasks.",
+          "why_it_matters": "For Indian developers and tech startups, the rise of high-performance, cost-effective open-weight models provides an affordable alternative to expensive proprietary AI systems.",
+          "gd_for": [
+            "Open-weight models democratize advanced AI technology, allowing developers globally to build localized applications without relying on expensive APIs.",
+            "Increased competition among AI startups drives down operational costs, making AI deployment more affordable for businesses of all sizes."
+          ],
+          "gd_against": [
+            "Open-weight models can be easily downloaded and repurposed by malicious actors to generate spam, malware, or coordinate cyberattacks.",
+            "The intense geopolitical competition in AI development could lead to fragmented global tech ecosystems and export restrictions."
+          ],
+          "key_fact": "Nvidia-backed Reflection AI debuted its first open-weight model named Beam on Monday, as the startup aims to compete with lower-cost Chinese models such as DeepSeek and Kimi.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
+        },
+        {
+          "title": "Wikipedia operator says OpenAI's rogue agents possibly tied to data service disruption in May",
+          "url": "https://economictimes.indiatimes.com/tech/technology/wikipedia-operator-says-openais-rogue-agents-possibly-tied-to-data-service-disruption-in-may/articleshow/134715909.cms",
+          "source": "Economic Times",
+          "published": "2026-10-06T00:26:47+05:30",
+          "sources_count": 2,
+          "summary": "The Wikimedia Foundation has reported that unauthorized activity by \"rogue\" OpenAI agents was detected on its platforms. This activity is believed to have caused a partial outage of Wikipedia's data services in May.",
+          "why_it_matters": "This incident highlights the growing friction between free public data sources and AI giants, raising critical questions about data ethics and infrastructure strain in India and globally.",
+          "gd_for": [
+            "Exposing these incidents holds AI companies accountable for their web-scraping practices and pushes them to adopt ethical data gathering standards.",
+            "It emphasizes the urgent need for robust defense mechanisms and rate-limiting to protect public digital public goods from corporate exploitation."
+          ],
+          "gd_against": [
+            "Over-regulating web scraping could choke the training pipelines of AI models, slowing down global technological progress and innovation.",
+            "Publicly blaming AI developers for infrastructure outages before full investigations might lead to unnecessary friction and panic in the tech ecosystem."
+          ],
+          "key_fact": "Wikimedia confirmed some activity by 'rogue' OpenAI agents on Wikimedia platforms, including a May incident that resulted in a 'partial outage' of its data service.",
+          "fact_is_context": false,
+          "ai": true
         }
       ]
     },
@@ -328,46 +424,64 @@
       "title": "Science, Climate & Sustainability",
       "stories": [
         {
-          "title": "Purchase of field aims to expand 'green lung'",
-          "url": "https://www.bbc.co.uk/news/articles/cv0lr3584ej9o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Science",
-          "published": "2026-10-04T16:35:56+05:30",
+          "title": "Delhi’s new pollution rules: What changes from October and November?",
+          "url": "https://www.downtoearth.org.in/air/delhis-new-pollution-rules-what-changes-from-october-and-november",
+          "source": "Down To Earth",
+          "published": "2026-10-05T11:39:36+05:30",
           "sources_count": 1,
-          "summary": "It is hoped the prospective sale provides a haven for wildlife in an urban area.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Delhi is implementing new pollution rules starting in October and November to combat rising PM2.5 levels. These measures include stricter vehicle regulations, construction bans, and revised air quality measures.",
+          "why_it_matters": "Winter pollution in Delhi-NCR is a severe recurring public health crisis that affects millions, forcing policymakers to constantly balance environmental health with economic activities.",
+          "gd_for": [
+            "Stricter vehicle and construction regulations are crucial to mitigate the toxic winter smog and protect citizen health.",
+            "Revised air quality measures enforce proactive compliance, pushing industries to adopt greener alternatives."
+          ],
+          "gd_against": [
+            "Sudden bans on construction activities severely hit the livelihoods of daily wage workers and delay key infrastructure.",
+            "Strict vehicle restrictions cause immense public inconvenience due to the lack of a fully adequate public transit alternative."
+          ],
+          "key_fact": "Context: Delhi's PM2.5 levels regularly spike to hazardous categories during winter, often exceeding the WHO safe limit of 15 µg/m³ by more than ten times.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "IIT-Gandhinagar scientists demo quantum link through 5.5 km of air",
-          "url": "https://www.thehindu.com/sci-tech/science/iit-gandhinagar-scientists-demo-quantum-link-through-55-km-of-air/article71544660.ece",
+          "title": "2026 Nobel medicine prize: Trio wins for optogenetics work",
+          "url": "https://www.thehindu.com/sci-tech/health/nobel-prize-physiology-medicine-2026-winner/article71545941.ece",
           "source": "The Hindu",
-          "published": "2026-10-05T10:22:08+05:30",
-          "sources_count": 1,
-          "summary": "India achieves first free-space quantum-key distribution link over 5.56 km, highlighting secure quantum communications across air between BISAG-N and IIT-Gandhinagar.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-10-05T21:31:45+05:30",
+          "sources_count": 3,
+          "summary": "Karl Deisseroth, Peter Hegemann, and Georg Nagel have won the 2026 Nobel Prize in Physiology or Medicine on October 5, 2026. Their work on optogenetics allowed neuroscientists to test how specific neural circuits are related to behaviors and emotions. The winners will receive a cash prize of 10 million Swedish kronor.",
+          "why_it_matters": "This breakthrough provides a revolutionary tool to map and understand human brain functions, potentially unlocking treatments for mental health and neurological diseases in India and globally.",
+          "gd_for": [
+            "Optogenetics transforms neuroscience from observational correlation to precise, causal mapping of brain disorders.",
+            "The technique opens up new avenues for targeted, non-invasive therapies for complex conditions like Parkinson's and depression."
+          ],
+          "gd_against": [
+            "High costs and technical barriers mean the practical medical benefits of optogenetics may take decades to reach patients in developing nations.",
+            "The ability to manipulate specific neural circuits and behaviors raises complex bioethical concerns regarding cognitive control."
+          ],
+          "key_fact": "The winners will get a cash award of 10 million Swedish kronor.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Environmental groups critical of housing levy idea",
-          "url": "https://www.bbc.co.uk/news/articles/cwm2q2e145p4o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Science",
-          "published": "2026-10-05T11:05:03+05:30",
+          "title": "Protests over dam heat up as crackdown on activists continues",
+          "url": "https://india.mongabay.com/2026/10/protests-over-dam-heat-up-as-crackdown-on-activists-continues/",
+          "source": "Mongabay India",
+          "published": "2026-10-05T23:15:48+05:30",
           "sources_count": 1,
-          "summary": "The government wants developers to fund waterways projects in Norfolk.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Peaceful protests against the Siang Upper Multipurpose Project in Arunachal Pradesh turned violent after more than a year. On October 4, police and paramilitary forces allegedly lathi charged protesters in Uggeng village. This action followed attacks where protesters allegedly set fire to properties and targeted an MLA's house.",
+          "why_it_matters": "This conflict highlights the ongoing tension between India's mega renewable energy infrastructure goals and the rights of indigenous communities to protect their land and ecology.",
+          "gd_for": [
+            "Large-scale projects like the Siang Upper Multipurpose Project are vital for India's clean energy goals and border-region development.",
+            "State intervention is necessary to maintain law and order when protests turn violent and public property is targeted."
+          ],
+          "gd_against": [
+            "Violent crackdowns and lathi charges on peaceful indigenous protesters undermine democratic dissent and human rights.",
+            "Pushing mega-dams without local consent threatens delicate Himalayan ecosystems and the socio-cultural fabric of local tribes."
+          ],
+          "key_fact": "On October 4, protesters resisting the project were allegedly lathi charged by police and paramilitary forces in Uggeng village.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         }
       ]
     },
@@ -376,46 +490,84 @@
       "title": "India: Governance & Society",
       "stories": [
         {
-          "title": "- preprod.indianexpress.com",
-          "url": "https://preprod.indianexpress.com/article/india/kerala/cpi-m-condemns-remarks-of-congress-leader-against-kerala-cm-7477008/",
-          "source": "Indian Express",
-          "published": "2026-10-05T00:00:40+05:30",
-          "sources_count": 3,
-          "summary": "preprod.indianexpress.com",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Two arrested for allegedly drugging, gang-raping woman in Kochi",
-          "url": "https://www.thehindu.com/news/national/kerala/two-arrested-for-allegedly-drugging-gang-raping-woman-in-kochi/article71545955.ece",
+          "title": "Supreme Court refuses to stay proceedings against Nicobar project",
+          "url": "https://www.thehindu.com/sci-tech/energy-and-environment/supreme-court-refuses-to-stay-calcutta-hc-order-in-great-nicobar-island-project-terms-preservation-of-culture-a-fundamental-right/article71546355.ece",
           "source": "The Hindu",
-          "published": "2026-10-05T11:10:23+05:30",
-          "sources_count": 2,
-          "summary": "Two men arrested in Kochi for allegedly drugging and gang-raping a woman at a lodge, amid suspected spa-linked sexual racket.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Protest against CEC Gyanesh Kumar LIVE: Journalist alleging molestation by ACP detained with 17 others; claims police assaulted detainees: CJP",
-          "url": "https://www.thehindu.com/news/national/cec-gyanesh-kumar-protest-live-updates-supreme-court-hearing-suspension-cjp-congress-delhi-mumbai-india/article71545740.ece",
-          "source": "The Hindu",
-          "published": "2026-10-05T11:02:44+05:30",
+          "published": "2026-10-06T01:31:46+05:30",
           "sources_count": 1,
-          "summary": "Follow The Hindu Live for further updates as protests continue against CEC Gyanesh Kumar as the Supreme Court hears pleas challenging his decisions and seeking his suspension from office.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "The Supreme Court has refused to stay Calcutta High Court proceedings regarding the Great Nicobar Island Project. Petitions state that diverting over 130 square kilometers of pristine tropical forest violates the Forest Rights Act. They also argue that the project threatens the unique way of life of the Shompen and Nicobarese tribes.",
+          "why_it_matters": "It emphasizes the crucial role of the Indian judiciary in safeguarding indigenous tribal cultures and pristine ecological habitats against massive strategic developmental projects.",
+          "gd_for": [
+            "Refusing to stay proceedings ensures that the fundamental rights and unique cultures of isolated tribes are legally protected.",
+            "Environmental regulations and the Forest Rights Act must not be bypassed for industrial projects without rigorous judicial scrutiny."
+          ],
+          "gd_against": [
+            "Strategic defense and shipping projects in the Nicobar region could face costly delays, affecting national security and trade advantages.",
+            "Uncertainty over major developmental projects can hurt investor confidence in India's mega-infrastructure pipeline."
+          ],
+          "key_fact": "The petitions in the Calcutta High Court contest the diversion of over 130 sq. km of pristine tropical forest.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
+        },
+        {
+          "title": "In Keralam, ‘affordable’ private health care is easier said than done",
+          "url": "https://www.thehindu.com/news/national/kerala/in-keralam-affordable-private-health-care-is-easier-said-than-done/article71547179.ece",
+          "source": "The Hindu",
+          "published": "2026-10-06T10:50:19+05:30",
+          "sources_count": 1,
+          "summary": "The Keralam government is attempting to draft a new Bill focusing on the Kerala Clinical Establishments Act 2018. However, the private healthcare sector continues to resist this regulatory framework. The Act aims to establish transparency and regulation across both public and private healthcare sectors.",
+          "why_it_matters": "In India, where private healthcare accounts for a massive share of treatment, establishing a balanced regulatory framework is critical to preventing medical inflation and ensuring affordable care.",
+          "gd_for": [
+            "A regulatory framework brings transparency in billing and standardizes quality across private and public healthcare providers.",
+            "It protects vulnerable patients from exploitation, over-charging, and unnecessary medical procedures."
+          ],
+          "gd_against": [
+            "Excessive government regulation can lead to bureaucratic red tape, discouraging private investments and innovation in healthcare.",
+            "Overly rigid compliance costs might force small-scale clinics and nursing homes in rural areas to shut down."
+          ],
+          "key_fact": "The private health sector is still holding out against the Kerala Clinical Establishments (Registration and Regulations) Act 2018.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Keralam to install Rs 10 sanitary napkin vending machines at public places",
+          "url": "https://indianexpress.com/article/india/keralam-government-womn-sanitary-napkin-vending-machines-incinerators-ksrtc-terminals-kerala-10908065/lite/",
+          "source": "Indian Express",
+          "published": "2026-10-05T22:09:08+05:30",
+          "sources_count": 2,
+          "summary": "Keralam is going to install sanitary napkin vending machines in public places. These machines will provide sanitary napkins at a cost of ten rupees.",
+          "why_it_matters": "This initiative addresses the critical issue of menstrual hygiene and public infrastructure for women, boosting their mobility and physical well-being in India.",
+          "gd_for": [
+            "Installing cheap vending machines in public places makes sanitary products highly accessible to women of all economic backgrounds.",
+            "It normalizes menstrual health in the public sphere, helping to break long-standing social stigmas."
+          ],
+          "gd_against": [
+            "Without regular maintenance, restocking, and working electricity, these public vending machines risk falling into disuse.",
+            "Simply distributing napkins is insufficient unless accompanied by proper waste disposal facilities to prevent environmental hazards."
+          ],
+          "key_fact": "Keralam is to install Rs 10 sanitary napkin vending machines at public places.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Congress' caste reset in Uttar Pradesh: Can Brahmin-Muslim leadership deliver in 2027 assembly polls?",
+          "url": "https://www.livemint.com/politics/news/congress-caste-reset-in-uttar-pradesh-can-brahmin-muslim-leadership-deliver-in-2027-assembly-polls-11791171097556.html",
+          "source": "Mint Politics",
+          "published": "2026-10-05T10:13:14+05:30",
+          "sources_count": 1,
+          "summary": "The Congress party is attempting a political reset in Uttar Pradesh for the 2027 assembly polls. Political analysts describe this as an effort to rebuild the party organization through a social coalition. This coalition includes Brahmins, Muslims, Dalits, and extremely backward classes.",
+          "why_it_matters": "As Uttar Pradesh is India's most politically influential state, the success of caste-based social alignments heavily dictates national electoral arithmetic and party strategies.",
+          "gd_for": [
+            "Forming inclusive, broad-based social coalitions can lead to fairer political representation for historically marginalized groups.",
+            "Uniting diverse social classes helps counter monolithic polarization, offering a more pluralistic political debate."
+          ],
+          "gd_against": [
+            "Heavy reliance on complex caste-based mathematics can perpetuate identity politics instead of encouraging votes based on development and governance.",
+            "Reconciling the contrasting local interests of Brahmins, Dalits, and extremely backward classes within one coalition is highly volatile and difficult to sustain."
+          ],
+          "key_fact": "Context: Uttar Pradesh is India's most populous state and sends the highest number of MPs (80) to the Indian Parliament, making its caste alliances highly influential.",
+          "fact_is_context": true,
+          "ai": true
         }
       ]
     }
@@ -437,7 +589,6 @@
     "Mongabay India",
     "Nature",
     "PIB",
-    "RBI",
     "Reuters",
     "Science Daily",
     "TechCrunch",
@@ -447,8 +598,9 @@
   ],
   "sources_failed": [
     "BBC India (no entries)",
+    "RBI (HTTP 418)",
     "Scroll.in (no entries)",
     "The Print (no entries)"
   ],
-  "reading_time_min": 5
+  "reading_time_min": 22
 }
