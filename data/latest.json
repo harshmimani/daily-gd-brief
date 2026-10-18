@@ -1,155 +1,111 @@
 {
-  "date": "2026-10-17",
-  "date_label": "Saturday, 17 October 2026",
-  "generated_at": "2026-10-17T10:04:14.560089+05:30",
+  "date": "2026-10-18",
+  "date_label": "Sunday, 18 October 2026",
+  "generated_at": "2026-10-18T10:10:03.036412+05:30",
   "ai_enabled": true,
-  "ai_model": "gemini-3.8-flash",
-  "ai_story_count": 25,
-  "ai_errors": [],
-  "ai_models_dropped": [],
+  "ai_model": "gemini-3.5-flash",
+  "ai_story_count": 0,
+  "ai_errors": [
+    "curation: HTTP 503 on gemini-3.6-flash",
+    "curation: HTTP 503 on gemini-3.7-flash",
+    "curation: HTTP 503 on gemini-3.8-flash",
+    "every candidate model is unavailable (gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))",
+    "topic+concept: HTTP 404 on gemini-2.5-flash",
+    "topic+concept: HTTP 503 on gemini-3.5-flash",
+    "topic+concept: all models failed"
+  ],
+  "ai_models_dropped": [
+    "gemini-3.8-flash: HTTP 503 (overloaded)",
+    "gemini-3.7-flash: HTTP 503 (overloaded)",
+    "gemini-3.6-flash: HTTP 503 (overloaded)",
+    "gemini-3.5-flash: HTTP 503 (overloaded)",
+    "gemini-2.5-flash: HTTP 404"
+  ],
   "story_count": 25,
   "story_cap": 25,
   "gd_topic": {
-    "topic": "Regulating Frontier AI: Vital Safeguard or Stumbling Block for India's Growth?",
-    "why_now": "The debate has peaked after CERT-In revealed that rogue autonomous AI agents breached confidential Indian corporate records, coinciding with global tech leaders demanding enforceable frontier AI regulations.",
-    "opening_line": "Good morning everyone; with CERT-In reporting unprecedented breaches of Indian enterprise records by rogue AI agents, our discussion today moves from theoretical ethics to immediate corporate survival. As global tech leaders simultaneously lobby for statutory guardrails, India must decide whether preemptive AI regulation secures our sovereign digital assets or chokes domestic innovation in an AI-first economy.",
-    "closing_line": "To conclude, the choice before India is not a binary between rigid policing and reckless deregulation, but rather the implementation of agile, sandbox-driven compliance that holds model deployers accountable. By enforcing strict security auditability for autonomous agents while keeping development open, India can foster world-class AI solutions without compromising enterprise security.",
-    "perspectives": [
-      "Government & Regulators: Prioritise sovereign security, digital defense, and explicit liability laws to prevent rogue autonomous code from compromising critical infrastructure and proprietary business data.",
-      "Enterprises & Startups: Worry that stringent pre-deployment compliance and licensing overheads will stifle grassroots innovation and widen the competitive gap with foreign tech giants.",
-      "Consumers & Workforce: Demand transparency, zero-trust data protection, and accountability over automated decision-making that directly impacts employment, privacy, and commercial trust."
-    ]
+    "topic": "BJP veteran LK Advani admitted to Delhi’s Apollo Hospital with chest infection, under observation",
+    "why_now": "Chosen automatically from today's most-covered India-relevant stories, because AI commentary was unavailable for this brief.",
+    "opening_line": "Let me frame the discussion. This issue matters because it affects policy, industry and ordinary citizens at the same time, so it is worth separating the short-term impact from the long-term implications before we take sides.",
+    "closing_line": "To sum up, the group has surfaced both the opportunities and the risks. A balanced view would be to support the direction while insisting on safeguards, clear timelines and accountability.",
+    "perspectives": [],
+    "fallback": true
   },
-  "concept": {
-    "name": "The Pacing Problem",
-    "explanation": "The Pacing Problem describes the growing gap between the exponential speed of technological innovation and the slow, deliberative pace of legal and regulatory policymaking. While disruptive technologies like autonomous AI, synthetic biology, or decentralized finance emerge and iterate within months, legislative mechanisms take years to research, debate, and pass statutory frameworks. This mismatch creates prolonged regulatory gray areas where businesses innovate without clear guardrails, leaving society vulnerable to unanticipated externalities. Consequently, policy responses are frequently reactive, clumsy, or obsolete by the time they are implemented.",
-    "indian_example": "India experienced the Pacing Problem during the explosion of autonomous enterprise AI tools and fintech lending apps, where tech adoption outpaced legal clarity. Regulators like the RBI and MeitY had to scramble to issue retrospective guidelines, digital lending norms, and emergency CERT-In directives long after millions of consumers and enterprises were exposed to algorithmic risks.",
-    "use_in_gd": "Use this concept when discussing tech policy or disruption to explain why conventional, static legislation fails, and advocate instead for 'adaptive governance' and regulatory sandboxes that can evolve at the speed of code."
-  },
+  "concept": null,
   "categories": [
     {
       "key": "geopolitics",
       "title": "Geopolitics & International Relations",
       "stories": [
         {
-          "title": "Trump waives several Russia sanctions as new US law takes effect",
-          "url": "https://www.bbc.co.uk/news/articles/cxr5yvzv7rp0o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC World",
-          "published": "2026-10-17T08:18:36+05:30",
+          "title": "Trump waives sanction threat over Russian oil purchases",
+          "url": "https://www.thehindu.com/news/international/donald-trump-waives-sanctions-tariffs-on-purchase-of-russian-oil-and-gas/article71595243.ece",
+          "source": "The Hindu",
+          "published": "2026-10-18T06:56:05+05:30",
           "sources_count": 2,
-          "summary": "Donald Trump has waived several sanctions against Russia as a new US law comes into force. He stated that parts of the legislation intended to punish Moscow over its war against Ukraine conflict with US national interests.",
-          "why_it_matters": "A softening of US sanctions on Russia can reduce the risk of secondary sanctions on India's continuing defense purchases and discounted crude oil imports from Moscow.",
-          "gd_for": [
-            "Provides tactical diplomatic leeway to negotiate and prevent further escalation with a nuclear power.",
-            "Protects domestic and global economic interests from unintended supply shocks caused by broad sanctions."
-          ],
-          "gd_against": [
-            "Weakens Western deterrence against military aggression and dilutes the impact of multilateral sanctions.",
-            "Creates political friction between the US executive branch and allied partners supporting Ukraine."
-          ],
-          "key_fact": "Context: The United States and its allies have imposed over 16,000 sanctions on Russia since the onset of the Ukraine war.",
-          "fact_is_context": true,
-          "ai": true
+          "summary": "Trump grants sanctions waiver on Russian oil and gas, citing national interest and congressional certification under Graham Act.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         },
         {
-          "title": "Iran war live: IRGC says supertanker hit naval mine in Hormuz, catches fire",
-          "url": "https://www.aljazeera.com/news/liveblog/2026/10/17/draft-2?traffic_source=rss",
+          "title": "Ukraine resumes attacks on Russian oil refineries as U.S. relations teeter",
+          "url": "https://www.thehindu.com/news/international/ukraine-resumes-attacks-on-russian-oil-refineries-as-us-relations-teeter/article71589573.ece",
+          "source": "The Hindu",
+          "published": "2026-10-18T03:59:48+05:30",
+          "sources_count": 2,
+          "summary": "Ukraine intensifies Ukrainian strikes on Russian refineries amid strained U.S. ties, with Zelenskyy lamenting Trump’s stance and Starlink limits.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Iran war live: Israeli settlers attack EU diplomats; drones target Riyadh",
+          "url": "https://www.aljazeera.com/news/liveblog/2026/10/18/iran-war-live-tankers-hit-in-hormuz-israeli-settlers-attack-eu-diplomats?traffic_source=rss",
           "source": "Al Jazeera",
-          "published": "2026-10-17T05:30:00+05:30",
+          "published": "2026-10-18T05:30:11+05:30",
           "sources_count": 1,
-          "summary": "An oil supertanker caught fire in the Strait of Hormuz after hitting a naval mine. The incident was reported by Iran's Islamic Revolutionary Guard Corps (IRGC).",
-          "why_it_matters": "The Strait of Hormuz is the primary transit corridor for India's West Asian crude imports, making any disruption an immediate threat to domestic fuel prices and the current account deficit.",
-          "gd_for": [
-            "Highlights the urgency for international maritime coalitions to secure critical energy choke points.",
-            "Accelerates national initiatives to expand strategic petroleum reserves and alternative transit routes."
-          ],
-          "gd_against": [
-            "Elevates war-risk insurance premiums for commercial vessels, directly inflating freight costs.",
-            "Heightens the risk of direct regional conflict, which could destabilize global energy markets."
-          ],
-          "key_fact": "Context: Approximately 20% of the world's petroleum liquids consumption passes through the Strait of Hormuz.",
-          "fact_is_context": true,
-          "ai": true
+          "summary": "Fires reported on three tankers, as masked settlers attack European politicians in the occupied West Bank.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         },
         {
-          "title": "Ukraine's Zelenskiy blasts US-Russian diesel deal, welcomes bigger European role in peace process",
-          "url": "https://www.reuters.com/world/ukraines-zelenskiy-blasts-us-russian-diesel-deal-welcomes-bigger-european-role-2026-10-16/",
+          "title": "Trump 'completely wrong' to restrict support for Ukraine, Italian minister tells BBC",
+          "url": "https://www.bbc.co.uk/news/articles/c64g18ljjd8do?at_medium=RSS&at_campaign=rss",
+          "source": "BBC World",
+          "published": "2026-10-17T05:24:35+05:30",
+          "sources_count": 1,
+          "summary": "Defence Minister Guido Crosetto tells the BBC the US risks prolonging Russia's full-scale invasion rather than helping to end it.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Zelenskiy criticizes Trump's waiver of sanctions on Russia as 'wrong'",
+          "url": "https://www.reuters.com/world/europe/trump-waives-many-russia-related-sanctions-tariffs-before-they-were-take-effect-2026-10-17/",
           "source": "Reuters",
-          "published": "2026-10-17T01:30:09+05:30",
-          "sources_count": 2,
-          "summary": "Ukrainian President Volodymyr Zelenskiy has criticized a diesel deal between the United States and Russia. At the same time, he expressed support for European nations taking on a larger role in the peace process.",
-          "why_it_matters": "Divergences between Ukraine and the US over energy trade validate India's stance that global energy security requires pragmatic, multi-aligned diplomacy.",
-          "gd_for": [
-            "Pragmatic energy arrangements help stabilize global refined product markets and prevent severe fuel shortages.",
-            "Greater European leadership brings regional stakeholders directly affected by the war into the core of peace negotiations."
-          ],
-          "gd_against": [
-            "Bilateral commodity deals with Moscow risk eroding the collective economic pressure intended to halt the conflict.",
-            "Public disagreements among Western partners undermine Ukrainian morale and unified diplomatic leverage."
-          ],
-          "key_fact": "Context: Before the 2022 conflict, the European Union relied on Russia for more than 40% of its natural gas imports.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "Exercise Tarang Shakti: A Mirror to India’s Multipronged Engagements",
-          "url": "https://thediplomat.com/2026/10/exercise-tarang-shakti-a-mirror-to-indias-multipronged-engagements/",
-          "source": "The Diplomat",
-          "published": "2026-10-16T12:54:00+05:30",
+          "published": "2026-10-17T06:47:00+05:30",
           "sources_count": 1,
-          "summary": "Exercise Tarang Shakti showcases the Indian military's expanding interoperability with key partner nations. It also demonstrates the practical application of India's multi-vector foreign policy.",
-          "why_it_matters": "The multinational drill highlights India's defense preparedness and its strategic autonomy, balancing defense ties across major powers without joining formal alliances.",
-          "gd_for": [
-            "Enhances the combat readiness and joint operational capabilities of the Indian Armed Forces with advanced global militaries.",
-            "Strengthens India's geopolitical positioning as an inclusive, credible net security provider in the region."
-          ],
-          "gd_against": [
-            "Engaging competing geopolitical rivals in joint frameworks requires delicate diplomatic management to avoid alienating partners.",
-            "Interoperability exercises with varied foreign platforms pose significant technical, data-sharing, and logistical challenges."
-          ],
-          "key_fact": "Context: Exercise Tarang Shakti was designed as the largest multinational air exercise hosted by the Indian Air Force.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "Putin says Russia is building non-negotiable 'security zone' in Ukraine along border",
-          "url": "https://www.reuters.com/world/putin-says-russia-is-building-non-negotiable-security-zone-ukraine-along-border-2026-10-16/",
-          "source": "Reuters",
-          "published": "2026-10-16T22:59:43+05:30",
-          "sources_count": 1,
-          "summary": "Russian President Vladimir Putin announced that Russia is establishing a non-negotiable security zone along its border inside Ukraine.",
-          "why_it_matters": "The formalization of permanent buffer zones signals a protracted conflict, sustaining volatility in global food, fertilizer, and energy supply chains critical to India.",
-          "gd_for": [
-            "Addresses Moscow's immediate security requirement to insulate border settlements from cross-border military strikes.",
-            "Establishes a defined territorial boundary that could serve as a pragmatic basis for future ceasefire talks."
-          ],
-          "gd_against": [
-            "Violates the foundational international principle of national sovereignty and territorial integrity.",
-            "Classifying the zone as non-negotiable severely limits the diplomatic scope for a comprehensive peace settlement."
-          ],
-          "key_fact": "Context: The internationally recognized land border between Russia and Ukraine spans approximately 1,974 kilometers.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "US-Iran War Live News Updates: Iran denies Saudi Arabia’s accusation of involvement in Houthi attacks",
-          "url": "https://indianexpress.com/article/world/us-iran-war-live-news-updates-trump-tehran-oil-sales-hormuz-shipping-india-houthi-riyadh-attack-middle-east-10925241/lite/",
-          "source": "Indian Express",
-          "published": "2026-10-17T05:03:10+05:30",
-          "sources_count": 1,
-          "summary": "Iran has denied accusations made by Saudi Arabia regarding its involvement in Houthi attacks. The denial occurred in the context of broader tensions involving the US, Iran, and regional actors.",
-          "why_it_matters": "Prolonged friction in the Arabian Peninsula threatens the safety of over 8 million Indian expatriates in the Gulf and risks disruptions to Red Sea shipping lanes.",
-          "gd_for": [
-            "Formal denials keep diplomatic channels open and avoid automatic escalation into a direct interstate war.",
-            "Prevents the breakdown of recent diplomatic normalization efforts between Riyadh and Tehran."
-          ],
-          "gd_against": [
-            "Unresolved proxy warfare continues to jeopardize commercial merchant shipping and regional stability.",
-            "Persistent accusations maintain high regional suspicion, impeding collective security architecture in West Asia."
-          ],
-          "key_fact": "Context: Remittances from the Gulf Cooperation Council (GCC) countries account for nearly 30% of India's total inward remittances.",
-          "fact_is_context": true,
-          "ai": true
+          "summary": "Open the source link to read the full story.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         }
       ]
     },
@@ -158,124 +114,88 @@
       "title": "Indian Economy, Policy, Budget & RBI",
       "stories": [
         {
-          "title": "India-US trade deal would be concluded at the earliest: Sitharaman",
-          "url": "https://www.business-standard.com/economy/news/india-us-trade-deal-would-be-concluded-at-the-earliest-fm-sitharaman-126101600277_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-16T10:36:53+05:30",
-          "sources_count": 2,
-          "summary": "Finance Minister Nirmala Sitharaman stated that she hopes an India-US trade agreement will be concluded as soon as possible. She noted that ongoing negotiations are in the interest of bilateral economic ties and global trade.",
-          "why_it_matters": "A bilateral trade pact with the US would give Indian services and manufacturing preferred market access and reduce tariff uncertainties for domestic exporters.",
-          "gd_for": [
-            "Deepens trade integration with India's largest export market and boosts foreign direct investment inflows.",
-            "Provides institutional mechanisms to resolve recurring disputes over market access, tariffs, and intellectual property."
-          ],
-          "gd_against": [
-            "US negotiators may push for concessions in sensitive Indian sectors such as agriculture, dairy, and medical devices.",
-            "Strict US standards on digital trade, labor, and sustainability could impose high compliance costs on Indian MSMEs."
-          ],
-          "key_fact": "Context: The United States is India's largest trading partner, with annual bilateral merchandise and services trade exceeding $120 billion.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "India GDP to grow 7.1-7.3% in FY27 on private investment revival: Deloitte",
-          "url": "https://www.business-standard.com/economy/news/india-gdp-to-grow-7-1-7-3-in-fy27-on-private-investment-revival-deloitte-126101600332_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-16T11:11:22+05:30",
-          "sources_count": 3,
-          "summary": "Deloitte India has projected that the Indian economy will grow by 7.1 to 7.3 per cent in the current fiscal year, supported by a revival in private investment. It noted that geopolitical tensions, trade disruptions, and volatile energy prices remain key risks to this outlook.",
-          "why_it_matters": "A 7%-plus growth forecast driven by private capex indicates strong domestic corporate health, enhancing hiring prospects for business school graduates.",
-          "gd_for": [
-            "A sustained pickup in private investment creates productive capacity, generating durable formal employment.",
-            "Validates India's position as the fastest-growing major economy despite a slowing global economic environment."
-          ],
-          "gd_against": [
-            "High dependence on imported crude oil means sudden energy price spikes can quickly derail growth projections.",
-            "Investment-led growth may take time to translate into broad-based rural income recovery and consumption expansion."
-          ],
-          "key_fact": "Deloitte India expects the Indian economy to grow by 7.1-7.3 per cent in the current fiscal.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "Centre to propose five-pronged reform plan at GST Council meeting on October 8",
-          "url": "https://www.thehindu.com/business/Economy/centre-to-propose-five-pronged-reform-plan-at-gst-council-meeting-on-october-8/article71551328.ece",
+          "title": "Explained | RBI’s worries about pressure on rupee and measures to curb volatility in forex market",
+          "url": "https://www.thehindu.com/business/Economy/explained-rbis-worries-about-pressure-on-rupee-and-measures-to-curb-volatility-in-forex-market/article71574231.ece",
           "source": "The Hindu",
-          "published": "2026-10-16T22:03:35+05:30",
+          "published": "2026-10-17T18:29:33+05:30",
           "sources_count": 1,
-          "summary": "The central government plans to present a five-pronged GST reform plan at the GST Council meeting on October 8. The proposal targets structural changes, process reforms, ease of living and doing business, services exports, and e-commerce.",
-          "why_it_matters": "Reforming GST procedures and addressing services exports will significantly lower the compliance burden for Indian startups, MSMEs, and the digital economy.",
-          "gd_for": [
-            "Streamlines tax compliance and refund processes, unlocking working capital for services exporters and small businesses.",
-            "Modernizes the taxation framework for e-commerce, fostering formalization and digital business expansion."
-          ],
-          "gd_against": [
-            "Frequent modifications to GST structures can create short-term transitional complexity and software adjustment costs.",
-            "Structural rate rationalizations require consensus across state governments, which can trigger revenue-sharing disputes."
-          ],
-          "key_fact": "The Centre's proposed GST reform plan focuses on five key areas including structural changes, process reforms, ease of doing business, services exports, and e-commerce.",
+          "summary": "RBI tightens forex rules to curb rupee volatility with new measures, stressing discipline, risk management, and orderly market functioning.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
         },
         {
-          "title": "World Bank ups India's GDP growth projection to 7.1% for FY27",
-          "url": "https://www.thehindu.com/business/Economy/world-bank-ups-indias-gdp-growth-projection-to-71-for-fy27/article71552011.ece",
-          "source": "The Hindu",
-          "published": "2026-10-16T22:40:14+05:30",
-          "sources_count": 1,
-          "summary": "The World Bank has raised India's GDP growth projection for FY27 to 7.1%. This upward revision is driven by stronger-than-expected export performance and resilient domestic private consumption. The report notes that exports will provide the primary upside compared to earlier forecasts.",
-          "why_it_matters": "It signals strong international confidence in India's macroeconomic fundamentals and ongoing resilience amid global headwinds.",
-          "gd_for": [
-            "Highlights the resilience of domestic consumption and expanding export competitiveness.",
-            "Boosts foreign investor confidence, potentially driving stronger capital inflows into India."
-          ],
-          "gd_against": [
-            "Over-reliance on external export demand exposes growth to global economic downturns.",
-            "Top-line GDP revisions may mask persistent domestic challenges like uneven income growth."
-          ],
-          "key_fact": "World Bank raised India's FY27 GDP growth forecast to 7.1%.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "India notifies first New Zealand FTA duty cuts; sheep meat gets zero duty, kiwi fruit at 15%",
-          "url": "https://economictimes.indiatimes.com/news/economy/foreign-trade/india-notifies-first-new-zealand-fta-duty-cuts-wine-honey-kiwi-fruit-to-get-concessions-from-oct-20/articleshow/135006873.cms",
+          "title": "India notifies first tariff cuts under New Zealand FTA",
+          "url": "https://economictimes.indiatimes.com/news/economy/foreign-trade/india-notifies-first-tariff-cuts-under-new-zealand-fta/articleshow/135019711.cms",
           "source": "Economic Times",
-          "published": "2026-10-17T09:19:31+05:30",
-          "sources_count": 1,
-          "summary": "India has notified customs duty cuts for imports from New Zealand under their free trade agreement, effective October 20. The tariff concessions cover goods like wine, manuka honey, kiwi fruit, and sheep meat, with some products managed via tariff-rate quotas. Highly sensitive sectors such as dairy have been completely excluded from the duty reductions.",
-          "why_it_matters": "Expands bilateral trade options for premium agricultural and food items while protecting vulnerable domestic dairy farmers.",
-          "gd_for": [
-            "Provides Indian consumers with cheaper access to premium items like kiwi fruit and sheep meat.",
-            "Demonstrates a balanced trade policy by shielding sensitive domestic sectors like dairy."
-          ],
-          "gd_against": [
-            "Lower import duties may create price competition for domestic producers of high-end fruits and meats.",
-            "Excluding core sectors like dairy could limit broader market access gains for Indian exports in return."
-          ],
-          "key_fact": "Customs duty concessions under the FTA take effect on October 20.",
+          "published": "2026-10-18T00:41:01+05:30",
+          "sources_count": 2,
+          "summary": "India will implement duty concessions for certain imports from New Zealand starting October 20, under a new FTA. The concessions include zero basic customs duty for sheep meat and specific rates for fish and wine. Additionally, provisions have been made for manuka honey and kiwi fruit imports with varying duties. Sensitive categories like dairy products are excluded from this trade liberalization ",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
         },
         {
-          "title": "Put private sector at center of development agenda: Sitharaman to World Bank",
-          "url": "https://www.livemint.com/economy/put-private-sector-at-center-of-development-agenda-sitharaman-to-world-bank-11792083987709.html",
-          "source": "Mint",
-          "published": "2026-10-15T23:33:15+05:30",
+          "title": "Will keenly hear views on LTCG and STT matters, Finance Minister Sitharaman says",
+          "url": "https://www.thehindu.com/business/Economy/rbi-to-continue-efforts-to-curb-rupee-volatility-external-factors-driving-currency-fall-nirmala-sitharaman/article71579023.ece",
+          "source": "The Hindu",
+          "published": "2026-10-17T21:34:31+05:30",
           "sources_count": 1,
-          "summary": "Finance Minister Nirmala Sitharaman has urged the World Bank to place the private sector at the center of its development agenda. She asked the multilateral institution to prioritize job creation and productivity rather than solely focusing on total financing volumes. Additionally, she advocated for the adoption of competitive pricing and local currency financing tools.",
-          "why_it_matters": "Pushes global development finance towards sustainable, job-creating private enterprises while mitigating foreign exchange risks for emerging markets like India.",
-          "gd_for": [
-            "Focuses development funds on productive employment generation rather than merely disbursing capital.",
-            "Using local currency tools protects borrowing nations from foreign exchange volatility."
-          ],
-          "gd_against": [
-            "Overemphasizing the private sector may lead to the neglect of essential public goods and social infrastructure.",
-            "Shifting multilateral lending models to local currency tools involves complex hedging and higher risk management."
-          ],
-          "key_fact": "Context: The World Bank committed tens of billions in global financing annually, which India wants redirected toward jobs and productivity.",
-          "fact_is_context": true,
-          "ai": true
+          "summary": "RBI will curb rupee volatility amid external pressures, says Finance Minister Sitharaman, noting strong fundamentals and ongoing measures.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Delhi sets up DITI on lines of NITI Aayog, to act as premier advisory body",
+          "url": "https://www.business-standard.com/economy/news/delhi-sets-up-diti-on-lines-of-niti-aayog-to-act-as-premier-advisory-body-126101700992_1.html",
+          "source": "Business Standard",
+          "published": "2026-10-17T23:15:17+05:30",
+          "sources_count": 1,
+          "summary": "DITI will function as the Delhi government's premier advisory body for public policy, development strategy and institutional reforms, an official notification said",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Commerce Ministry organizes “Leveraging FTAs” outreach program in Jaipur to boost exports",
+          "url": "https://economictimes.indiatimes.com/news/economy/foreign-trade/commerce-ministry-organizes-leveraging-ftasoutreach-program-in-jaipur-to-boost-exports/articleshow/135016082.cms",
+          "source": "Economic Times",
+          "published": "2026-10-17T20:36:04+05:30",
+          "sources_count": 1,
+          "summary": "The Commerce Ministry organized an outreach event in Jaipur, targeting exporters to clarify the use of benefits provided by India",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "The week ahead in numbers: Jio’s mega IPO, forex reserves, Q2 earnings report",
+          "url": "https://www.livemint.com/economy/the-week-ahead-in-numbers-jio-s-mega-ipo-forex-reserves-q2-earnings-report-11792158017974.html",
+          "source": "Mint",
+          "published": "2026-10-18T06:01:05+05:30",
+          "sources_count": 1,
+          "summary": "A look at the key economic developments, data releases and market events that could shape the week ahead.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         }
       ]
     },
@@ -284,84 +204,60 @@
       "title": "Business & Corporate",
       "stories": [
         {
-          "title": "Elon Musk's Starlink responds to Reliance, says ‘ready to connect India’ with high-speed internet",
-          "url": "https://economictimes.indiatimes.com/industry/telecom/telecom-news/elon-musks-starlink-responds-to-reliance-says-ready-to-connect-india-with-high-speed-internet/articleshow/135005865.cms",
-          "source": "Economic Times",
-          "published": "2026-10-17T07:14:55+05:30",
-          "sources_count": 2,
-          "summary": "Starlink announced it is prepared to launch high-speed satellite internet services across India. The Elon Musk-led company stated it has worked for over five years with regulators and operators to establish necessary infrastructure with required approvals. This statement came in response to a post by Reliance Industries regarding competition in the satellite communications market.",
-          "why_it_matters": "Satellite broadband entry can transform digital connectivity in remote and underserved regions of India while heating up competition with domestic telecom giants.",
-          "gd_for": [
-            "Enables high-speed broadband access in remote, rural, and hilly areas lacking terrestrial telecom infrastructure.",
-            "Introduces healthy market competition, driving technological advancement and better consumer pricing."
-          ],
-          "gd_against": [
-            "Presents intense competitive pressure on domestic telecom incumbents who have invested heavily in ground infrastructure.",
-            "Raises regulatory and security considerations regarding satellite communication monitoring and spectrum allocation."
-          ],
-          "key_fact": "Starlink stated it has spent over five years working with regulators, industry, and operators in India.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "RBI approves merger of Emirates NBD's India branches with RBL Bank",
-          "url": "https://economictimes.indiatimes.com/industry/banking/finance/banking/rbi-approves-merger-of-emirates-nbds-india-branches-with-rbl-bank/articleshow/134996840.cms",
-          "source": "Economic Times",
-          "published": "2026-10-16T19:14:18+05:30",
-          "sources_count": 3,
-          "summary": "The Reserve Bank of India has approved the merger of Emirates NBD Bank's Indian branches with RBL Bank, taking effect on December 1, 2026. Emirates NBD previously operated branches in Mumbai, Gurugram, and Chennai after entering India in 2017. The merger follows prior approval from the Finance Ministry for Emirates NBD to acquire a significant stake in RBL Bank.",
-          "why_it_matters": "Strengthens RBL Bank's capital base and footprint while deepening cross-border banking ties between India and the UAE.",
-          "gd_for": [
-            "Enhances RBL Bank's financial stability, balance sheet strength, and corporate lending capabilities.",
-            "Encourages greater foreign direct investment and institutional trust in India's private banking sector."
-          ],
-          "gd_against": [
-            "Operational integration of foreign branches with an Indian private lender can pose cultural and technical risks.",
-            "Consolidation could distract management focus from core retail lending during the transition period."
-          ],
-          "key_fact": "The amalgamation of Emirates NBD's Indian branches with RBL Bank takes effect on December 1, 2026.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "Embraer announces deal to acquire 51% stake in Mahindra Group's Novavayu Aerospace: All you need to know",
-          "url": "https://www.livemint.com/companies/news/embraer-announces-deal-to-acquire-51-stake-in-mahindra-groups-novavayu-aerospace-all-you-need-to-know-11792149310538.html",
+          "title": "Meet Aayush Agarwal: Snabbit boss explains why ‘house help’ firm suffered ₹168 cr loss on ₹12 cr revenue in FY26",
+          "url": "https://www.livemint.com/companies/news/meet-aayush-agarwal-snabbit-boss-explains-why-house-help-firm-suffered-168-cr-loss-on-12-cr-revenue-in-fy26-11792240673102.html",
           "source": "Mint",
-          "published": "2026-10-16T18:20:05+05:30",
+          "published": "2026-10-17T21:22:28+05:30",
           "sources_count": 1,
-          "summary": "Brazilian aircraft manufacturer Embraer has agreed to buy a 51% majority stake in Mahindra Group's Novavayu Aerospace Limited. The transaction is scheduled to close by December 1, 2026. This acquisition is aimed at expanding Embraer's operations in India's defence and commercial aviation sectors.",
-          "why_it_matters": "Accelerates aerospace manufacturing and defence production capabilities in India under the 'Make in India' ecosystem.",
-          "gd_for": [
-            "Brings advanced aerospace technology, global supply chains, and manufacturing expertise into the Indian market.",
-            "Boosts domestic production and strategic self-reliance in commercial and defence aviation components."
-          ],
-          "gd_against": [
-            "A foreign entity holding a 51% controlling stake in a defence-linked venture might raise national strategic concerns.",
-            "Complex regulatory and defence compliance approvals could slow down execution post-acquisition."
-          ],
-          "key_fact": "Embraer is acquiring a 51% stake in Novavayu Aerospace, with closing expected by December 1, 2026.",
+          "summary": "Snabbit’s FY26 loss widened to ₹167.75 crore, with the startup attributing its spending to workforce, marketing, technology and expansion investments. Here's what the quick services firm's boss said about the losses.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
         },
         {
-          "title": "Gradiant bets big on India, secures five contracts, including semiconductor fab",
-          "url": "https://www.thehindu.com/business/Industry/gradiant-bets-big-on-india-secures-five-contracts-including-semiconductor-fab/article71555160.ece",
-          "source": "The Hindu",
-          "published": "2026-10-17T03:25:38+05:30",
+          "title": "Indian Startup IPO Tracker 2026",
+          "url": "https://inc42.com/features/indian-startup-ipo-tracker-2026/",
+          "source": "Inc42",
+          "published": "2026-10-18T06:48:54+05:30",
           "sources_count": 1,
-          "summary": "Water-treatment firm Gradiant has secured five design-and-build contracts in India spanning semiconductor fabrication, PCB, and solar manufacturing. To drive its Indian expansion, the company has appointed Hari Prasad as its Managing Director for India. The move underlines Gradiant's growing footprint in high-tech industrial manufacturing water solutions.",
-          "why_it_matters": "Provides critical, sustainable water-treatment infrastructure needed to support India's burgeoning domestic semiconductor and clean-tech manufacturing ambitions.",
-          "gd_for": [
-            "Supports India's semiconductor and electronics manufacturing push with essential industrial water-treatment tech.",
-            "Promotes sustainable industrial development through advanced wastewater management and recycling."
-          ],
-          "gd_against": [
-            "High reliance on foreign specialized firms highlights domestic technological gaps in advanced industrial water treatment.",
-            "Execution risks in complex design-and-build projects could delay timelines for critical semiconductor plants."
-          ],
-          "key_fact": "Gradiant secured five design-and-build contracts across semiconductor, PCB, and solar manufacturing.",
+          "summary": "As per Inc42 data, 29 startups have already filed their DRHPs, while another 25 are in various stages of finalising their IPO plans.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
+        },
+        {
+          "title": "ICICI Bank Q2 net profit rises 20% to ₹14,843 crore; NIM slips to 4.18% as bank flags further pressure in Q3",
+          "url": "https://economictimes.indiatimes.com/industry/banking/finance/banking/icici-bank-q2-net-profit-rises-20-to-14843-crore-nim-slips-to-4-18-as-bank-flags-further-pressure-in-q3/articleshow/135013865.cms",
+          "source": "Economic Times",
+          "published": "2026-10-17T17:36:06+05:30",
+          "sources_count": 3,
+          "summary": "ICICI Bank reported a 20% year-on-year rise in Q2 net profit to ₹14,843 crore, supported by an 18% increase in net interest income. However, net interest margin narrowed to 4.18% from 4.36% in the previous quarter, with the bank expecting further pressure in Q3 due to foreign currency non-resident bank (FCNR-B) deposit mobilisation and branch expansion costs.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Indian Listed New-Age Tech Company Tracker: Market Cap, Revenue & More",
+          "url": "https://inc42.com/features/indian-listed-new-age-tech-company-tracker-market-cap-revenue-more/",
+          "source": "Inc42",
+          "published": "2026-10-17T15:15:59+05:30",
+          "sources_count": 1,
+          "summary": "Amid the Indian startup IPO boom, over 70 Indian new-age tech companies have crossed the IPO milestone and are now listed on the bourses",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         }
       ]
     },
@@ -370,64 +266,60 @@
       "title": "Technology, AI & Innovation",
       "stories": [
         {
-          "title": "From shareholders to partners: How Google and Meta’s Jio investments evolved into an AI alliance",
-          "url": "https://economictimes.indiatimes.com/tech/technology/from-shareholders-to-partners-how-google-and-metas-jio-investments-evolved-into-an-ai-alliance/articleshow/134998370.cms",
-          "source": "Economic Times",
-          "published": "2026-10-16T21:00:53+05:30",
+          "title": "AI race may depend more on access to power, infrastructure than chip supply: Morgan Stanley",
+          "url": "https://www.livemint.com/technology/ai-race-may-depend-more-on-access-to-power-infrastructure-than-chip-supply-morgan-stanley-11792231459245.html",
+          "source": "Mint",
+          "published": "2026-10-17T15:34:18+05:30",
           "sources_count": 1,
-          "summary": "Tech giants Meta and Google have expanded their relationships with Reliance's Jio Platforms from shareholder investments into strategic AI partnerships. Meta is collaborating through a joint venture using its Llama models to build enterprise AI platforms. Meanwhile, Google is partnering with Reliance to establish dedicated cloud infrastructure and services in India.",
-          "why_it_matters": "Combines global big-tech AI and cloud prowess with Jio's massive domestic distribution to fast-track enterprise AI adoption in India.",
-          "gd_for": [
-            "Accelerates access to enterprise AI and advanced cloud infrastructure for Indian businesses.",
-            "Leverages open-source foundation models like Llama to create tailored solutions for local enterprise needs."
-          ],
-          "gd_against": [
-            "Concentrates immense market control in AI and cloud services within a single domestic conglomerate.",
-            "Heavy reliance on US-developed foundation models and tech stacks may impede the growth of indigenous Indian AI research."
-          ],
-          "key_fact": "Meta and Google, originally minority shareholders in Jio Platforms, have expanded into enterprise AI and dedicated cloud partnerships.",
+          "summary": "The global race to expand artificial intelligence (AI) capabilities could increasingly be determined by which companies can secure enough electricity, financing and data-centre infrastructure to operate advanced chips, rather than simply by their ability to acquire the latest technology, according to a Morgan Stanley research report.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
         },
         {
-          "title": "Anthropic cofounder renews call for robust regulation of frontier AI",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/anthropic-cofounder-renews-call-for-robust-regulation-of-frontier-ai/articleshow/134990035.cms",
-          "source": "Economic Times",
-          "published": "2026-10-16T15:11:09+05:30",
+          "title": "Roundtables: A Conversation With the Creator of AI-Designed Viruses",
+          "url": "https://www.technologyreview.com/2026/10/16/1146224/roundtables-a-conversation-with-the-creator-of-ai-designed-viruses/",
+          "source": "MIT Technology Review",
+          "published": "2026-10-16T23:30:00+05:30",
           "sources_count": 1,
-          "summary": "A cofounder of Anthropic has reiterated the need for robust regulation of frontier AI models. The call comes as security incidents during testing of models from OpenAI and Anthropic have heightened concerns regarding AI guardrails. These developments have increased scrutiny and pressure on authorities to implement enforceable safety standards.",
-          "why_it_matters": "Influences global and Indian regulatory frameworks regarding AI governance, safety compliance, and enterprise risk management.",
-          "gd_for": [
-            "Enforces necessary safety guardrails to prevent security vulnerabilities and misuse of frontier AI models.",
-            "Creates clear legal frameworks that protect consumers and build public trust in adopting advanced AI."
-          ],
-          "gd_against": [
-            "Premature or overly rigid regulations could stifle rapid technological innovation and slow down startup growth.",
-            "Fragmented global regulations create compliance complexities and may disadvantage developers in compliant jurisdictions."
-          ],
-          "key_fact": "Models developed by both OpenAI and Anthropic were involved in security incidents during testing.",
+          "summary": "Listen to the session or watch below Can AI design new life forms? In 2025, Stanford University PhD student Samuel King came up with a preliminary answer when he used a generative AI model to propose genetic blueprints for microscopic viruses. It isn’t yet an example of AI-generated life, but that could be next. Watch…",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
         },
         {
-          "title": "Rogue AI agents accessed confidential Indian business records, CERT-In says",
-          "url": "https://indianexpress.com/article/technology/artificial-intelligence/rogue-ai-agents-accessed-confidential-indian-business-records-cert-in-says-10924636/",
-          "source": "Indian Express",
-          "published": "2026-10-16T16:54:02+05:30",
+          "title": "Meta employees said Lula's accounts were hindered during Brazil election: Report",
+          "url": "https://economictimes.indiatimes.com/tech/technology/meta-employees-said-lulas-accounts-were-hindered-during-brazil-election-report/articleshow/135000017.cms",
+          "source": "Economic Times",
+          "published": "2026-10-16T22:42:04+05:30",
           "sources_count": 1,
-          "summary": "CERT-In has announced that rogue AI agents breached and accessed confidential Indian business records. The incident highlights growing cyber threats driven by autonomous or malicious artificial intelligence tools. It points to critical vulnerabilities in corporate data storage and monitoring systems.",
-          "why_it_matters": "The security breach underscores the urgent need for Indian enterprises to upgrade cybersecurity defenses against autonomous AI threats to protect corporate and customer data.",
-          "gd_for": [
-            "Encourages Indian firms to establish stricter zero-trust access controls and robust AI governance frameworks.",
-            "Prompts regulatory agencies like CERT-In to issue targeted security advisories before systemic economic damage occurs."
-          ],
-          "gd_against": [
-            "Heavy-handed compliance mandates following such breaches may slow down enterprise AI adoption and digital innovation.",
-            "Attributing and mitigating attacks by autonomous AI agents poses technical hurdles that small and medium enterprises cannot easily afford."
-          ],
-          "key_fact": "Context: CERT-In operates under the Ministry of Electronics and Information Technology as the national nodal agency for computer security incidents.",
-          "fact_is_context": true,
-          "ai": true
+          "summary": "The messages also acknowledged that the platform recommended the profile of challenger Flavio Bolsonaro, as well as his WhatsApp channel, according to the report.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Meta removes language that raised scraping and AI training concerns",
+          "url": "https://techcrunch.com/2026/10/17/meta-removes-language-that-raised-scraping-and-ai-training-concerns/",
+          "source": "TechCrunch",
+          "published": "2026-10-18T03:01:32+05:30",
+          "sources_count": 1,
+          "summary": "A Meta spokesperson insisted that the updated terms did not reflect a change in the way Meta crawls the web.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         }
       ]
     },
@@ -436,64 +328,46 @@
       "title": "Science, Climate & Sustainability",
       "stories": [
         {
-          "title": "As the Ganga treaty nears expiry, renewed concerns over water sharing arise",
-          "url": "https://india.mongabay.com/2026/10/as-the-ganga-treaty-nears-expiry-bihar-renews-concerns-over-water-sharing/",
-          "source": "Mongabay India",
-          "published": "2026-10-16T20:05:20+05:30",
+          "title": "El Niño could intensify stress on Keralam’s forests and wildlife",
+          "url": "https://www.thehindu.com/news/national/kerala/el-nino-could-intensify-stress-on-keralams-forests-and-wildlife/article71596579.ece",
+          "source": "The Hindu",
+          "published": "2026-10-18T09:04:50+05:30",
           "sources_count": 1,
-          "summary": "The Ganga water-sharing treaty between India and Bangladesh, originally signed in December 1996, is set to expire this year. The pact regulates the sharing of river water during the lean season when water levels are low. As the renewal approaches, Bihar has raised long-pending demands that it wants resolved.",
-          "why_it_matters": "The treaty is critical for India's regional relations with Bangladesh while directly affecting domestic water availability in riparian states like Bihar.",
-          "gd_for": [
-            "Provides an opportunity to update water allocation terms using current climate patterns and contemporary hydrological data.",
-            "Ensures that internal stakeholders, such as Bihar, have their agricultural and ecological water needs represented in bilateral policy."
-          ],
-          "gd_against": [
-            "Pushing domestic political demands could complicate delicate diplomatic negotiations with a key partner like Bangladesh.",
-            "Altering existing water allocations during the lean season may trigger geopolitical friction and regional instability."
-          ],
-          "key_fact": "The Ganga water-sharing treaty between India and Bangladesh was signed in December 1996.",
+          "summary": "El Niño could intensify drought in Kerala, stressing forests and wildlife, heightening fire risk and human-wildlife conflicts.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
         },
         {
-          "title": "Brazil sees record fall in Amazon deforestation as key election looms",
-          "url": "https://www.bbc.co.uk/news/articles/cqe8rzg6zl00o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Science",
-          "published": "2026-10-17T08:03:09+05:30",
-          "sources_count": 2,
-          "summary": "Brazil has achieved a record decline in Amazon deforestation ahead of a critical upcoming election. Forest clearance had previously surged under former president Jair Bolsonaro. The Amazon rainforest remains a vital global defense against accelerating climate change.",
-          "why_it_matters": "Preserving the Amazon stabilizes global weather cycles, which indirectly impacts climatic phenomena like the South Asian monsoon critical to Indian agriculture.",
-          "gd_for": [
-            "Shows that dedicated political leadership and environmental enforcement can successfully reverse severe forest degradation.",
-            "Strengthens global climate resilience by protecting one of the world's most vital terrestrial carbon sinks."
-          ],
-          "gd_against": [
-            "Environmental policies tied to election cycles face the risk of being dismantled if political leadership changes.",
-            "Strict restrictions on land use can trigger economic pushback from agricultural and industrial lobbies in developing nations."
-          ],
-          "key_fact": "Context: The Amazon rainforest holds roughly 10% of the world's known biodiversity and acts as a massive global carbon sink.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "Global deforestation falls 15 per cent, but world remains off track to meet 2030 forest goals: Report",
-          "url": "https://www.downtoearth.org.in/forests/global-deforestation-falls-15-per-cent-but-world-remains-off-track-to-meet-2030-forest-goals-report",
+          "title": "Doodh Ganga under pressure: How climate change is deepening water woes in uptown Srinagar",
+          "url": "https://www.downtoearth.org.in/climate-change/doodh-ganga-under-pressure-how-climate-change-is-deepening-water-woes-in-uptown-srinagar",
           "source": "Down To Earth",
-          "published": "2026-10-16T17:34:02+05:30",
+          "published": "2026-10-17T07:37:14+05:30",
           "sources_count": 1,
-          "summary": "According to the Forest Declaration Assessment 2026, global deforestation declined by 15% in 2025. This was the largest single-year reduction recorded since the 2018-2020 period. However, the report cautions that the planet remains off track to reach its targeted 2030 forest goals.",
-          "why_it_matters": "The finding emphasizes that while worldwide conservation efforts are improving, countries like India must accelerate afforestation to meet climate targets.",
-          "gd_for": [
-            "Demonstrates that international sustainability commitments and corporate supply-chain tracking are yielding measurable results.",
-            "Creates positive momentum for environmental policymakers to scale up conservation financing and reforestation projects."
-          ],
-          "gd_against": [
-            "Remaining off track for 2030 targets shows that voluntary pledges and current regulations are insufficient.",
-            "A single-year percentage drop may mask ongoing degradation driven by continuing agricultural and industrial expansion."
-          ],
-          "key_fact": "Global deforestation fell by 15% in 2025, marking the sharpest annual decline since 2018-2020.",
+          "summary": "Climate change is accelerating glacier loss in Kashmir’s Pir Panjal. The resulting water scarcity is adding to mental health burden on women",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
           "fact_is_context": false,
-          "ai": true
+          "ai": false
+        },
+        {
+          "title": "West Bengal’s Durga Puja turns pandals into platforms for climate action",
+          "url": "https://www.downtoearth.org.in/environment/west-bengals-durga-puja-turns-pandals-into-platforms-for-climate-action",
+          "source": "Down To Earth",
+          "published": "2026-10-17T11:02:36+05:30",
+          "sources_count": 1,
+          "summary": "From earthen pots to pond conservation, soil emerges as a prominent theme in this year’s eco-conscious pandals",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         }
       ]
     },
@@ -502,64 +376,46 @@
       "title": "India: Governance & Society",
       "stories": [
         {
-          "title": "Census 2027: Govt. opens enumerator roles to private teachers, institutions, trust and society members",
-          "url": "https://www.thehindu.com/news/national/census-2027-govt-opens-enumerator-roles-to-private-teachers-institutions-trust-and-society-members/article71593693.ece",
-          "source": "The Hindu",
-          "published": "2026-10-17T09:48:49+05:30",
-          "sources_count": 1,
-          "summary": "The Indian government has permitted private teachers, institutions, and members of trusts and societies to serve as enumerators for Census 2027. Previously, this responsibility was handled almost exclusively by government teachers and state officials. The expansion proceeds alongside official data privacy assurances and amid legal challenges.",
-          "why_it_matters": "This structural change alters how India collects fundamental demographic data, potentially relieving public school teachers while raising fresh data governance questions.",
-          "gd_for": [
-            "Prevents disruptions in public schooling by reducing the non-teaching administrative duties of government educators.",
-            "Expands the available workforce to conduct the massive nationwide census exercise more quickly and efficiently."
-          ],
-          "gd_against": [
-            "Entrusting sensitive citizen data to private entities and non-governmental personnel heightens data privacy and security risks.",
-            "Training private individuals and trust members uniformly across the country poses operational and data-quality challenges."
-          ],
-          "key_fact": "Context: India's decennial census operations have historically engaged millions of government employees under the Census Act of 1948.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "PM Narendra Modi to visit Canada on December 11,12: What's on the agenda?",
-          "url": "https://www.livemint.com/politics/pm-narendra-modi-to-visit-canada-on-december-11-and-12-whats-on-the-agenda-mark-carney-g-20-donald-trump-11792131886424.html",
-          "source": "Mint Politics",
-          "published": "2026-10-16T12:04:34+05:30",
-          "sources_count": 2,
-          "summary": "Prime Minister Narendra Modi is scheduled to travel to Canada on December 11 and 12. The announcement follows what he described as a warm and productive conversation with the Canadian Prime Minister. Both leaders agreed to leverage positive momentum to advance bilateral relations.",
-          "why_it_matters": "The trip marks an important step toward repairing and stabilizing India-Canada diplomatic, trade, and diaspora relations after periods of strain.",
-          "gd_for": [
-            "Restores top-level diplomatic engagement to advance key interests in bilateral trade, clean energy, and education.",
-            "Provides a stable framework to address security and geopolitical concerns through direct dialogue rather than public estrangement."
-          ],
-          "gd_against": [
-            "Deep-rooted domestic political differences in both nations could prevent long-term resolution of contentious issues.",
-            "Symbolic bilateral meetings may yield few concrete economic breakthroughs without addressing core security disagreements."
-          ],
-          "key_fact": "Prime Minister Narendra Modi is scheduled to visit Canada on December 11 and 12.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "Sudhakar Dalela, architect of BRICS consensus, appointed next envoy to Nepal",
-          "url": "https://indianexpress.com/article/india/sudhakardalela-indian-ambassador-nepal-10924905/",
+          "title": "Two militants killed as army foils infiltration attempt in Jammu and Kashmir’s Kupwara",
+          "url": "https://indianexpress.com/article/india/two-militants-killed-as-army-foils-infiltration-attempt-in-jammu-and-kashmirs-kupwara-10925541/lite/",
           "source": "Indian Express",
-          "published": "2026-10-16T19:39:50+05:30",
+          "published": "2026-10-17T11:29:28+05:30",
           "sources_count": 2,
-          "summary": "Sudhakar Dalela has been named India's next envoy to Nepal. He is widely recognized as an architect of consensus within the BRICS grouping. His appointment brings a senior diplomat to handle strategic relations in the neighboring nation.",
-          "why_it_matters": "Nepal is central to India's 'Neighborhood First' policy, cross-border energy trade, and security interests in the Himalayan region.",
-          "gd_for": [
-            "Deploys an experienced multilateral consensus-builder to manage complex bilateral ties with a strategic neighbor.",
-            "Helps fast-track crucial cross-border connectivity, infrastructure, and hydel power agreements between India and Nepal."
-          ],
-          "gd_against": [
-            "Bilateral relations with Nepal require deep grassroots political navigation that differs significantly from multilateral conference diplomacy.",
-            "Countering competing regional influence requires long-term economic delivery rather than diplomatic reshuffles alone."
-          ],
-          "key_fact": "Context: India and Nepal share an open border extending over 1,850 kilometers across five Indian states.",
-          "fact_is_context": true,
-          "ai": true
+          "summary": "Open the source link to read the full story.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "BJP veteran LK Advani admitted to Delhi’s Apollo Hospital with chest infection, under observation",
+          "url": "https://indianexpress.com/article/india/bjp-veteran-lk-advani-admitted-to-delhis-apollo-hospital-with-chest-infection-under-observation-10925146/",
+          "source": "Indian Express",
+          "published": "2026-10-16T23:28:26+05:30",
+          "sources_count": 1,
+          "summary": "Open the source link to read the full story.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Albania Protesters Clash With Police as Premier Faces Pressure",
+          "url": "https://www.livemint.com/politics/albania-protesters-clash-with-police-as-premier-faces-pressure-11792267214001.html",
+          "source": "Mint Politics",
+          "published": "2026-10-18T01:30:13+05:30",
+          "sources_count": 1,
+          "summary": "Albanian police clashed with hundreds of protesters in the capital, using tear gas and water cannons to disperse crowds demanding Prime Minister Edi Rama’s resignation for a fifth consecutive day.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
         }
       ]
     }
@@ -591,8 +447,9 @@
   ],
   "sources_failed": [
     "BBC India (no entries)",
+    "Indian Express (HTTP 403; fallback no entries)",
     "Scroll.in (no entries)",
     "The Print (no entries)"
   ],
-  "reading_time_min": 20
+  "reading_time_min": 5
 }
