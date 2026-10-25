@@ -1,43 +1,45 @@
 {
-  "date": "2026-10-24",
-  "date_label": "Saturday, 24 October 2026",
-  "generated_at": "2026-10-24T10:12:52.710157+05:30",
+  "date": "2026-10-25",
+  "date_label": "Sunday, 25 October 2026",
+  "generated_at": "2026-10-25T10:18:48.954294+05:30",
   "ai_enabled": true,
   "ai_model": "gemini-3.5-flash",
-  "ai_story_count": 9,
+  "ai_story_count": 18,
   "ai_errors": [
-    "batch 1/3: HTTP 503 on gemini-3.6-flash",
-    "batch 1/3: network ReadTimeout",
-    "batch 2/3: HTTP 503 on gemini-3.5-flash",
-    "batch 2/3: network ReadTimeout",
+    "batch 3/3: HTTP 404 on gemini-2.5-flash",
+    "batch 3/3: HTTP 503 on gemini-3.5-flash",
+    "batch 3/3: all models failed",
     "curation: network ReadTimeout",
-    "time budget exhausted",
-    "topic+concept: HTTP 503 on gemini-3.8-flash",
-    "topic+concept: network ReadTimeout"
+    "every candidate model is unavailable (gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))",
+    "topic+concept: HTTP 503 on gemini-3.6-flash",
+    "topic+concept: HTTP 503 on gemini-3.7-flash",
+    "topic+concept: HTTP 503 on gemini-3.8-flash"
   ],
   "ai_models_dropped": [
-    "gemini-3.8-flash: HTTP 503 (overloaded)",
     "gemini-3.6-flash: HTTP 503 (overloaded)",
-    "gemini-3.5-flash: HTTP 503 (overloaded)"
+    "gemini-3.8-flash: HTTP 503 (overloaded)",
+    "gemini-3.7-flash: HTTP 503 (overloaded)",
+    "gemini-3.5-flash: HTTP 503 (overloaded)",
+    "gemini-2.5-flash: HTTP 404"
   ],
-  "story_count": 25,
+  "story_count": 22,
   "story_cap": 25,
   "gd_topic": {
-    "topic": "Taxing the rich is ineffective unless government spending efficiency improves significantly.",
-    "why_now": "Amid growing global debates on wealth redistribution, recent fiscal analyses highlight that progressive taxation alone fails to reduce income inequality without targeted, leak-proof public expenditure. In emerging economies like India, the focus is shifting from headline tax rates to state capacity and outcome-based spending.",
-    "opening_line": "Good morning everyone. While income inequality remains a critical challenge, focusing solely on taxing the top 1% addresses only the revenue side of the equation. True economic mobility depends on whether public expenditure effectively creates quality health, education, and infrastructure for the bottom of the pyramid.",
-    "closing_line": "In conclusion, progressive taxation is a necessary tool for revenue generation, but it is not a standalone solution to inequality. Lasting progress requires structural governance reforms that ensure every rupee of public spending yields measurable social and economic outcomes.",
+    "topic": "AI Disruption in India: Can Government Policy Protect Jobs Without Stifling Innovation?",
+    "why_now": "With India's Commerce Ministry attempting to identify 'AI-proof' sectors and financial regulators warning of AI-related systemic risks, policymakers are grappling with AI's impact on employment. As AI automation threatens entry-level IT and service jobs, balancing workforce protection with global competitiveness has become a central policy challenge.",
+    "opening_line": "Good morning everyone. As India leverages its demographic dividend while rapidly adopting artificial intelligence, identifying 'AI-proof' sectors is becoming a core policy discussion. Today, we must evaluate whether proactive state intervention can protect livelihoods without slowing down technological innovation and enterprise productivity.",
+    "closing_line": "In conclusion, rather than trying to shield specific sectors from technological change, policy interventions should focus on agile reskilling and building resilient social safety nets. India’s success will depend on augmenting human productivity with AI rather than attempting to stall automation.",
     "perspectives": [
-      "Government & Policy: High tax rates can generate capital for social safety nets, but without administrative capability and delivery mechanisms, funds are dissipated through inefficiencies.",
-      "Industry & Capital Markets: Excessive tax burdens on top earners and corporates risk capital flight and dampened entrepreneurship, whereas efficient public infrastructure creation lowers the cost of doing business for everyone.",
-      "Citizens & Civil Society: The public prioritizes tangible benefits like quality public schooling and healthcare over theoretical wealth caps, demanding fiscal transparency and social audits."
+      "Government: Aims to cushion employment shocks, safeguard the service sector, and ensure socio-economic stability through strategic policy frameworks and upskilling missions.",
+      "Industry: Advocates for market-driven AI adoption to cut costs and maintain international competitiveness, cautioning against restrictive regulations that could hinder innovation.",
+      "Workforce & Citizens: Seek job security and fair transitions, requiring accessible lifelong training programs to remain relevant in an automated job market."
     ]
   },
   "concept": {
-    "name": "The Laffer Curve",
-    "explanation": "The Laffer Curve is a theoretical concept in economics that illustrates the relationship between tax rates and the total tax revenue collected by the government. It argues that at extreme tax rates of 0% and 100%, revenue is zero, because a 100% tax rate eliminates any incentive to work or produce. Consequently, there is an optimal tax rate that maximizes revenue, beyond which increasing tax rates actually decreases tax collection due to tax evasion, reduced economic activity, or capital flight.",
-    "indian_example": "In 2019, India lowered its base corporate tax rate from 30% to 22% to stimulate economic growth and improve compliance. Over the following years, corporate tax collections rebounded to record highs as improved profitability and a broader tax base offset the lower tax rate, demonstrating Laffer Curve dynamics in action.",
-    "use_in_gd": "You can bring up the Laffer Curve in GDs on fiscal policy, wealth taxes, or budget allocations to explain why simply increasing tax rates on the wealthy or businesses might backfire and reduce the overall fiscal pie."
+    "name": "The Smiling Curve",
+    "explanation": "The Smiling Curve is an economic model illustrating how value addition varies across different stages of an IT or manufacturing supply chain. It shows that high value is generated at the beginning (R&D, product design, patents) and at the end (branding, marketing, customer support), while middle-stage activities like simple assembly yield the lowest profit margins. Graphically, plotting value creation against the production chain forms a U-shape resembling a smile. Winning economies and firms aim to move away from the low-margin middle toward the high-value ends.",
+    "indian_example": "India’s mobile phone manufacturing boom under the Production Linked Incentive (PLI) scheme initially focused on assembly—the low-margin dip of the smiling curve. Recent policy initiatives pushing for domestic R&D, component manufacturing, and creating indigenous brand-led IP represent a strategic effort to climb up both ends of the smiling curve.",
+    "use_in_gd": "Drop this concept into GDs on manufacturing, industrial policy, or tech strategy to explain why India must transition from being just an assembly or backend service hub to owning product design, brand IP, and high-value R&D."
   },
   "categories": [
     {
@@ -45,62 +47,62 @@
       "title": "Geopolitics & International Relations",
       "stories": [
         {
-          "title": "Russia, Ukraine agree to Oleshky ceasefire brokered by Melania Trump, White House says",
-          "url": "https://www.thehindu.com/news/international/russia-ukraine-agree-to-oleshky-ceasefire-brokered-by-melania-trump-white-house-says/article71616736.ece",
+          "title": "Iran Speaker to skip BRICS meet, as Iran seeks bilateral air route for ‘humanitarian aid’ from India",
+          "url": "https://www.thehindu.com/news/national/irans-ghalibaf-will-not-attend-brics-parliamentary-forum-in-delhi-embassy/article71619999.ece",
           "source": "The Hindu",
-          "published": "2026-10-23T20:49:29+05:30",
-          "sources_count": 2,
-          "summary": "Russia and Ukraine agreed to a ceasefire in Oleshky brokered by Melania Trump, according to the White House. Non-military teams from both countries will visit residents in their homes and coordinate evacuations to either country. An unnamed American media organization will accompany the teams to document the process.",
-          "why_it_matters": "De-escalation in global conflicts helps stabilize international commodity markets, which directly benefits India as a major energy importer.",
-          "gd_for": [
-            "Facilitates urgent civilian evacuations and non-military humanitarian access in conflict zones.",
-            "Demonstrates the potential for targeted localized ceasefires through third-party diplomacy."
-          ],
-          "gd_against": [
-            "Localized ceasefires may be fragile and fail to halt broader regional military conflict.",
-            "Involvement of non-neutral media documentation could raise monitoring and trust concerns."
-          ],
-          "key_fact": "Context: Over 6 million Ukrainian refugees have been recorded across Europe since the conflict began.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "Iran has detailed plans to hit Gulf undersea cables if war resumes, officials say",
-          "url": "https://www.thehindu.com/news/international/iran-has-detailed-plans-to-hit-gulf-undersea-cables-if-war-resumes-officials-say/article71617797.ece",
-          "source": "The Hindu",
-          "published": "2026-10-24T02:46:46+05:30",
-          "sources_count": 2,
-          "summary": "Iranian officials warned that Iran has detailed plans to target Gulf undersea cables if conflict resumes following a collapse in diplomacy with Washington. These warnings raise concerns over potential widespread internet disruptions across the region.",
-          "why_it_matters": "Undersea cable disruptions in the Gulf directly threaten India's digital connectivity, international banking channels, and IT service exports.",
-          "gd_for": [
-            "Highlights the strategic need for nations to diversify and secure undersea digital infrastructure.",
-            "Serves as a deterrent by emphasizing the global economic fallout of renewing military conflicts."
-          ],
-          "gd_against": [
-            "Targeting civilian communication infrastructure violates international norms and risks crippling global trade.",
-            "Heightened threats raise insurance premiums and operational risks for regional logistics and telecom providers."
-          ],
-          "key_fact": "Context: More than 95% of international data traffic is carried through subsea fiber-optic cables.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "Trump weighs quick end to Iran war against letting conflict ‘wither’",
-          "url": "https://www.reuters.com/world/trump-weighs-quick-end-iran-war-against-letting-conflict-wither-2026-10-23/",
-          "source": "Reuters",
-          "published": "2026-10-23T21:23:34+05:30",
+          "published": "2026-10-24T22:39:33+05:30",
           "sources_count": 1,
-          "summary": "Former US President Donald Trump is considering options regarding the war with Iran. He is weighing whether to pursue a fast conclusion to the conflict or allow it to gradually wither away.",
-          "why_it_matters": "US strategic decisions in the Middle East directly impact global crude oil price stability and the safety of Indian expatriates in the region.",
+          "summary": "Iran's Parliamentary Speaker Ghalibaf will miss the BRICS Parliament Forum in Delhi, though a Iranian delegation will still attend. Iran sought a direct air route to import medicines from India to Tehran under humanitarian exemptions. However, India suggested routing the supplies through a third country due to concerns over potential U.S. sanctions.",
+          "why_it_matters": "This highlights India's challenge in maintaining critical humanitarian and strategic ties with Iran while ensuring compliance with U.S. sanction risks.",
           "gd_for": [
-            "A rapid resolution can quickly restore stability to global energy supply chains.",
-            "Allowing conflict intensity to diminish naturally avoids unpredictable military escalations."
+            "Establishing direct humanitarian routes aligns with ethical duties and supports India's pharmaceutical export sector.",
+            "Maintaining strong bilateral engagement with Iran preserves strategic regional partnerships for India."
           ],
           "gd_against": [
-            "A passive approach allows prolonged instability that harms regional trade and investment.",
-            "Quick exits without clear peace terms may leave underlying geopolitical drivers unresolved."
+            "Direct trade routes risk triggering U.S. secondary sanctions against Indian financial and business entities.",
+            "Routing supplies through third countries provides a prudent diplomatic middle path that reduces risk."
           ],
-          "key_fact": "Context: The Middle East accounts for roughly one-third of the world's total crude oil production.",
+          "key_fact": "Context: India is one of the world's largest providers of generic medicines to foreign markets.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Xi Jinping May Have His Own Reasons to Avert a China-Russia-US Summit",
+          "url": "https://thediplomat.com/2026/10/xi-jinping-may-have-his-own-reasons-to-avert-a-china-russia-us-summit/",
+          "source": "The Diplomat",
+          "published": "2026-10-23T22:39:00+05:30",
+          "sources_count": 1,
+          "summary": "Chinese President Xi Jinping may prefer to avoid a formal trilateral summit with the United States and Russia. Such a high-level meeting could raise difficult strategic questions for China itself. It could also create uncomfortable diplomatic strain with Ukraine and the European Union.",
+          "why_it_matters": "Global power realignments directly influence India's strategic autonomy, trade routes, and diplomatic posture in the Indo-Pacific region.",
+          "gd_for": [
+            "Avoiding a trilateral meeting prevents China from alienating European trade partners and maintains strategic flexibility.",
+            "Bilateral diplomatic channels often deliver more concrete outcomes than high-visibility multi-power summits."
+          ],
+          "gd_against": [
+            "Declining a three-way summit misses a potential avenue to negotiate peace and calm global market volatility.",
+            "Sustaining diplomatic ambiguity creates persistent uncertainty for global geopolitical stability."
+          ],
+          "key_fact": "Context: China is currently the largest bilateral trading partner of the Russian Federation.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Iran blames US for deal failure, urges new try amid fear of new attacks",
+          "url": "https://www.aljazeera.com/news/2026/10/24/iran-blames-us-for-deal-failure-urges-new-try-amid-fear-of-new-attacks?traffic_source=rss",
+          "source": "Al Jazeera",
+          "published": "2026-10-25T03:00:11+05:30",
+          "sources_count": 2,
+          "summary": "Iran has blamed the United States for the breakdown of negotiations and called for renewed diplomatic efforts. Tehran also warned that even limited military strikes against its targets would provoke a far larger response. The warnings come amidst heightened fears of fresh attacks in the region.",
+          "why_it_matters": "Escalation in West Asia poses severe risks to India's energy supply chains and the security of millions of Indian workers in the Gulf.",
+          "gd_for": [
+            "Renewing diplomatic efforts is essential to prevent regional military escalation and protect global trade.",
+            "Strong deterrence messaging can deter immediate aggression and force parties back to the negotiating table."
+          ],
+          "gd_against": [
+            "Public threats of strong retaliation increase the risk of miscalculation and full-scale conflict.",
+            "Focusing on mutual blame undermines the trust necessary for successful diplomatic negotiations."
+          ],
+          "key_fact": "Context: India imports around 85% of its total crude oil requirements, heavily relying on West Asian stability.",
           "fact_is_context": true,
           "ai": true
         }
@@ -111,123 +113,123 @@
       "title": "Indian Economy, Policy, Budget & RBI",
       "stories": [
         {
-          "title": "RBI's Rs 2.5 lakh crore liquidity infusion raises questions over tightening policy signal: SBI Report",
-          "url": "https://economictimes.indiatimes.com/news/economy/policy/questions-raised-over-rbi-policy-after-rs-2-5-lakh-crore-liquidity-infusion/articleshow/135148493.cms",
+          "title": "Data suggests broad-based increase in food prices: RBI Bulletin",
+          "url": "https://www.thehindu.com/business/Economy/data-suggests-broad-based-increase-in-food-prices-rbi-bulletin/article71616686.ece",
+          "source": "The Hindu",
+          "published": "2026-10-24T13:49:33+05:30",
+          "sources_count": 1,
+          "summary": "The Reserve Bank of India's bulletin indicates a broad-based rise in food prices across multiple commodities. Inflation in rural regions was found to be higher than in urban areas, pushing headline CPI upward. Despite these price pressures, overall domestic economic growth momentum remains resilient.",
+          "why_it_matters": "Elevated rural inflation directly impacts the purchasing power of India's vast rural population and influences RBI interest rate decisions.",
+          "gd_for": [
+            "Resilient economic growth momentum provides an underlying safety net to absorb short-term inflationary trends.",
+            "Early identification of price broad-basing allows policymakers to implement targeted supply-side interventions."
+          ],
+          "gd_against": [
+            "Higher rural inflation disproportionately burdens vulnerable low-income households and dampens domestic consumption.",
+            "Broadening inflation across multiple commodities risks unanchoring long-term price expectations."
+          ],
+          "key_fact": "Inflation in rural areas was found to be higher than in urban areas.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "India’s commerce and industry ministry working to identify AI proof sectors: Piyush Goyal",
+          "url": "https://www.livemint.com/economy/piyush-goyal-ai-proof-sectors-artificial-intelligence-indiaai-mission-niti-aayog-job-creation-ai-led-disruption-11792811061007.html",
+          "source": "Mint",
+          "published": "2026-10-24T11:05:17+05:30",
+          "sources_count": 1,
+          "summary": "India's Commerce and Industry Ministry is working to identify economic sectors that can withstand AI-led disruption. Commerce Minister Piyush Goyal announced this initiative to safeguard industries against technology-driven displacement. The effort aims to prepare national employment and trade policies for future technological shifts.",
+          "why_it_matters": "Proactively identifying resilient sectors allows India to safeguard domestic employment while upgrading workforce skills for an AI-driven economy.",
+          "gd_for": [
+            "Identifying AI-resilient industries protects job security in labor-intensive sectors vital to India's economy.",
+            "Strategic policy planning helps align national skilling initiatives with future industrial requirements."
+          ],
+          "gd_against": [
+            "Excessive focus on protecting legacy sectors might hinder overall AI adoption and technological innovation.",
+            "Accurately predicting long-term AI impacts across varied sectors is difficult and carries risk of policy missteps."
+          ],
+          "key_fact": "Context: India's IT and software services sector contributes over 7% to the nation's total GDP.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "FSDC stresses on vigilance, reforms amid global uncertainty & AI boom",
+          "url": "https://economictimes.indiatimes.com/news/economy/policy/fsdc-stresses-on-vigilance-reforms-amid-global-uncertainty-ai-boom/articleshow/135152520.cms",
           "source": "Economic Times",
-          "published": "2026-10-23T19:53:11+05:30",
+          "published": "2026-10-23T23:23:20+05:30",
+          "sources_count": 1,
+          "summary": "Finance Minister Nirmala Sitharaman led a meeting of the Financial Stability and Development Council to review economic resilience. The council focused on maintaining stability despite global geopolitical tensions, volatile bond yields, and cybersecurity risks. Discussions also covered improving the domestic investment environment and maintaining effective capital movement.",
+          "why_it_matters": "High-level regulatory oversight ensures that India's banking system and financial markets remain secure against global spillovers and cyber threats.",
+          "gd_for": [
+            "Proactive financial monitoring safeguards domestic banking stability against international market shocks.",
+            "Prioritizing financial sector cybersecurity protects rapidly growing digital payment and banking infrastructure."
+          ],
+          "gd_against": [
+            "Overly cautious regulatory oversight can slow down financial innovation and smooth capital deployment.",
+            "Addressing global bond yield volatility remains difficult through domestic administrative measures alone."
+          ],
+          "key_fact": "Context: The Financial Stability and Development Council (FSDC) is an apex-level body chaired by India's Union Finance Minister.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "German firms see India as manufacturing, R&D hub, not just market: Goyal",
+          "url": "https://www.business-standard.com/economy/news/german-firms-see-india-as-manufacturing-r-d-innovation-hub-goyal-126102400401_1.html",
+          "source": "Business Standard",
+          "published": "2026-10-24T13:34:30+05:30",
           "sources_count": 2,
-          "summary": "An SBI report questioned the Reserve Bank of India's decision to inject Rs 2.5 lakh crore of liquidity through repo auctions. The report noted that this action conflicts with the RBI's consistent signals committing to monetary tightening across its policy statements and MPC minutes.",
-          "why_it_matters": "Inconsistencies between monetary policy signals and liquidity actions create uncertainty in Indian money markets and influence commercial bank lending rates.",
+          "summary": "Commerce and Industry Minister Piyush Goyal stated that German companies view India as a strategic manufacturing and R&D hub rather than just a consumer market. Following a two-day visit, Goyal highlighted engagements with major firms including Volkswagen, Siemens Healthcare, and Bertelsmann Investment. The shift reflects growing confidence in India's innovation and industrial capacity.",
+          "why_it_matters": "Attracting European foreign direct investment into high-tech manufacturing and R&D accelerates India's 'Make in India' and tech-advancement goals.",
           "gd_for": [
-            "Provides short-term liquidity to prevent credit stringency in the domestic banking system.",
-            "Offers tactical flexibility to manage temporary systemic liquidity shortfalls without altering core policy rates."
+            "Foreign investment in domestic R&D creates high-skilled jobs and boosts local technological capabilities.",
+            "Positioning India as a global manufacturing hub enhances its integration into international supply chains."
           ],
           "gd_against": [
-            "Creates confusion among market participants regarding the central bank's true monetary policy stance.",
-            "Infusing excessive liquidity risks counteracting anti-inflationary measures."
+            "Translating corporate interest into operational manufacturing units requires solving regulatory and infrastructure bottlenecks.",
+            "Heavy dependence on foreign technology investment can shadow the need for domestic indigenous research funding."
           ],
-          "key_fact": "Rs 2.5 lakh crore",
-          "fact_is_context": false,
+          "key_fact": "Context: Germany is India's largest trading partner in the European Union.",
+          "fact_is_context": true,
           "ai": true
         },
         {
-          "title": "Private sector activity hits four month high in October",
-          "url": "https://economictimes.indiatimes.com/news/economy/indicators/private-sector-activity-hits-four-month-high-in-october/articleshow/135153950.cms",
+          "title": "Strong macro fundamentals, policy interventions to anchor eco against global headwinds: RBI bulletin",
+          "url": "https://economictimes.indiatimes.com/news/economy/policy/strong-macro-fundamentals-policy-interventions-to-anchor-eco-against-global-headwinds-rbi-bulletin/articleshow/135151046.cms",
           "source": "Economic Times",
-          "published": "2026-10-24T00:25:01+05:30",
-          "sources_count": 3,
-          "summary": "India's private sector growth reached a four-month high in October as new orders expanded. The HSBC Flash India Composite PMI rose to 56.7, driven by notable improvements in service sector activity. Hiring expanded slightly, though companies remained cautious due to adequate staffing levels.",
-          "why_it_matters": "Accelerating private sector activity indicates strong domestic macroeconomic fundamentals, creating better corporate job opportunities for Indian graduates.",
-          "gd_for": [
-            "Reflects strong economic demand across service and manufacturing sectors.",
-            "Sustained high PMI figures boost business sentiment and encourage capacity expansion."
-          ],
-          "gd_against": [
-            "Cautious hiring indicates that economic growth is not yet driving robust employment generation.",
-            "Uneven growth tilted towards services makes overall momentum vulnerable to global demand shocks."
-          ],
-          "key_fact": "56.7",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "Govt bonds log worst losing streak in 30 years as crude, US yields rise",
-          "url": "https://www.business-standard.com/economy/news/govt-bonds-log-worst-losing-streak-in-30-years-as-crude-us-yields-rise-126102301399_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-23T19:45:36+05:30",
+          "published": "2026-10-23T22:26:53+05:30",
           "sources_count": 1,
-          "summary": "Indian government bond yields rose for a tenth straight week, marking their worst losing streak in 30 years. Sentiment was hurt by elevated crude oil prices and rising US yields, while India's forex reserves fell by $65 billion over six weeks.",
-          "why_it_matters": "Rising yields elevate government borrowing costs and corporate interest rates in India, while falling forex reserves constrain currency management options.",
+          "summary": "The Reserve Bank of India bulletin stated that strong macroeconomic fundamentals continue to protect the Indian economy from global inflation and trade frictions. Central bank interventions successfully stabilized the rupee against global currency fluctuations. Additionally, Foreign Direct Investment remains robust, backed by major inflows from countries like the US and Singapore.",
+          "why_it_matters": "Strong macroeconomic stability and foreign investment inflows provide a crucial buffer for India's growth amid global economic headwinds.",
           "gd_for": [
-            "Higher bond yields offer attractive debt returns for long-term domestic institutional investors.",
-            "Encourages fiscal prudence by raising the cost of additional public debt issuing."
+            "Strong FDI inflows validate foreign investor confidence in India's long-term economic growth story.",
+            "Active RBI intervention stabilizes currency fluctuations, protecting domestic businesses from import cost shocks."
           ],
           "gd_against": [
-            "Higher yields increase sovereign debt servicing costs, curbing capital expenditure.",
-            "A sharp $65 billion drop in foreign exchange reserves reduces national buffers against external economic shocks."
+            "Persistent global trade tensions and supply disruptions could still strain India's current account balance over time.",
+            "High reliance on foreign capital leaves domestic asset markets vulnerable to shifts in global risk sentiment."
           ],
-          "key_fact": "$65 billion",
+          "key_fact": "Foreign Direct Investment remains robust, driven by significant inflows from major sources like the US and Singapore.",
           "fact_is_context": false,
           "ai": true
         },
         {
-          "title": "Taxing top 1% isn't enough to solve income inequality; how governments spend matters | Opinion",
-          "url": "https://www.livemint.com/economy/taxing-top-1-isnt-enough-to-not-solve-income-inequality-how-governments-spend-matters-opinion-11792732837165.html",
+          "title": "France’s debt crisis explained: Could it trigger another euro zone meltdown?",
+          "url": "https://www.livemint.com/economy/frances-debt-crisis-explained-could-it-trigger-another-euro-zone-meltdown-11792896671197.html",
           "source": "Mint",
-          "published": "2026-10-23T11:22:00+05:30",
+          "published": "2026-10-25T09:30:02+05:30",
           "sources_count": 1,
-          "summary": "An opinion article states that taxing the top 1% of earners is insufficient to eliminate income inequality, highlighting that government spending choices are critical. It argues that unjust laws and institutions must be reformed or abolished unless necessary to avoid greater injustice.",
-          "why_it_matters": "For India, balancing progressive taxation with high-quality public spending is key to tackling economic inequality without hindering private capital creation.",
+          "summary": "France is experiencing a economic contraction alongside rising borrowing risks, creating severe concerns over its national debt crisis. Ongoing public protests are damaging business confidence, public finances, and tourism prospects. These compounded factors have raised fears of a potential financial meltdown spreading across the Eurozone.",
+          "why_it_matters": "A severe economic slowdown in major Eurozone economies can reduce demand for Indian exports and cause global financial market volatility.",
           "gd_for": [
-            "Directs focus toward improving public expenditure efficiency and social infrastructure investments.",
-            "Prevents capital flight by avoiding excessively high direct taxation on wealth creators."
+            "Fiscal stress forces essential structural reforms and long-term spending discipline in major economies.",
+            "Economic weakness in Europe may encourage global investors to redirect capital toward high-growth emerging markets like India."
           ],
           "gd_against": [
-            "Shifting focus away from top-tier taxation may reduce redistributive revenue needed for social welfare.",
-            "Public spending in developing nations often faces execution bottlenecks and corruption risks."
+            "A Eurozone debt crisis could trigger global economic contagion and reduce international trade volume.",
+            "Weakening business confidence and contracting growth in Europe directly harms Indian export industries."
           ],
-          "key_fact": "top 1%",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "India's net FDI inflows rise to $13.8 billion in April-August FY27: RBI",
-          "url": "https://www.business-standard.com/economy/news/india-s-net-fdi-inflows-rise-to-13-8-billion-in-april-august-fy27-rbi-126102301599_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-23T21:53:58+05:30",
-          "sources_count": 1,
-          "summary": "India's net FDI inflows rose to $13.8 billion during April-August FY27, up from $9.6 billion in the previous year. Reserve Bank of India data shows this increase was driven by higher gross inward investment and a slowdown in outward FDI.",
-          "why_it_matters": "Higher net foreign direct investment provides long-term capital for Indian infrastructure and stabilizes the current account balance.",
-          "gd_for": [
-            "Indicates strong foreign investor confidence in India's long-term economic growth.",
-            "Provides stable, non-debt capital inflows to finance domestic economic projects."
-          ],
-          "gd_against": [
-            "Growth driven partly by lower outward FDI reflects reduced overseas expansion by Indian firms.",
-            "Foreign investment flows remain susceptible to shifting monetary policies in developed economies."
-          ],
-          "key_fact": "$13.8 billion",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "Rishikesh–Karnaprayag rail line to have 16 tunnels: How India’s homegrown technology is advancing Himalayan connectivity",
-          "url": "https://www.livemint.com/economy/rishikeshkarnaprayag-rail-line-to-have-16-tunnels-how-india-s-homegrown-technology-is-advancing-himalayan-connectivity-11792777119591.html",
-          "source": "Mint",
-          "published": "2026-10-23T23:31:45+05:30",
-          "sources_count": 1,
-          "summary": "Construction is progressing on the 125-km Rishikesh–Karnaprayag railway line, which will include 16 tunnels. India is simultaneously expanding its domestic tunnel boring machine (TBM) manufacturing capabilities to support this project.",
-          "why_it_matters": "Improved Himalayan rail infrastructure strengthens national security transport links and boosts regional economic growth in Uttarakhand.",
-          "gd_for": [
-            "Significantly improves all-weather transport connectivity in strategic mountain terrain.",
-            "Fosters indigenous manufacturing capabilities in advanced heavy engineering equipment."
-          ],
-          "gd_against": [
-            "Heavy tunneling in fragile Himalayan ecosystems creates severe environmental and geological hazard risks.",
-            "Complex hill-terrain engineering projects face high potential for timeline delays and cost overruns."
-          ],
-          "key_fact": "125-km",
-          "fact_is_context": false,
+          "key_fact": "Context: France represents the second-largest national economy within the European Union.",
+          "fact_is_context": true,
           "ai": true
         }
       ]
@@ -237,60 +239,84 @@
       "title": "Business & Corporate",
       "stories": [
         {
-          "title": "Tata Sons listing row: What Parsi, Zoroastrian groups want PM Modi to protect",
-          "url": "https://www.livemint.com/companies/news/tata-sons-listing-row-parsi-zoroastrian-groups-write-to-pm-modi-in-support-of-tata-trusts-11792775937728.html",
-          "source": "Mint",
-          "published": "2026-10-23T23:15:52+05:30",
-          "sources_count": 1,
-          "summary": "The community organisations' letter adds another dimension to the debate, framing the issue as one involving not only corporate governance and regulatory requirements but also the Tata Group's institutional identity and philanthropic commitments.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "[Update] Jio Platforms IPO Subscribed 22.19X On Final Day, QIB Portion Booked 70.55X",
-          "url": "https://inc42.com/buzz/jio-platforms-ipo-booked-6-76x-on-day-3-so-far-qib-portion-subscribed-14-18x/",
-          "source": "Inc42",
-          "published": "2026-10-23T19:50:32+05:30",
-          "sources_count": 1,
-          "summary": "Reliance Industries’ digital services arm Jio Platforms’ IPO was subscribed 6.76X as of 11:48 IST on the third and final day of bidding",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Petronet LNG, Gruner Renewable float JV to develop CBG plants with Rs 1,200 cr investment",
-          "url": "https://economictimes.indiatimes.com/industry/renewables/petronet-lng-gruner-renewable-float-jv-to-develop-cbg-plants-with-rs-1200-cr-investment/articleshow/135142099.cms",
+          "title": "Volkswagen freezes India EV investment as JSW partnership talks continue",
+          "url": "https://economictimes.indiatimes.com/industry/auto/auto-news/volkswagen-freezes-india-ev-investment-as-jsw-partnership-talks-continue/articleshow/135159796.cms",
           "source": "Economic Times",
-          "published": "2026-10-23T15:26:12+05:30",
-          "sources_count": 2,
-          "summary": "Petronet LNG and Gruner Renewable Energy have formed a 50:50 joint venture to develop compressed biogas plants. This joint venture will involve an estimated investment of Rs 1,200 crore for developing ten plants in India. Each plant is designed to handle 18 metric tonnes of biogas per day, contributing to renewable energy goals. The partnership aims to enhance the commercial viability of the compr",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "published": "2026-10-24T07:58:36+05:30",
+          "sources_count": 3,
+          "summary": "Volkswagen has paused further investment in its Indian electric vehicle programme while awaiting clarity on a potential partnership with Sajjan Jindal's JSW Group. The German automaker completed preliminary design work on a low-cost platform developed for China but requires a clearer business plan. This pause could delay Volkswagen's EV expansion in India as market competition intensifies.",
+          "why_it_matters": "Strategic partnerships are critical for foreign OEMs aiming to navigate India's highly competitive and price-sensitive EV ecosystem.",
+          "gd_for": [
+            "Joint ventures allow foreign automakers to share risk and leverage local market distribution networks.",
+            "Utilizing existing low-cost platforms helps maintain product affordability for Indian consumers."
+          ],
+          "gd_against": [
+            "Investment delays risk losing ground to aggressive local players like Tata Motors and Mahindra.",
+            "Relying on platforms designed for China may not fully address Indian road conditions and consumer preferences."
+          ],
+          "key_fact": "Context: Electric vehicles currently account for around 2.5% of total passenger vehicle sales in India.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Adani Power Q2FY27 results: Net profit rises 142% to ₹7,019 crore",
-          "url": "https://www.business-standard.com/companies/news/adani-power-q2-results-net-profit-increases-142-to-7-019-crore-126102300818_1.html",
+          "title": "BPCL Q2 profit falls 22.5% to ₹4,993 cr as fuel price freeze hits earnings",
+          "url": "https://www.business-standard.com/companies/quarterly-results/bpcl-q2-profit-falls-22-5-to-4-993-cr-as-fuel-price-freeze-hits-earnings-126102400659_1.html",
           "source": "Business Standard",
-          "published": "2026-10-23T15:42:42+05:30",
-          "sources_count": 3,
-          "summary": "Adani Power Q2FY27 results: Operating revenue increased by 29.8 per cent to Rs 17,014.06 crore during the quarter under review from Rs 13,106.34 crore in Q2 FY26, it said",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-10-24T15:11:53+05:30",
+          "sources_count": 2,
+          "summary": "State-owned Bharat Petroleum Corporation Ltd reported a 22.5 per cent fall in net profit to Rs 4,993 crore for the July-September quarter. The profit decline was caused by a retail fuel price freeze that squeezed margins despite rising operational costs. However, quarterly revenue from operations grew to Rs 1.58 lakh crore from Rs 1.22 lakh crore a year earlier.",
+          "why_it_matters": "Retail price controls on state-run oil companies protect consumer inflation but squeeze state-owned enterprises' margins during cost spikes.",
+          "gd_for": [
+            "Retail fuel price freezes protect citizens and small businesses from global cost volatility.",
+            "Strong revenue growth reflects robust underlying energy demand across the Indian economy."
+          ],
+          "gd_against": [
+            "Artificial price caps compress corporate profit margins and hurt public sector balance sheets.",
+            "Reduced net profits limit the capital reserves needed for clean energy transition investments."
+          ],
+          "key_fact": "BPCL's net profit fell 22.5% to Rs 4,993 crore in the September quarter.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
+        },
+        {
+          "title": "Tata Motors stands firm on ₹1,531-per-share Iveco bid as investor questions valuation: All you need to know",
+          "url": "https://www.livemint.com/companies/tata-motors-stands-firm-on-1-531-per-share-iveco-bid-as-investor-questions-valuation-all-you-need-to-know-11792865438375.html",
+          "source": "Mint",
+          "published": "2026-10-24T23:59:44+05:30",
+          "sources_count": 1,
+          "summary": "Tata Motors has refused to increase its bid of Rs 1,531 per share for Italian truck manufacturer Iveco. A minority shareholder holding 3.8% of Iveco argued the offered valuation is too low. Despite the opposition, Tata Motors expects to acquire over 80% of Iveco's shares by the deadline.",
+          "why_it_matters": "Reflects disciplined capital allocation by Indian conglomerates executing global cross-border acquisitions in commercial mobility.",
+          "gd_for": [
+            "Maintaining a firm valuation cap prevents overpayment and protects long-term shareholder value.",
+            "Securing over 80% ownership ensures clear operational control and seamless technology transfer."
+          ],
+          "gd_against": [
+            "Refusing to raise the offer could alienate minority shareholders and create post-merger friction.",
+            "Heavy commercial vehicle markets face cyclical global risks that could strain debt levels."
+          ],
+          "key_fact": "Tata Motors maintained its offer of Rs 1,531 per share to acquire over 80% of Iveco.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Indian Listed New-Age Tech Company Tracker: Market Cap, Revenue & More",
+          "url": "https://inc42.com/features/indian-listed-new-age-tech-company-tracker-market-cap-revenue-more/",
+          "source": "Inc42",
+          "published": "2026-10-24T16:42:59+05:30",
+          "sources_count": 1,
+          "summary": "More than 70 Indian new-age tech startups have successfully completed initial public offerings and listed on stock exchanges. Tracking by Inc42 highlights the long-term transformation and maturation of the Indian technology startup ecosystem. This comes amid a broader surge in Indian tech startup IPO activity.",
+          "why_it_matters": "A maturing startup IPO market provides exit liquidity for venture capital and opens new wealth creation avenues for domestic retail investors.",
+          "gd_for": [
+            "Public listings improve corporate governance standards and financial transparency in the startup ecosystem.",
+            "Domestic IPOs allow retail Indian investors to participate in high-growth technology ventures."
+          ],
+          "gd_against": [
+            "Public market quarterly scrutiny creates pressure on unproven business models focused on market share.",
+            "Post-IPO stock volatility can cause significant losses for retail investors if initial valuations were hyper-inflated."
+          ],
+          "key_fact": "Over 70 Indian new-age tech companies have crossed the IPO milestone and are listed on bourses.",
+          "fact_is_context": false,
+          "ai": true
         }
       ]
     },
@@ -299,88 +325,64 @@
       "title": "Technology, AI & Innovation",
       "stories": [
         {
-          "title": "Apple India revenue grows 32% to cross Rs 1 lakh crore mark in FY26",
-          "url": "https://economictimes.indiatimes.com/tech/technology/apple-india-revenue-grows-32-to-cross-rs-1-lakh-crore-mark-in-fy26/articleshow/135152541.cms",
-          "source": "Economic Times",
-          "published": "2026-10-23T23:18:57+05:30",
-          "sources_count": 1,
-          "summary": "\"Apple India Private Limited provides and markets Apple brand products and software, and reported its revenues for the financial year 2025-26 at Rs 1,04,607 crore, a 32 per cent jump since the last financial year,\" Tofler said.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "AI-discovered bugs may soon trigger fresh disruptions, cyber experts say",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/ai-discovered-bugs-may-soon-trigger-fresh-disruptions-cyber-experts-say/articleshow/135147270.cms",
-          "source": "Economic Times",
-          "published": "2026-10-23T18:52:58+05:30",
-          "sources_count": 2,
-          "summary": "AI helped drive a doubling of the number of digital flaws discovered year-on-year, according to research due to be published in the coming days by VulnCheck, a Massachusetts-based threat intelligence firm.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Polish PM Donald Tusk seeks deeper technology cooperation with India across AI, digital and space sectors",
-          "url": "https://www.livemint.com/technology/polish-pm-donald-tusk-seeks-deeper-technology-cooperation-with-india-across-ai-digital-and-space-sectors-11792741007680.html",
+          "title": "Forget iPhone Duo: Ashwini Vaishnaw sets October 2028 deadline for India’s own smartphone brand",
+          "url": "https://www.livemint.com/technology/tech-news/forget-iphone-duo-ashwini-vaishnaw-sets-october-2028-deadline-for-india-s-own-smartphone-brand-11792834782422.html",
           "source": "Mint",
-          "published": "2026-10-23T13:06:47+05:30",
+          "published": "2026-10-24T15:23:52+05:30",
           "sources_count": 1,
-          "summary": "Polish Prime Minister Donald Tusk has called for stronger technology partnerships between India and Poland, highlighting opportunities for companies from both countries across sectors including artificial intelligence (AI) solutions, digital products and space technology.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Union IT Minister Ashwini Vaishnaw set October 23, 2028, as the official target date for India to build its own domestic smartphone brand. The initiative focuses on achieving end-to-end domestic design, manufacturing, and intellectual property. This plan aims to position India beyond assembly into complete hardware ownership.",
+          "why_it_matters": "Transitions India's electronics sector from low-margin assembly work to high-value domestic design and intellectual property creation.",
+          "gd_for": [
+            "Developing indigenous IP enhances national technological security and retains supply chain profits in India.",
+            "Domestic manufacturing fosters high-skilled design engineering jobs and reduces reliance on imports."
+          ],
+          "gd_against": [
+            "Building globally competitive smartphone technology requires immense capital investments and advanced semiconductor access within tight timelines.",
+            "Dominant foreign incumbents control market share and component supply chains, making market entry challenging."
+          ],
+          "key_fact": "Union IT Minister Ashwini Vaishnaw set October 23, 2028, as the target date for India's domestic smartphone brand.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "OpenAI says it will no longer train its AI models on the live internet, citing “significant risks”",
-          "url": "https://techcrunch.com/2026/10/23/openai-says-it-will-no-longer-train-its-ai-models-on-the-live-internet-citing-significant-risks/",
+          "title": "The AI graveyard: a running list of projects and startups that didn’t make it",
+          "url": "https://techcrunch.com/2026/10/24/the-ai-graveyard-a-running-list-of-projects-and-startups-that-didnt-make-it/",
           "source": "TechCrunch",
-          "published": "2026-10-24T04:35:49+05:30",
+          "published": "2026-10-25T00:30:00+05:30",
           "sources_count": 1,
-          "summary": "OpenAI will cut frontier models off from the internet weeks after one of its engineers said that solution wouldn't work.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Several prominent artificial intelligence projects and startups have shut down or failed to meet market expectations. High-profile setbacks include repeated delays for Apple's Siri AI and a messy launch for OpenAI's super app. The situation highlights growing challenges in fulfilling aggressive AI timelines.",
+          "why_it_matters": "Serves as a cautionary lesson for Indian tech founders and venture funds regarding over-hyped valuations and execution bottlenecks in AI.",
+          "gd_for": [
+            "Market corrections clear out unsustainable business models and redirect capital toward practical AI applications.",
+            "Failed experiments offer critical real-world data regarding software limitations and user preferences."
+          ],
+          "gd_against": [
+            "High failure rates can discourage venture capital funding for early-stage artificial intelligence research.",
+            "Product delays erode user trust and damage corporate reputations in fast-moving technology markets."
+          ],
+          "key_fact": "Context: Industry reports estimate that over 80% of corporate artificial intelligence projects fail to reach deployment.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Frugal tech innovations from rural India have proved themselves: IIM Prof Anil Gupta",
-          "url": "https://indianexpress.com/article/technology/anil-k-gupta-grassroots-frugal-innovation-india-technology-10933935/lite/",
-          "source": "Indian Express",
-          "published": "2026-10-24T07:30:55+05:30",
-          "sources_count": 1,
-          "summary": "Open the source link to read the full story.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "title": "OpenAI resumes frontier AI training after security overhaul, discloses flaw in widely used software",
+          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/openai-resumes-frontier-ai-training-after-security-overhaul-discloses-flaw-in-widely-used-software/articleshow/135161388.cms",
+          "source": "Economic Times",
+          "published": "2026-10-24T09:29:03+05:30",
+          "sources_count": 2,
+          "summary": "OpenAI temporarily stopped training its most advanced AI models after a research model accessed the internet due to a configuration error in September. The company reported that the safety incident was contained without broader breach issues. OpenAI used the pause to review its system vulnerabilities and strengthen security defenses.",
+          "why_it_matters": "Emphasizes the critical importance of AI safety, governance protocols, and risk mitigation as India expands its AI compute infrastructure.",
+          "gd_for": [
+            "Proactively pausing model development demonstrates responsible governance and commitment to AI safety.",
+            "Fixing configuration flaws before full deployment prevents potential autonomous system misuse."
+          ],
+          "gd_against": [
+            "Halting training cycles delays product timelines and gives international rivals a competitive head start.",
+            "Unintended internet access by AI research models exposes existing vulnerabilities in lab containment protocols."
+          ],
+          "key_fact": "OpenAI paused frontier model training after a configuration error gave a research model internet access in September.",
           "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "iPhone Duo at ₹2.99 lakh sells out on Blinkit in 5 minutes; Is Apple's monthly lease worth it?",
-          "url": "https://www.livemint.com/technology/iphone-duo-at-rs-2-99-lakh-sells-out-on-blinkit-in-5-minutes-is-apples-monthly-lease-worth-it-11792813203796.html",
-          "source": "Mint",
-          "published": "2026-10-24T09:16:46+05:30",
-          "sources_count": 1,
-          "summary": "Apple’s first foldable smartphone, the iPhone Duo, sold out on Blinkit within five minutes of going on sale in Delhi-NCR on October 23, 2026, with prices starting at ₹2,99,900 in India.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "ai": true
         }
       ]
     },
@@ -389,40 +391,52 @@
       "title": "Science, Climate & Sustainability",
       "stories": [
         {
-          "title": "How is air pollution in Delhi-NCR ahead of winter?",
-          "url": "https://www.thehindu.com/news/cities/Delhi/how-is-air-pollution-in-delhi-ncr-ahead-of-winter/article71615365.ece",
+          "title": "A distant Pacific phenomenon may be drying India’s north, says study",
+          "url": "https://www.thehindu.com/sci-tech/energy-and-environment/a-distant-pacific-phenomenon-may-be-drying-indias-north-says-study/article71620192.ece",
           "source": "The Hindu",
-          "published": "2026-10-23T17:20:29+05:30",
+          "published": "2026-10-24T22:36:06+05:30",
           "sources_count": 1,
-          "summary": "Delhi-NCR braces for stringent winter pollution controls under GRAP and Delhi’s 2026-27 restrictions, with mixed effectiveness in reducing AQI.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "A research study by scientists from IMD and IITM links the Pacific oceanic cycle 'Victoria Mode' to expanding semi-arid zones in north-west India. The ocean phenomenon affects moisture flow patterns, which reduces water availability across northern regions. Scientists warn this environmental shift threatens local food supplies and risks displacing populations.",
+          "why_it_matters": "Directly impacts Indian agricultural planning, food security strategies, and climate displacement management in vulnerable northern states.",
+          "gd_for": [
+            "Identifying specific ocean-climate drivers improves long-term weather forecasting and agricultural planning.",
+            "Early scientific warnings enable targeted government interventions for regional climate adaptation."
+          ],
+          "gd_against": [
+            "Expanding semi-arid regions reduce arable land, causing crop losses and threatening national food security.",
+            "Loss of agricultural livelihoods accelerates distress migration from rural areas into overcrowded cities."
+          ],
+          "key_fact": "Scientists from IMD and IITM linked the Pacific's 'Victoria Mode' to expanding semi-arid zones in north-west India.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "Severe crisis ahead? India’s major reservoirs lose 3.49 billion cubic metres of water in a week, CWC data shows",
-          "url": "https://www.downtoearth.org.in/water/severe-crisis-ahead-indias-major-reservoirs-lose-349-billion-cubic-metres-of-water-in-a-week-cwc-data-shows",
-          "source": "Down To Earth",
-          "published": "2026-10-23T11:10:15+05:30",
-          "sources_count": 1,
-          "summary": "India's major reservoirs face a severe water crisis, losing 3.49 billion cubic metres in a week, with southern and western states reporting critically low storage levels, according to CWC data.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "title": "Rosebank: Life on the oil field at the centre of a political storm",
+          "url": "https://www.bbc.co.uk/news/articles/cqy8ljkle97ro?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Science",
+          "published": "2026-10-25T04:45:18+05:30",
+          "sources_count": 2,
+          "summary": "A field report highlights life aboard a ship at the untapped Rosebank oil field near Scotland. The site remains surrounded by political debates regarding environmental policy and future development rights. The situation illustrates ongoing tensions between energy extraction and climate regulations.",
+          "why_it_matters": "Reflects the global policy balancing act between maintaining conventional energy security and committing to decarbonization targets.",
+          "gd_for": [
+            "Developing untapped domestic fields enhances national energy independence and mitigates global supply shocks.",
+            "Offshore oil projects generate substantial industrial employment and support maritime supply chains."
+          ],
+          "gd_against": [
+            "Opening new oil fields directly contradicts global carbon emission reduction commitments.",
+            "Regulatory and political uncertainty creates stranded asset risks for long-term capital investments."
+          ],
+          "key_fact": "Context: The Rosebank offshore oil field holds an estimated 300 million barrels of recoverable oil reserves.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Chart: A record two-thirds of car sales in China are now electric vehicles",
-          "url": "https://www.carbonbrief.org/chart-a-record-two-thirds-of-car-sales-in-china-are-now-electric-vehicles",
-          "source": "Carbon Brief",
-          "published": "2026-10-23T21:25:26+05:30",
+          "title": "NASA’s asteroid Bennu samples reveal a 4.5-billion-year-old secret",
+          "url": "https://www.sciencedaily.com/releases/2026/10/261023023734.htm",
+          "source": "Science Daily",
+          "published": "2026-10-24T18:20:06+05:30",
           "sources_count": 1,
-          "summary": "For the first time, NEVs made up 67% of new car sales in China in September, according to latest data from China Passenger Car Association.",
+          "summary": "Tiny samples from asteroid Bennu are rewriting scientists&apos; understanding of how our Solar System formed. New evidence suggests that Bennu was born where material from the inner and outer Solar System mixed, with Jupiter playing a surprising role in shaping its formation.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -437,12 +451,12 @@
       "title": "India: Governance & Society",
       "stories": [
         {
-          "title": "Delhi High Court rejects Neha Bora's plea against police notice to sign peace bond",
-          "url": "https://www.thehindu.com/news/national/delhi-high-court-rejects-neha-boras-plea-against-police-notice-to-sign-peace-bond/article71616696.ece",
+          "title": "Road Ministry seeks forensic audit of its portals after vehicle data leak",
+          "url": "https://www.thehindu.com/news/national/road-ministry-seeks-forensic-audit-of-its-portals-after-vehicle-data-leak/article71620455.ece",
           "source": "The Hindu",
-          "published": "2026-10-23T22:14:46+05:30",
+          "published": "2026-10-25T06:35:02+05:30",
           "sources_count": 1,
-          "summary": "Delhi HC rejects Neha Bora’s petition challenging BNSS peace bond notice; directs SEM to share case materials.",
+          "summary": "MoRTH orders forensic audit of VAHAN, SARATHI, e-Challan, PUCC portals; tightens data-sharing after leak reports and app misuse.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -451,26 +465,26 @@
           "ai": false
         },
         {
-          "title": "Assam government to present 1st Bhupen Hazarika National Award to Usha Mangeshkar: Himanta",
-          "url": "https://www.thehindu.com/news/national/assam-government-to-present-1st-bhupen-hazarika-national-award-to-usha-mangeshkar-himanta/article71617957.ece",
-          "source": "The Hindu",
-          "published": "2026-10-24T04:08:44+05:30",
-          "sources_count": 2,
-          "summary": "Assam to award Usha Mangeshkar the inaugural Bhupen Hazarika National Award, with PM Modi presenting it on November 29 in New Delhi.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Diwali 2026 Train Booking Alert: Reservation counters at several locations in Delhi-NCR to remain closed on November 8",
-          "url": "https://indianexpress.com/article/india/diwali-2026-delhi-ncr-railway-reservation-counters-closed-november-8-10933877/",
+          "title": "Ladakh body rejects Centre’s draft, alleges region turned into ‘testing lab’",
+          "url": "https://indianexpress.com/article/india/kargil-democratic-alliance-rejects-centre-mha-draft-proposal-ladakh-empty-draft-sajjad-kargili-asgar-karbalai-article-240-10935419/",
           "source": "Indian Express",
-          "published": "2026-10-23T17:33:20+05:30",
-          "sources_count": 1,
+          "published": "2026-10-24T20:28:25+05:30",
+          "sources_count": 2,
           "summary": "Open the source link to read the full story.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Siddaramaiah ‘sting operation’: Delhi-based man arrested and released on bail",
+          "url": "https://www.thehindu.com/news/national/karnataka/siddaramaiah-sting-operation-delhi-man-arrested-and-released-on-bail/article71619920.ece",
+          "source": "The Hindu",
+          "published": "2026-10-24T23:32:27+05:30",
+          "sources_count": 1,
+          "summary": "Delhi man arrested in Siddaramaiah sting case; probe targets video upload link, pendrive source, and party-affiliated social media team.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -511,5 +525,5 @@
     "Scroll.in (no entries)",
     "The Print (no entries)"
   ],
-  "reading_time_min": 11
+  "reading_time_min": 16
 }
