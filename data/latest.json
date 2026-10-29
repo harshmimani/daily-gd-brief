@@ -1,45 +1,45 @@
 {
-  "date": "2026-10-28",
-  "date_label": "Wednesday, 28 October 2026",
-  "generated_at": "2026-10-28T11:19:00.697451+05:30",
+  "date": "2026-10-29",
+  "date_label": "Thursday, 29 October 2026",
+  "generated_at": "2026-10-29T11:24:10.780545+05:30",
   "ai_enabled": true,
-  "ai_model": "gemini-3.6-flash",
-  "ai_story_count": 9,
+  "ai_model": "gemini-3.5-flash",
+  "ai_story_count": 18,
   "ai_errors": [
-    "batch 1/3: network ReadTimeout",
-    "batch 2/3: HTTP 404 on gemini-2.5-flash",
-    "batch 2/3: HTTP 503 on gemini-3.5-flash",
-    "batch 2/3: HTTP 503 on gemini-3.6-flash",
-    "batch 2/3: HTTP 503 on gemini-3.7-flash",
-    "batch 2/3: HTTP 503 on gemini-3.8-flash",
-    "batch 2/3: all models failed",
-    "every candidate model is unavailable (gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))"
+    "batch 3/3: HTTP 404 on gemini-2.5-flash",
+    "batch 3/3: HTTP 503 on gemini-3.5-flash",
+    "batch 3/3: all models failed",
+    "curation: HTTP 503 on gemini-3.6-flash",
+    "curation: HTTP 503 on gemini-3.7-flash",
+    "curation: HTTP 503 on gemini-3.8-flash",
+    "curation: network ReadTimeout",
+    "every candidate model is unavailable (gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))"
   ],
   "ai_models_dropped": [
-    "gemini-3.6-flash: HTTP 503 (overloaded)",
     "gemini-3.8-flash: HTTP 503 (overloaded)",
     "gemini-3.7-flash: HTTP 503 (overloaded)",
+    "gemini-3.6-flash: HTTP 503 (overloaded)",
     "gemini-3.5-flash: HTTP 503 (overloaded)",
     "gemini-2.5-flash: HTTP 404"
   ],
   "story_count": 25,
   "story_cap": 25,
   "gd_topic": {
-    "topic": "China-Plus-One: Is India Losing the Manufacturing Race to Vietnam?",
-    "why_now": "Fresh economic data reveals Vietnam has overtaken India in emerging market export growth and investor interest, intensifying scrutiny on India's ability to capitalize on global supply chain relocations.",
-    "opening_line": "Good morning, everyone; while India positions itself as the natural anchor for the global 'China-Plus-One' diversification, recent trade indicators show Vietnam outperforming us in export velocity and manufacturing inflows. To truly turn geopolitical tailwinds into domestic prosperity, we must evaluate whether production-linked incentives are sufficient to offset India's structural challenges in logistics and factor markets.",
-    "closing_line": "To conclude, India has not lost the race, but Vietnam’s ascendancy demonstrates that sheer scale is secondary to regulatory agility and low tariff friction in global value chains. Moving forward, India must complement capital subsidies with comprehensive labor and trade policy rationalization to become an indispensable manufacturing powerhouse.",
+    "topic": "Price Controls on Healthcare: Essential Public Welfare or Threat to Market Innovation?",
+    "why_now": "The Indian government recently cut MRPs on trade-margin-capped cancer drugs by up to 93% to make critical care affordable. This decision re-ignites the debate on whether state price interventions protect consumers or stifle pharmaceutical R&D.",
+    "opening_line": "The recent 93% slash in cancer drug MRPs highlights the critical necessity of making life-saving healthcare affordable in India. However, while price caps relieve vulnerable households, we must examine if extreme margin caps risk choking private investments in domestic pharmaceutical innovation.",
+    "closing_line": "To achieve sustainable healthcare equity, India cannot rely solely on aggressive price caps that may disincentivize drug development and supply security. A balanced approach requires pairing rational margin caps with targeted government subsidies and public-private healthcare infrastructure development.",
     "perspectives": [
-      "Policy & Trade: While India's PLI schemes have driven domestic electronics assembly, persistent high tariffs on intermediate components contrast sharply with Vietnam’s aggressive, low-barrier Free Trade Agreements (FTAs).",
-      "Corporate & Supply Chain: Multinational corporations prefer Vietnam for faster bureaucratic turnarounds and plug-and-play industrial parks, though India offers a far larger domestic consumption market and software-hardware integration potential.",
-      "Employment & Demographics: Vietnam's rapid absorption of labor highlights India's urgent imperative to scale low- and medium-skill manufacturing, without which the country risks squandering its demographic dividend on underemployment."
+      "Government: Views price controls as a non-negotiable moral responsibility to prevent medical-debt-induced poverty among citizens.",
+      "Pharma Industry: Argues that severe trade-margin restrictions reduce profit margins, hampering long-term R&D, clinical trials, and supply chain quality.",
+      "Citizens & Patients: Gain immediate, life-saving financial relief, drastically lowering out-of-pocket medical expenditure for chronic illnesses."
     ]
   },
   "concept": {
-    "name": "Premature Deindustrialization",
-    "explanation": "Premature deindustrialization describes a phenomenon where developing economies transition directly from agriculture to services without first building a dominant manufacturing core. Historically, advanced nations enriched their populations by moving farm workers into labor-intensive factories before gradually evolving into service-driven economies. When this path is truncated—often due to automation and early exposure to global trade—manufacturing's share of employment peaks at much lower per-capita income levels. This limits a nation's capacity to generate mass, high-productivity employment for non-technical workers.",
-    "indian_example": "India is a classic case where the services sector expanded rapidly to generate over 50% of GDP, while manufacturing has remained stagnant at roughly 14–17% of GDP for decades. Consequently, millions of workers exiting agriculture are unable to find industrial employment, prompting aggressive government pushes like 'Make in India' and the PLI scheme to counter this structural anomaly.",
-    "use_in_gd": "Deploy this concept during discussions on job creation, export competitiveness, or economic growth models to explain why services alone cannot solve India's structural unemployment and why manufacturing revival is an existential economic priority."
+    "name": "Deadweight Loss",
+    "explanation": "Deadweight loss occurs when market equilibrium for a product or service is disrupted by external distortions like price caps, price floors, or taxes. It represents the total loss of economic welfare where neither consumers nor producers gain value. In simple terms, it is the economic waste generated when mutually beneficial transactions are prevented from taking place.",
+    "indian_example": "When the government imposes strict price ceilings on medical devices like cardiac stents or cancer drugs, domestic manufacturers with thin margins may stop producing them or divert supply away. The resulting shortages mean patients who were willing to buy the medication cannot find it, creating a net welfare loss for society.",
+    "use_in_gd": "Cite 'Deadweight Loss' during GDs on price caps, agricultural subsidies, or taxation to articulate how well-intentioned market interventions can inadvertently create supply shortages and reduce overall economic efficiency."
   },
   "categories": [
     {
@@ -47,122 +47,62 @@
       "title": "Geopolitics & International Relations",
       "stories": [
         {
-          "title": "Trump drastically loosens oil and gas methane rules",
-          "url": "https://www.thehindu.com/sci-tech/energy-and-environment/trump-drastically-loosens-oil-and-gas-methane-rules/article71634215.ece",
-          "source": "The Hindu",
-          "published": "2026-10-28T09:30:46+05:30",
-          "sources_count": 1,
-          "summary": "Donald Trump rolled back methane regulations on the oil and gas sector to help reduce energy costs. He claimed this deregulation would save $45 billion. This move comes amid voter anger over high oil prices caused by the war on Iran.",
-          "why_it_matters": "Lower global energy costs could help lower India's massive crude import bill, though weakening emissions standards undermines global climate goals.",
-          "gd_for": [
-            "Provides immediate relief to consumers by lowering energy production costs.",
-            "Reduces regulatory burdens, encouraging higher industrial output and energy security."
-          ],
-          "gd_against": [
-            "Increases harmful methane emissions, worsening global warming risks.",
-            "Diverts investments away from long-term renewable energy transitions."
-          ],
-          "key_fact": "$45B in claimed savings from rolling back oil and gas methane rules.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "How Would China Actually Govern Taiwan?",
-          "url": "https://thediplomat.com/2026/10/how-would-china-actually-govern-taiwan/",
+          "title": "Hegseth Seeks to Reassure Southeast Asia of US Security Commitment to the Region",
+          "url": "https://thediplomat.com/2026/10/hegseth-seeks-to-reassure-southeast-asia-of-us-security-commitment-to-the-region/",
           "source": "The Diplomat",
-          "published": "2026-10-27T23:19:00+05:30",
-          "sources_count": 1,
-          "summary": "A recent academic symposium provided new insights into China's vision for governing Taiwan. Discussions focused on the proposed structure of a 'Taiwan Special Administrative Region'.",
-          "why_it_matters": "Cross-Strait stability is critical for India's semiconductor supply chain and overall Indo-Pacific maritime security.",
+          "published": "2026-10-29T06:34:00+05:30",
+          "sources_count": 2,
+          "summary": "The U.S. secretary of war spoke at the ASEAN Defense Ministers' Meeting in Cebu. He pledged to defend American interests as well as those of allies and partners. The statement aims to reassure Southeast Asian nations of U.S. security commitments.",
+          "why_it_matters": "Maritime stability in Southeast Asia directly impacts India's Act East policy and trade security through critical sea lines of communication.",
           "gd_for": [
-            "Offers a clear academic framework to understand China's proposed administrative model.",
-            "Provides a structured policy discussion rather than relying solely on military escalation."
+            "Strengthens regional defense posture against coercive security threats in Southeast Asia.",
+            "Reassures ASEAN nations regarding long-term balance of power and regional stability."
           ],
           "gd_against": [
-            "Disregards the democratic self-determination of the Taiwanese population.",
-            "Risks heightening geopolitical friction across East Asia."
+            "Could escalate military tensions and bloc rivalries in the Indo-Pacific region.",
+            "May increase ASEAN dependence on external superpowers rather than regional defense mechanisms."
           ],
-          "key_fact": "Context: Taiwan accounts for over 60% of the world's semiconductor manufacturing capacity.",
+          "key_fact": "Context: ASEAN is India's fourth-largest trading partner, accounting for over 10% of India's overall international trade.",
           "fact_is_context": true,
           "ai": true
         },
         {
-          "title": "Iran war live: Pezeshkian says Middle East can solve own issues without US",
-          "url": "https://www.aljazeera.com/news/liveblog/2026/10/27/iran-war-live-pezeshkian-says-middle-east-can-solve-own-issues-without-us?traffic_source=rss",
-          "source": "Al Jazeera",
-          "published": "2026-10-28T03:59:31+05:30",
-          "sources_count": 1,
-          "summary": "Iranian President Pezeshkian stated that Middle Eastern nations can solve regional issues without US involvement. He made these remarks at a gas exporting countries summit held in Russia.",
-          "why_it_matters": "Stability in West Asia directly affects India's energy security and the welfare of millions of Indian expats living in the Gulf.",
-          "gd_for": [
-            "Encourages regional self-reliance and direct diplomatic engagement among neighbor states.",
-            "Fosters cooperation among major energy-producing nations to stabilize regional markets."
-          ],
-          "gd_against": [
-            "Excludes major international partners necessary for enforcing global maritime trade security.",
-            "Ignores deep internal political divisions among Middle Eastern nations that hinder unity."
-          ],
-          "key_fact": "Context: Iran holds the world's second-largest natural gas reserves.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "US costs of Iran war rise to over $47 billion, according to Pentagon estimate",
-          "url": "https://www.reuters.com/world/middle-east/us-costs-iran-war-rise-over-47-billion-according-pentagon-estimate-2026-10-28/",
-          "source": "Reuters",
-          "published": "2026-10-28T06:31:00+05:30",
-          "sources_count": 1,
-          "summary": "The cost of the war in Iran for the United States has risen significantly. According to a Pentagon estimate, total spending has now surpassed $47 billion.",
-          "why_it_matters": "Escalating US conflict expenses contributes to global economic uncertainty and affects foreign portfolio flows into emerging markets like India.",
-          "gd_for": [
-            "Ensures transparent accounting of government defense spending during wartime.",
-            "Demonstrates fiscal tracking to justify defense resource allocations."
-          ],
-          "gd_against": [
-            "Diverts billions of public funds away from domestic infrastructure and social development.",
-            "Sustains prolonged global conflict, inflating energy costs worldwide."
-          ],
-          "key_fact": "US costs of the Iran war have risen to over $47 billion.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "Hegseth likely to face questions on US role in Indo-Pacific at ASEAN summit",
-          "url": "https://www.reuters.com/world/china/hegseth-likely-face-questions-us-role-indo-pacific-asean-summit-2026-10-27/",
-          "source": "Reuters",
-          "published": "2026-10-28T04:59:04+05:30",
-          "sources_count": 1,
-          "summary": "US official Hegseth is expected to face questions regarding America's strategic role in the Indo-Pacific. These discussions will take place during the upcoming ASEAN summit.",
-          "why_it_matters": "Clarity on US strategic commitments in the Indo-Pacific directly affects India's security calculations and freedom of navigation in regional sea lanes.",
-          "gd_for": [
-            "Promotes constructive dialogue between Western allies and Southeast Asian nations.",
-            "Reaffirms defense commitments to maintain open and secure trade routes."
-          ],
-          "gd_against": [
-            "Puts pressure on ASEAN countries that prefer maintaining strict geopolitical neutrality.",
-            "Risks escalating strategic rivalry and tensions with China in the region."
-          ],
-          "key_fact": "Context: ASEAN is India's fourth-largest trading partner.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "Ceasefire extended across Ukraine's Kherson region, officials say",
-          "url": "https://www.bbc.co.uk/news/articles/c6lye1w9p2l8o?at_medium=RSS&at_campaign=rss",
+          "title": "Israel's election deadlock is a sign of the country's deep divisions",
+          "url": "https://www.bbc.co.uk/news/articles/cqz0ve94ygpjo?at_medium=RSS&at_campaign=rss",
           "source": "BBC World",
-          "published": "2026-10-28T03:41:08+05:30",
-          "sources_count": 1,
-          "summary": "A ceasefire has been expanded across the Kherson region in Ukraine. The truce was initially set up for stranded residents in Oleshky, and both Russia and Ukraine report no violations.",
-          "why_it_matters": "Regional stability in Eastern Europe helps normalize global supply chains, including crucial agricultural and fertilizer trade for India.",
+          "published": "2026-10-29T02:23:02+05:30",
+          "sources_count": 2,
+          "summary": "Israel's election highlighted democratic engagement but resulted in a political deadlock. The outcome leaves the nation without a clear path to form a new government. This reflects underlying political and social divisions within the country.",
+          "why_it_matters": "Political stability in Israel is crucial for India due to extensive bilateral defense, technology, and strategic partnerships in West Asia.",
           "gd_for": [
-            "Provides essential humanitarian relief and protection for stranded civilian populations.",
-            "Creates localized operational trust that could lay the groundwork for broader peace talks."
+            "Demonstrates high democratic participation and representation of diverse political views.",
+            "Prevents unilateral rule by forcing parties toward coalition building and consensus."
           ],
           "gd_against": [
-            "May act only as a temporary pause for military regrouping rather than a lasting resolution.",
-            "Fails to address the underlying political drivers of the broader conflict."
+            "Prolonged political deadlock leads to policy paralysis and governance uncertainty.",
+            "Frequent election stalemates destabilize national security strategies and economic planning."
           ],
-          "key_fact": "Context: The Kherson region is a major agricultural and transportation hub along the Dnipro River.",
+          "key_fact": "Context: India-Israel bilateral trade stands at approximately $10 billion annually, heavily driven by high-tech and defense sectors.",
+          "fact_is_context": true,
+          "ai": true
+        },
+        {
+          "title": "Brazil’s Flavio Bolsonaro lands in Florida after election defeat",
+          "url": "https://www.thehindu.com/news/international/flavio-bolsonaro-flees-brazil-and-boards-a-flight-to-ecuador-after-election-loss-to-lula/article71634871.ece",
+          "source": "The Hindu",
+          "published": "2026-10-28T19:54:46+05:30",
+          "sources_count": 5,
+          "summary": "Flavio Bolsonaro arrived at Opa-Locka Executive Airport outside Miami following his election defeat. He flew from Argentina with a stopover in Ecuador amid days of speculation about his location. His departure occurs amidst rising political tension and legal probes in Brazil.",
+          "why_it_matters": "Political volatility in major Global South nations like Brazil affects global diplomatic coordination within forums like BRICS and IBSA.",
+          "gd_for": [
+            "Reduces immediate domestic political confrontation by removing a central figure from the country.",
+            "Allows law enforcement and judicial probes to proceed without direct political friction."
+          ],
+          "gd_against": [
+            "Undermines public trust in accountability if leaders avoid local legal scrutinies by traveling abroad.",
+            "Signals deep institutional instability and intense political polarization."
+          ],
+          "key_fact": "Context: Bilateral trade between India and Brazil exceeds $15 billion, driven by agriculture, energy, and pharmaceuticals.",
           "fact_is_context": true,
           "ai": true
         }
@@ -173,106 +113,124 @@
       "title": "Indian Economy, Policy, Budget & RBI",
       "stories": [
         {
-          "title": "Resist temptation to defend ₹ at any cost: Raghuram Rajan cautions India against excessive use of forex reserves",
-          "url": "https://economictimes.indiatimes.com/news/economy/policy/resist-temptation-to-defend-at-any-cost-raghuram-rajan-cautions-india-against-excessive-use-of-forex-reserves/articleshow/135228668.cms",
+          "title": "Union Cabinet approves ₹10,000 crore Container Manufacturing Scheme to boost India's production",
+          "url": "https://economictimes.indiatimes.com/news/economy/policy/union-cabinet-approves-10000-crore-container-manufacturing-scheme-to-boost-indias-production/articleshow/135280224.cms",
           "source": "Economic Times",
-          "published": "2026-10-27T13:59:53+05:30",
-          "sources_count": 2,
-          "summary": "Former RBI Governor Raghuram Rajan advised India against aggressively defending the rupee using foreign exchange reserves. He highlighted that a weaker currency can benefit India's economy and urged avoiding fixed exchange rate defense.",
-          "why_it_matters": "Currency policy directly impacts India's import inflation, export pricing, and foreign capital flows.",
+          "published": "2026-10-29T02:37:38+05:30",
+          "sources_count": 3,
+          "summary": "The Union Cabinet approved the ₹10,000 crore Container Manufacturing Promotion Scheme to boost container production by 2040. It also approved the Pradhan Mantri Viksit Gram Swaraj Yojana to provide funding from 2026-27 to 2030-31. Additionally, support was extended to sports equipment manufacturing.",
+          "why_it_matters": "Boosting domestic container manufacturing reduces India's export logistics costs and reliance on international shipping container monopolies.",
           "gd_for": [
-            "Preserves vital foreign exchange reserves to cushion against major macro economic shocks.",
-            "Enhances export competitiveness by making Indian goods cheaper globally."
+            "Enhances domestic manufacturing capacity and reduces export supply chain vulnerabilities.",
+            "Generates employment and supports broader industrial growth across rural and manufacturing sectors."
           ],
           "gd_against": [
-            "Increases import costs, inflating domestic prices for critical goods like crude oil.",
-            "Creates exchange rate instability, potentially discouraging foreign capital inflows."
+            "High capital allocations require long gestation periods before delivering tangible market outcomes.",
+            "Global trade slowdowns could lower the utilization rates of domestic shipping containers."
           ],
-          "key_fact": "Context: India's foreign exchange reserves crossed $700 billion for the first time in late 2024.",
+          "key_fact": "The ₹10,000 crore Container Manufacturing Promotion Scheme aims to increase container production substantially by 2040.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "India's industrial output growth slows to 6.7% in September as manufacturing, consumer durables lose momentum",
+          "url": "https://www.livemint.com/economy/indias-industrial-output-growth-slows-to-6-7-in-september-as-manufacturing-consumer-durables-lose-momentum-11793187860166.html",
+          "source": "Mint",
+          "published": "2026-10-28T17:21:55+05:30",
+          "sources_count": 3,
+          "summary": "India's industrial output growth dropped to 6.7% in September from 7.8% in August, falling short of market expectations. Manufacturing and electricity sectors saw growth moderate, while mining output contracted by 6.2%. Despite the monthly drop, industrial output grew 6.8% in the April-September period, up from 4.4% a year earlier.",
+          "why_it_matters": "A slowdown in key industrial segments signals potential headwinds for urban demand, corporate earnings, and overall GDP expansion.",
+          "gd_for": [
+            "Overall April-September growth of 6.8% shows strong year-on-year industrial expansion compared to 4.4%.",
+            "Highlighting sector weakness allows targeted policy interventions in mining and consumer goods."
+          ],
+          "gd_against": [
+            "Contracting mining output by 6.2% highlights persistent raw material supply constraints.",
+            "Slowing manufacturing momentum suggests weakening consumer demand and high interest rate impacts."
+          ],
+          "key_fact": "India’s industrial output growth slowed to 6.7% in September from 7.8% in August, missing market expectations of 7.3%.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Disinvestment as key economic strategy",
+          "url": "https://www.thehindu.com/opinion/op-ed/disinvestment-as-key-economic-strategy/article71637709.ece",
+          "source": "The Hindu",
+          "published": "2026-10-29T01:14:06+05:30",
+          "sources_count": 1,
+          "summary": "Full privatization of public sector enterprises is a long process. Calibrated disinvestment can serve as a practical interim measure. This approach balances economic strategy with long-term reform goals.",
+          "why_it_matters": "Disinvestment helps the Indian government raise non-tax revenue for infrastructure spending while improving market discipline in state firms.",
+          "gd_for": [
+            "Provides non-tax capital revenue without immediate full loss of government oversight.",
+            "Encourages market transparency, better corporate governance, and operational efficiency in public firms."
+          ],
+          "gd_against": [
+            "Partial stake sales may not resolve fundamental operational delays and bureaucratic management issues.",
+            "Selling shares during adverse market conditions risks under-valuing national public assets."
+          ],
+          "key_fact": "Context: The Indian government set a disinvestment target of ₹51,000 crore in recent fiscal budget allocations.",
           "fact_is_context": true,
           "ai": true
         },
         {
-          "title": "Industrial credit growth nears 20%, signals private capex revival; Shaktikanta Das urges banks to fund strategic sectors",
-          "url": "https://www.livemint.com/economy/industrial-credit-growth-nears-20-signals-private-capex-revival-shaktikanta-das-urges-banks-to-fund-strategic-sectors-11793104030383.html",
-          "source": "Mint",
-          "published": "2026-10-27T18:26:07+05:30",
-          "sources_count": 1,
-          "summary": "Shaktikanta Das noted that industrial credit growth neared 20% in July, indicating an early revival in private capital expenditure. He encouraged banks to fund infrastructure, semiconductors, and defense, while cautioning against rising household debt.",
-          "why_it_matters": "Private capex expansion in strategic sectors like defense and semiconductors drives India's 'Make in India' and long-term GDP growth goals.",
-          "gd_for": [
-            "Accelerates self-reliance in high-tech manufacturing like semiconductors and defense.",
-            "Signals strong corporate sector confidence and economic momentum."
-          ],
-          "gd_against": [
-            "Exposes banks to default risks if strategic high-tech projects experience long gestation delays.",
-            "Highlights growing financial stress from rising household debt levels."
-          ],
-          "key_fact": "Industrial credit growth neared 20% in July.",
-          "fact_is_context": false,
-          "ai": true
-        },
-        {
-          "title": "India loses top EM spot in September as Vietnam surges in exports, stocks",
-          "url": "https://www.livemint.com/economy/india-vietnam-emerging-markets-ranking-september2026-11793079539758.html",
-          "source": "Mint",
-          "published": "2026-10-27T12:09:26+05:30",
-          "sources_count": 1,
-          "summary": "India lost its top spot among emerging markets in September as Vietnam saw strong gains in exports and stocks. Despite robust domestic GDP growth and manufacturing, persistent capital outflows and currency weakness impacted India's standing.",
-          "why_it_matters": "Emerging market ranking shifts influence foreign institutional investor sentiment and capital allocation toward India.",
-          "gd_for": [
-            "Highlights key areas for reform to boost export competitiveness and attract FDI.",
-            "Encourages policymakers to address foreign capital flight and market volatility."
-          ],
-          "gd_against": [
-            "Overemphasizes short-term portfolio capital outflows over solid long-term domestic macro fundamentals.",
-            "Ignores India's massive scale and domestic market size advantage over smaller export-led peers."
-          ],
-          "key_fact": "Context: Vietnam's export-to-GDP ratio stands above 80%, highlighting its heavy reliance on foreign trade.",
-          "fact_is_context": true,
-          "ai": true
-        },
-        {
-          "title": "RBI may raise repo rate to 6.25% by 2027 amid inflation risks: Deutsche Bank",
-          "url": "https://economictimes.indiatimes.com/news/economy/policy/rbi-may-raise-repo-rate-to-6-25-by-2027-amid-inflation-risks-deutsche-bank/articleshow/135229287.cms",
+          "title": "India, Mexico sign terms of reference to kickstart trade pact negotiations",
+          "url": "https://economictimes.indiatimes.com/news/economy/foreign-trade/india-mexico-sign-terms-of-reference-to-kickstart-trade-pact-negotiations/articleshow/135253148.cms",
           "source": "Economic Times",
-          "published": "2026-10-27T14:28:23+05:30",
-          "sources_count": 2,
-          "summary": "The Reserve Bank of India is anticipated to raise the repo rate to 6.25% by mid-2027. This increase is driven by persistent inflationary pressures and robust economic growth expectations. Deutsche Bank forecasts an average consumer price index inflation of 6% in late 2026, stabilizing to 4.7% by FY28. India",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "published": "2026-10-28T10:53:28+05:30",
+          "sources_count": 3,
+          "summary": "India and Mexico signed Terms of Reference to begin negotiations on a Preferential Trade Agreement. The deal aims to expand bilateral trade and investment by addressing market access, customs, and trade facilitation. Discussions also covered a Mexican business mission traveling to India in early 2027.",
+          "why_it_matters": "A trade pact with Mexico expands market access for Indian exporters into Latin America and provides access to North American trade networks.",
+          "gd_for": [
+            "Opens new export markets and trade diversification opportunities for Indian businesses in Latin America.",
+            "Streamlines trade facilitation and customs procedures, reducing friction in international commerce."
+          ],
+          "gd_against": [
+            "Lowering trade barriers could subject domestic Indian industries to increased foreign competition.",
+            "Trade negotiations can suffer long delays due to regulatory differences and sector protectionism."
+          ],
+          "key_fact": "Both delegations discussed organizing a Mexican business mission to India in early 2027.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "India's growth seen losing momentum after strong start to fiscal year: Poll",
-          "url": "https://www.business-standard.com/economy/news/india-s-growth-seen-losing-momentum-after-strong-start-to-fiscal-year-poll-126102800116_1.html",
+          "title": "Centre cuts MRPs for trade-margin-capped cancer meds by up to 93%",
+          "url": "https://www.business-standard.com/health/centre-cuts-mrps-for-trade-margin-capped-cancer-meds-by-up-to-93-126102801604_1.html",
           "source": "Business Standard",
-          "published": "2026-10-28T08:56:22+05:30",
+          "published": "2026-10-28T18:50:03+05:30",
           "sources_count": 1,
-          "summary": "The US-Israeli-led war with Iran has so far had limited impact on ​economic growth, but it has pushed up inflation mainly through higher energy costs",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "The central government reduced maximum retail prices for trade-margin-capped cancer medicines by up to 93 per cent. However, major innovator brands did not see price reductions. Patient groups noted that exclusions in assistance programs and data gaps diluted the intended relief.",
+          "why_it_matters": "Lowering cancer drug prices directly reduces catastrophic out-of-pocket health expenditures that force millions of Indian families into poverty.",
+          "gd_for": [
+            "Significantly improves affordability for key generic cancer medications by slashing trade margins.",
+            "Protects vulnerable patients from excessive price gouging in vital life-saving healthcare sectors."
+          ],
+          "gd_against": [
+            "Exclusion of innovator brands leaves expensive, advanced cancer therapies out of reach for many.",
+            "Program exclusions and data gaps prevent maximum price reduction benefits from reaching all patients."
+          ],
+          "key_fact": "Centre cuts MRPs for trade-margin-capped cancer meds by up to 93%.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         },
         {
-          "title": "GST officers told to split multi-yr tax notices, substantiate fraud claims",
-          "url": "https://www.business-standard.com/economy/news/gst-officers-told-to-split-multi-yr-tax-notices-substantiate-fraud-claims-126102701432_1.html",
-          "source": "Business Standard",
-          "published": "2026-10-27T19:10:22+05:30",
+          "title": "U.S. Fed holds interest rates steady despite surging inflation",
+          "url": "https://www.thehindu.com/business/Economy/federal-reserve-likely-to-skip-rate-hike-despite-elevated-inflation/article71634402.ece",
+          "source": "The Hindu",
+          "published": "2026-10-29T00:08:40+05:30",
           "sources_count": 1,
-          "summary": "CBIC's new circulars seek greater clarity in GST notices and adjudication, while easing registration requirements, export payment rules and input tax credit distribution",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "The U.S. Federal Reserve held interest rates steady between 3.75% and 4.00% following a 10-2 vote by the FOMC. Officials cited the need for additional economic data as inflation remains elevated due to oil prices. The central bank highlighted ongoing risks in reaching its 2% inflation target.",
+          "why_it_matters": "U.S. interest rate policies influence global capital flows, affecting the Indian rupee's exchange rate and foreign institutional investment in India.",
+          "gd_for": [
+            "Prevents sudden borrowing cost spikes that could slow down broader economic recovery.",
+            "Gives monetary authorities additional time to evaluate incoming economic data before policy shifts."
+          ],
+          "gd_against": [
+            "Pausing rate hikes despite high inflation risks unanchoring long-term inflation expectations.",
+            "Sustained elevated US inflation maintains global financial market volatility and currency pressure."
+          ],
+          "key_fact": "The 12-member FOMC voted 10-2 to hold rates at a target range between 3.75 and 4.00%.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
         }
       ]
     },
@@ -281,46 +239,104 @@
       "title": "Business & Corporate",
       "stories": [
         {
-          "title": "Akash Ambani vows to take Jio to new heights after blockbuster IPO",
-          "url": "https://economictimes.indiatimes.com/industry/telecom/telecom-news/akash-ambani-vows-to-take-jio-to-new-heights-after-blockbuster-ipo/articleshow/135252895.cms",
-          "source": "Economic Times",
-          "published": "2026-10-28T10:39:13+05:30",
-          "sources_count": 1,
-          "summary": "Speaking at the listing ceremony, Ambani said the company aims to democratise technology with the potential to transform Indian lives over the next ten years, including connectivity from space.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Anup Bagchi takes charge as HDFC Bank CEO and MD, succeeds Jagdishan",
-          "url": "https://www.business-standard.com/companies/news/anup-bagchi-takes-charge-as-hdfc-bank-ceo-and-md-succeeds-jagdishan-126102700313_1.html",
+          "title": "Jio listing a new beginning, next decade to focus on AI: Akash Ambani",
+          "url": "https://www.business-standard.com/companies/news/jio-listing-a-new-beginning-next-decade-to-focus-on-ai-akash-ambani-126102800614_1.html",
           "source": "Business Standard",
-          "published": "2026-10-27T11:05:53+05:30",
+          "published": "2026-10-28T13:16:49+05:30",
           "sources_count": 2,
-          "summary": "His predecessor, Sashidhar Jagdishan, vacated office on Monday after the completion of his term, the bank informed exchanges",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Jio Platforms Limited recently made its debut on the Indian stock exchanges. Managing Director Akash Ambani informed employees that the listing is a new beginning rather than the final destination. He emphasized that the company's focus for the coming decade will be on empowering Indians through Artificial Intelligence.",
+          "why_it_matters": "It signals a strategic pivot by India's leading telecom giant toward AI-driven technologies and digital empowerment across the country.",
+          "gd_for": [
+            "A strategic focus on AI can accelerate digital adoption and tech literacy across India.",
+            "Going public grants the firm capital and market standing to fund large-scale AI infrastructure."
+          ],
+          "gd_against": [
+            "Heavy investments in AI involve high capital expenditure with uncertain short-term returns.",
+            "Quarterly market performance demands after listing may conflict with long-term technological development."
+          ],
+          "key_fact": "Context: Reliance Jio is India's largest telecom operator with over 450 million subscribers.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Rahul Gandhi alleges Tata Group ‘being criminally destroyed’, says will ensure justice for ‘crimes’",
-          "url": "https://www.thehindu.com/news/national/tata-group-being-destroyed-conflict-business-leader-rahul-gandhi-congress-remarks/article71634362.ece",
+          "title": "Jio Platforms debuts at 21% premium as Sensex slides; valuation tops ₹12 lakh crore",
+          "url": "https://www.thehindu.com/business/Industry/jio-platforms-debuts-at-21-premium-as-sensex-slides-valuation-tops-12-lakh-crore/article71635707.ece",
           "source": "The Hindu",
-          "published": "2026-10-28T10:43:42+05:30",
+          "published": "2026-10-28T21:41:18+05:30",
           "sources_count": 1,
-          "summary": "Rahul Gandhi accuses Tata Group of being “criminally destroyed,” vows justice amid internal Tata Sons leadership clash and silent business leaders.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Jio Platforms debuted on the stock market at a 21% premium despite a falling Sensex. Its market capitalization crossed ₹12.5 lakh crore following the launch. This valuation enabled it to overtake Bharti Airtel as India's second-most-valued listed company.",
+          "why_it_matters": "Demonstrates strong investor faith in Indian tech conglomerates and reshapes the market leadership landscape in India's telecom and digital sector.",
+          "gd_for": [
+            "Strong debut performance reflects robust investor confidence in India's digital economy.",
+            "Reaching a ₹12.5 lakh crore valuation boosts overall investor sentiment in a volatile market."
+          ],
+          "gd_against": [
+            "Rapid valuation surges during market volatility could lead to overvaluation risks.",
+            "Dominance by a few market giants increases consolidation risk within India's telecom space."
+          ],
+          "key_fact": "Jio Platforms debuted at a 21% premium with a market capitalisation of around ₹12.5 lakh crore.",
           "fact_is_context": false,
-          "ai": false
+          "ai": true
+        },
+        {
+          "title": "Microsoft posts blockbuster quarterly results riding on AI boom; CEO Satya Nadella says, ‘Never been more confident’",
+          "url": "https://www.livemint.com/companies/company-results/microsoft-posts-blockbuster-quarterly-results-riding-on-ai-boom-ceo-satya-nadella-says-never-been-more-confident-11793250893318.html",
+          "source": "Mint",
+          "published": "2026-10-29T10:50:09+05:30",
+          "sources_count": 1,
+          "summary": "Microsoft posted strong quarterly results driven by high demand for artificial intelligence services. Its revenue grew 19% to $92.3 billion, with cloud revenue reaching $63.9 billion. CEO Satya Nadella expressed strong confidence as Azure experienced 48% growth.",
+          "why_it_matters": "Shows how global enterprise spending on AI and cloud services is booming, setting growth targets for tech vendors worldwide including Indian IT partners.",
+          "gd_for": [
+            "Surging cloud revenues demonstrate strong enterprise demand and monetization of AI products.",
+            "Robust earnings provide the capital required to build next-generation computing infrastructure."
+          ],
+          "gd_against": [
+            "Over-reliance on AI-driven cloud growth makes tech companies vulnerable if enterprise tech budgets tighten.",
+            "High infrastructure investment costs required for 48% Azure growth could compress future operating margins."
+          ],
+          "key_fact": "Microsoft's September-quarter revenue rose 19% to $92.3 billion, with Azure growing 48%.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Info Edge CEO Hitesh Oberoi to step down after 27 years",
+          "url": "https://www.livemint.com/companies/people/info-edge-ceo-hitesh-oberoi-to-step-down-after-27-years-11793188642542.html",
+          "source": "Mint",
+          "published": "2026-10-28T20:44:36+05:30",
+          "sources_count": 4,
+          "summary": "Info Edge CEO Hitesh Oberoi will step down from his role after leading the company for 27 years. Founder Sanjeev Bikhchandani has been approved by the board to take over as group CEO. This leadership change is effective 3 December 2026, subject to shareholder approval.",
+          "why_it_matters": "Marks a significant leadership transition at one of India's oldest internet companies that pioneered digital consumer platforms like Naukri.com.",
+          "gd_for": [
+            "A founder returning to the top leadership post provides strategic stability and clear direction.",
+            "Leadership transitions allow established tech firms to reboot strategies for modern market dynamics."
+          ],
+          "gd_against": [
+            "Reverting to founder management after 27 years may highlight potential challenges in external succession planning.",
+            "Executive suite shifts can cause short-term market uncertainty during the transition phase."
+          ],
+          "key_fact": "Info Edge CEO Hitesh Oberoi is stepping down after 27 years, effective 3 December 2026.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Foreign airlines, Adani Airports deadlocked over Mumbai Airport shift",
+          "url": "https://economictimes.indiatimes.com/industry/transportation/airlines-/-aviation/foreign-airlines-adani-airports-deadlocked-over-mumbai-airport-shift/articleshow/135279391.cms",
+          "source": "Economic Times",
+          "published": "2026-10-29T01:25:26+05:30",
+          "sources_count": 2,
+          "summary": "Adani Airports and foreign airlines reached a deadlock regarding shifting flight operations to Navi Mumbai Airport. A 90-minute meeting involving representatives from nearly 45 airlines ended without an agreement. Airlines requested further operational details before agreeing to relocate.",
+          "why_it_matters": "Highlights operational and stakeholder coordination hurdles in expanding infrastructure and launching major international airports in India.",
+          "gd_for": [
+            "Shifting operations to Navi Mumbai Airport is essential to relieve extreme congestion at the existing airport.",
+            "Expanding airport capacity modernizes regional transport hubs and improves passenger experiences."
+          ],
+          "gd_against": [
+            "Forcing operational moves without operational clarity risks disrupting international air traffic schedules.",
+            "Pushback from major foreign airlines could delay the financial realization and scaling of the new airport."
+          ],
+          "key_fact": "About 50 executives representing almost all 45 airlines in Mumbai's Airline Operators' Committee attended the meeting.",
+          "fact_is_context": false,
+          "ai": true
         }
       ]
     },
@@ -329,40 +345,92 @@
       "title": "Technology, AI & Innovation",
       "stories": [
         {
-          "title": "Nearly 60% of firms yet to move AI beyond pilots as deployment remains key challenge: Report",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/nearly-60-of-firms-yet-to-move-ai-beyond-pilots-as-deployment-remains-key-challenge-report/articleshow/135250951.cms",
+          "title": "Indian IT firms poised to benefit from enterprise AI adoption as infrastructure costs rise: Report",
+          "url": "https://economictimes.indiatimes.com/tech/information-tech/indian-it-firms-poised-to-benefit-from-enterprise-ai-adoption-as-infrastructure-costs-rise-report/articleshow/135253790.cms",
           "source": "Economic Times",
-          "published": "2026-10-28T09:05:59+05:30",
+          "published": "2026-10-28T11:21:12+05:30",
           "sources_count": 2,
-          "summary": "Nearly 60 per cent of organisations surveyed remain in the exploration or pilot stages of artificial intelligence (AI) adoption, with only around 40 per cent having moved to production or scaling, highlighting the challenge businesses face in deploying AI across their operations, according to a report by Citi Institute.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "Indian IT companies are positioned to gain from rising enterprise adoption of artificial intelligence. An Anand Rathi report notes that enterprise AI computing infrastructure involves high financial risks and funding requirements. Consequently, global clients will increasingly rely on Indian IT firms for cost-effective deployment.",
+          "why_it_matters": "Offers a growth opportunity for India's massive IT sector to pivot from low-margin maintenance toward high-value AI integration services.",
+          "gd_for": [
+            "Rising infrastructure costs encourage global clients to outsource AI integration to efficient Indian IT firms.",
+            "Indian IT providers can capture lucrative enterprise consulting and system management contracts."
+          ],
+          "gd_against": [
+            "High enterprise spending on hardware infrastructure might reduce budget allocations for outsourced IT services.",
+            "Indian IT firms face intense pressure to rapidly upskill employees to match advanced AI implementation needs."
+          ],
+          "key_fact": "Context: The Indian IT services industry generates over $250 billion in annual revenue.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "AI chip giant SK hynix says quarterly operating profit soars 630%",
-          "url": "https://economictimes.indiatimes.com/tech/artificial-intelligence/ai-chip-giant-sk-hynix-says-quarterly-operating-profit-soars-630/articleshow/135252393.cms",
+          "title": "Trump DOE loans $5B to nuclear plants that will power data centers",
+          "url": "https://techcrunch.com/2026/10/28/trump-doe-loans-5b-to-nuclear-plants-that-will-power-data-centers/",
+          "source": "TechCrunch",
+          "published": "2026-10-28T21:23:21+05:30",
+          "sources_count": 1,
+          "summary": "Constellation Energy will receive $5 billion in US government loans to modernize nuclear reactors. The power generated will support energy-intensive data centers. Most of this upcoming capacity is already committed to Google, Amazon, and Meta.",
+          "why_it_matters": "Demonstrates how massive energy demands from modern computing are driving government loans toward nuclear energy, setting global tech power trends.",
+          "gd_for": [
+            "Nuclear energy offers reliable, zero-carbon baseload power to sustain high-density computing needs.",
+            "Government backing helps modernize energy infrastructure while meeting growing digital energy demand."
+          ],
+          "gd_against": [
+            "Allocating large public loans primarily for Big Tech data centers raises concerns over fair public resource distribution.",
+            "Nuclear power plant modernizations carry safety concerns and potential project cost overruns."
+          ],
+          "key_fact": "Constellation Energy will receive $5 billion in government loans to modernize nuclear reactors.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "US DOJ is inquiring about Nvidia's purchase of Hugging Face",
+          "url": "https://economictimes.indiatimes.com/tech/technology/us-doj-is-inquiring-about-nvidias-purchase-of-hugging-face/articleshow/135287206.cms",
           "source": "Economic Times",
-          "published": "2026-10-28T10:15:52+05:30",
+          "published": "2026-10-29T08:17:26+05:30",
           "sources_count": 1,
-          "summary": "South Korean chip giant SK hynix said Wednesday its third-quarter operating profit soared 632 percent on-year, largely driven by the artificial intelligence industry's explosive demand for its advanced memory chips. The memory chip giant said it had posted record revenue and operating profit for six straight quarters since the second quarter of last year.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
+          "summary": "The US Department of Justice is inquiring into Nvidia's business and sales practices, including its acquisition of Hugging Face. The inquiry covers Nvidia's acquisitions, investments, and customer practices. Investigators are assessing whether the chipmaker exerted pressure on its customers.",
+          "why_it_matters": "Shows increasing global antitrust scrutiny on AI hardware monopolies, directly affecting the price and supply of AI hardware globally, including in India.",
+          "gd_for": [
+            "Antitrust scrutiny prevents market dominance and protects smaller software ecosystem players.",
+            "Investigating sales practices ensures open competition and prevents unfair customer lock-in tactics."
+          ],
+          "gd_against": [
+            "Aggressive legal inquiries could hamper innovation and slow down technology distribution in the AI sector.",
+            "Regulatory friction on key hardware suppliers can create global tech supply chain uncertainties."
+          ],
+          "key_fact": "Context: Nvidia commands an estimated 80% to 90% share of the global AI chip market.",
+          "fact_is_context": true,
+          "ai": true
         },
         {
-          "title": "Industrial Intelligence: The next growth opportunity for manufacturing",
-          "url": "https://www.technologyreview.com/2026/10/27/1147142/industrial-intelligence-the-next-growth-opportunity-for-manufacturing/",
-          "source": "MIT Technology Review",
-          "published": "2026-10-27T16:49:18+05:30",
+          "title": "Microsoft profits soar days after announcing thousands of layoffs",
+          "url": "https://www.bbc.co.uk/news/articles/c6m24klyjr8no?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Technology",
+          "published": "2026-10-29T06:57:40+05:30",
           "sources_count": 1,
-          "summary": "Every manufacturer has its own industrial intelligence. Some is documented, and some resides in the knowledge of experienced workers. Consider an experienced operator preparing to restart a line after a changeover. The machine settings matter, but so does knowing how a particular material behaves, what happened during the previous shift, and when an apparently minor…",
+          "summary": "Microsoft reported soaring quarterly profits shortly after announcing workforce reduction plans. The company plans to offer voluntary buyouts to 60,000 employees to curb operating costs. This reflects cost-cutting initiatives occurring alongside record earnings performance.",
+          "why_it_matters": "Sparks debate on corporate ethics and employment security in tech hubs worldwide, including India, where major tech companies employ thousands.",
+          "gd_for": [
+            "Cost reduction allows businesses to optimize efficiency and reallocate capital toward fast-growing sectors like AI.",
+            "Offering voluntary buyouts provides financial support for departing workers compared to abrupt layoffs."
+          ],
+          "gd_against": [
+            "Cutting 60,000 jobs during periods of record profit damages workplace morale and corporate reputation.",
+            "Prioritizing short-term cost cuts over human talent risks compromising long-term institutional knowledge."
+          ],
+          "key_fact": "Microsoft offered buyouts to 60,000 workers as part of cost-cutting measures.",
+          "fact_is_context": false,
+          "ai": true
+        },
+        {
+          "title": "Microsoft recorded $10 billion in revenue from OpenAI",
+          "url": "https://techcrunch.com/2026/10/28/microsoft-recorded-10-billion-in-revenue-from-openai/",
+          "source": "TechCrunch",
+          "published": "2026-10-29T03:04:30+05:30",
+          "sources_count": 1,
+          "summary": "Microsoft said it made $10 billion in revenue from commercial arrangements with OpenAI, including revenue-sharing payments, in the quarter ending September 30. It underscores the still-enormous financial dependency of the partnership.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -377,54 +445,40 @@
       "title": "Science, Climate & Sustainability",
       "stories": [
         {
-          "title": "India’s next investment cycle will shape its carbon future",
-          "url": "https://www.thehindu.com/opinion/op-ed/indias-next-investment-cycle-will-shape-its-carbon-future/article71632615.ece",
-          "source": "The Hindu",
-          "published": "2026-10-28T01:23:43+05:30",
-          "sources_count": 1,
-          "summary": "India’s next major investment cycle will be crucial in determining its ability to achieve a sustainable, low-carbon economic future",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "Centre says tribal leaders are not ‘necessary’ parties to Great Nicobar forest rights dispute",
-          "url": "https://india.mongabay.com/2026/10/centre-says-tribal-leaders-are-not-necessary-parties-to-great-nicobar-forest-rights-dispute/",
-          "source": "Mongabay India",
-          "published": "2026-10-27T22:33:23+05:30",
-          "sources_count": 1,
-          "summary": "India's environmental science and conservation news",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "India among top countries with highest heatwave exposure for infants, older adults: Report",
-          "url": "https://www.thehindu.com/sci-tech/energy-and-environment/india-among-top-countries-with-highest-heatwave-exposure-for-infants-older-adults-report/article71634194.ece",
-          "source": "The Hindu",
-          "published": "2026-10-28T09:02:28+05:30",
-          "sources_count": 1,
-          "summary": "India among top nations facing highest infant and older adult heatwave exposure, as Lancet Countdown urges climate-health emergency action.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "What is Nasa's Artemis III mission? And what comes next?",
-          "url": "https://www.bbc.co.uk/news/articles/cr5j40ezgz4o?at_medium=RSS&at_campaign=rss",
+          "title": "Building boom puts 300,000 people in the path of potential Himalayan disasters",
+          "url": "https://www.bbc.co.uk/news/articles/c574pj3zljvjo?at_medium=RSS&at_campaign=rss",
           "source": "BBC Science",
-          "published": "2026-10-27T16:03:26+05:30",
+          "published": "2026-10-29T04:41:59+05:30",
           "sources_count": 2,
-          "summary": "Artemis III will help test crucial systems needed for the planned Artemis IV Moon landing in 2028.",
+          "summary": "The construction of tourism facilities, housing, and infrastructure has surged in parts of Nepal and India's Uttarakhand.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Climate change must be declared 'global health emergency': Lancet study",
+          "url": "https://www.thehindu.com/sci-tech/health/climate-change-must-be-declared-global-health-emergency-lancet-study/article71635902.ece",
+          "source": "The Hindu",
+          "published": "2026-10-28T18:18:54+05:30",
+          "sources_count": 1,
+          "summary": "Lancet Countdown urges declaring climate change a global health emergency, detailing millions of heat deaths, regional economic losses, and progress in adaption and clean energy.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Simply Put: Loss and Damage Fund for Nepal",
+          "url": "https://www.downtoearth.org.in/climate-change/simply-put-loss-and-damage-fund-for-nepal?utm_source=website&utm_medium=related-stories",
+          "source": "Down To Earth",
+          "published": "2026-10-28T14:59:50+05:30",
+          "sources_count": 2,
+          "summary": "Open the source link to read the full story.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -439,24 +493,10 @@
       "title": "India: Governance & Society",
       "stories": [
         {
-          "title": "In a first since 2023, Delhi invites Pakistan Minister for inaugural SCO Civilisational Dialogue in November",
-          "url": "https://www.thehindu.com/news/national/in-a-first-since-2023-delhi-invites-pakistan-minister-for-inaugural-sco-civilisational-dialogue-in-november/article71630539.ece",
-          "source": "The Hindu",
-          "published": "2026-10-28T09:15:39+05:30",
-          "sources_count": 2,
-          "summary": "Delhi to host SCO Civilisational Dialogue Nov 20-22, inaugurating by Modi with ministers from 25+ countries at Purana Quila.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
-          "fact_is_context": false,
-          "ai": false
-        },
-        {
-          "title": "2 IAS officers senior to J&K’s new Chief Secretary transferred to Delhi",
-          "url": "https://indianexpress.com/article/india/2-ias-officers-senior-to-jks-new-chief-secretary-transferred-to-delhi-10939619/",
+          "title": "‘All Indian businesses, except 3-4, hate all of you’: Rahul responds to Sitharaman’s ‘trying to incite’ post",
+          "url": "https://indianexpress.com/article/india/nirmala-sitharaman-rahul-gandhi-spreading-distrust-india-inc-destroying-tata-charge-10940541/",
           "source": "Indian Express",
-          "published": "2026-10-28T06:55:07+05:30",
+          "published": "2026-10-28T16:09:06+05:30",
           "sources_count": 2,
           "summary": "Open the source link to read the full story.",
           "why_it_matters": "",
@@ -467,12 +507,26 @@
           "ai": false
         },
         {
-          "title": "Merz Pitches Closer Ties With Asia, Warns on Pressure From China",
-          "url": "https://www.livemint.com/politics/merz-pitches-closer-ties-with-asia-warns-on-pressure-from-china-11793088157820.html",
+          "title": "US Wins Over 23 More Countries in UN Vote Against Cuba Embargo",
+          "url": "https://www.livemint.com/politics/us-wins-over-23-more-countries-in-un-vote-against-cuba-embargo-11793212613479.html",
           "source": "Mint Politics",
-          "published": "2026-10-27T13:32:37+05:30",
+          "published": "2026-10-29T00:06:52+05:30",
           "sources_count": 1,
-          "summary": "German Chancellor Friedrich Merz said Europe and Asia can benefit from closer ties across trade and security issues as both regions face pressures from great powers, particularly China.",
+          "summary": "The United Nations General Assembly again called for the end of the US embargo on Cuba in a symbolic vote, but the number of countries opposing the motion was the most ever after a push by President Donald Trump’s administration to curb support.",
+          "why_it_matters": "",
+          "gd_for": [],
+          "gd_against": [],
+          "key_fact": "",
+          "fact_is_context": false,
+          "ai": false
+        },
+        {
+          "title": "Iran’s Khamenei Reiterates Conditions for Ending War With US",
+          "url": "https://www.livemint.com/politics/irans-khamenei-reiterates-conditions-for-ending-war-with-us-11793142614834.html",
+          "source": "Mint Politics",
+          "published": "2026-10-28T04:40:14+05:30",
+          "sources_count": 1,
+          "summary": "Iran’s Supreme Leader reiterated his country’s conditions for ending the war with the US, amid a regional diplomatic push to avert a fresh round of fighting in the Persian Gulf.",
           "why_it_matters": "",
           "gd_for": [],
           "gd_against": [],
@@ -513,5 +567,5 @@
     "Scroll.in (no entries)",
     "The Print (no entries)"
   ],
-  "reading_time_min": 10
+  "reading_time_min": 15
 }
