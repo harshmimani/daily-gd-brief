@@ -5,11 +5,7 @@
   "ai_enabled": true,
   "ai_model": "gemini-3.5-flash-lite",
   "ai_story_count": 25,
-  "ai_errors": [
-    "batch 1/5: HTTP 503 on gemini-3.7-flash",
-    "batch 1/5: HTTP 503 on gemini-3.8-flash",
-    "batch 3/5: unparseable output"
-  ],
+  "ai_errors": [],
   "ai_models_dropped": [],
   "story_count": 25,
   "story_cap": 25,
@@ -44,12 +40,12 @@
           "summary": "India's Foreign Minister Jaishankar visited Baku to pursue rapprochement with Azerbaijan. This diplomatic engagement occurs despite Azerbaijan having backed Pakistan during the military clashes of May 2025.",
           "why_it_matters": "This move illustrates the pragmatic evolution of India's foreign policy towards independent bilateral relations, balancing historical alignments with broader strategic and economic interests in the South Caucasus.",
           "gd_for": [
-            "Engaging with a state that previously supported a rival allows India to secure its diplomatic footprint and energy interests in the South Caucasus region rather than ceding space to adversaries (strategic).",
-            "Pursuing rapprochement demonstrates diplomatic maturity and flexibility, moving past past friction for contemporary geopolitical gains (practical)."
+            "Engaging with a state that previously supported a rival allows India to secure its diplomatic footprint and energy interests in the South Caucasus region rather than ceding space to adversaries.",
+            "Pursuing rapprochement demonstrates diplomatic maturity and flexibility, moving past past friction for contemporary geopolitical gains."
           ],
           "gd_against": [
-            "Reaching out to a nation that openly backed Pakistan during military conflicts risks undermining India's solidarity with its own security posture and core alliances (ethical).",
-            "Investing diplomatic capital in Baku may yield limited returns if Azerbaijan's fundamental alignment with Pakistan remains unchanged (economic)."
+            "Reaching out to a nation that openly backed Pakistan during military conflicts risks undermining India's solidarity with its own security posture and core alliances.",
+            "Investing diplomatic capital in Baku may yield limited returns if Azerbaijan's fundamental alignment with Pakistan remains unchanged."
           ],
           "key_fact": "Azerbaijan backed Pakistan during the May 2025 military clashes.",
           "fact_is_context": false,
@@ -68,12 +64,12 @@
           "summary": "Gold prices slipped following higher oil prices and United States inflation data. These economic indicators bolstered market bets on interest rate hikes by the Federal Reserve.",
           "why_it_matters": "Fluctuations in global commodities and United States monetary policy directly influence foreign capital flows, currency stability, and imported inflation management for emerging markets like India.",
           "gd_for": [
-            "Anticipated Federal Reserve rate hikes strengthen the dollar, which can help cool imported commodity inflation globally (economic).",
-            "Market adjustments driven by inflation data enforce fiscal and monetary discipline across interconnected global financial systems (practical)."
+            "Anticipated Federal Reserve rate hikes strengthen the dollar, which can help cool imported commodity inflation globally.",
+            "Market adjustments driven by inflation data enforce fiscal and monetary discipline across interconnected global financial systems."
           ],
           "gd_against": [
-            "Higher borrowing costs driven by aggressive Fed hikes can trigger capital outflows from emerging economies, putting severe pressure on local currencies (economic).",
-            "Rising oil prices combined with tightening monetary policy risk stalling global growth momentum and disproportionately hurting net energy importers (social)."
+            "Higher borrowing costs driven by aggressive Fed hikes can trigger capital outflows from emerging economies, putting severe pressure on local currencies.",
+            "Rising oil prices combined with tightening monetary policy risk stalling global growth momentum and disproportionately hurting net energy importers."
           ],
           "key_fact": "",
           "fact_is_context": false,
@@ -92,12 +88,12 @@
           "summary": "Presidents Trump and Xi agreed to establish a China-U.S. AI incident reporting channel to manage technology risks. However, artificial intelligence companies in both nations currently fail to provide the required information to make the channel functional.",
           "why_it_matters": "Managing safety and regulatory compliance in critical technologies like artificial intelligence between superpowers sets precedents for global tech governance and cross-border corporate accountability.",
           "gd_for": [
-            "Establishing a formal reporting channel creates a baseline mechanism for managing sudden technological crises and preventing accidental escalations between superpowers (strategic).",
-            "Involving both nations acknowledges that artificial intelligence safety is a shared global public good requiring cooperative oversight (ethical)."
+            "Establishing a formal reporting channel creates a baseline mechanism for managing sudden technological crises and preventing accidental escalations between superpowers.",
+            "Involving both nations acknowledges that artificial intelligence safety is a shared global public good requiring cooperative oversight."
           ],
           "gd_against": [
-            "The refusal or inability of AI companies to provide necessary information renders the proposed reporting channel practically toothless and ineffective (practical).",
-            "Compelling private technology firms to share sensitive operational data with geopolitical rivals creates severe intellectual property and commercial vulnerabilities (economic)."
+            "The refusal or inability of AI companies to provide necessary information renders the proposed reporting channel practically toothless and ineffective.",
+            "Compelling private technology firms to share sensitive operational data with geopolitical rivals creates severe intellectual property and commercial vulnerabilities."
           ],
           "key_fact": "Trump and Xi agreed to set up a China-U.S. AI incident reporting channel.",
           "fact_is_context": false,
@@ -116,12 +112,12 @@
           "summary": "Russian Foreign Minister Sergey Lavrov arrived in the United States to attend G20 meetings. He aims to argue against international sanctions amidst rising global tensions ahead of the leaders' summit.",
           "why_it_matters": "Multilateral forums like the G20 remain primary battlegrounds for navigating economic sanctions, great power competition, and global supply chain negotiations that affect developing economies.",
           "gd_for": [
-            "Maintaining multilateral forums ensures that opposing global powers retain diplomatic channels to negotiate differences during periods of high tension (strategic).",
-            "Allowing sanctioned officials to present their perspective preserves the inclusive nature of global governance institutions (ethical)."
+            "Maintaining multilateral forums ensures that opposing global powers retain diplomatic channels to negotiate differences during periods of high tension.",
+            "Allowing sanctioned officials to present their perspective preserves the inclusive nature of global governance institutions."
           ],
           "gd_against": [
-            "Using multilateral economic summits to contest sanctions can paralyze consensus-building on pressing humanitarian and financial issues (practical).",
-            "Engaging with representatives of heavily sanctioned states can undermine the credibility and unified moral stance of international coalitions (ethical)."
+            "Using multilateral economic summits to contest sanctions can paralyze consensus-building on pressing humanitarian and financial issues.",
+            "Engaging with representatives of heavily sanctioned states can undermine the credibility and unified moral stance of international coalitions."
           ],
           "key_fact": "Russian Foreign Minister Sergey Lavrov arrives in U.S. for G20 talks to argue against sanctions",
           "fact_is_context": false,
@@ -146,12 +142,12 @@
           "summary": "The IMF views India as continuing to serve as a global growth engine. The international body will reassess India's economic growth projections in the upcoming January World Economic Outlook update once the potential risks of a Super El Nino weather event materialize.",
           "why_it_matters": "Monitoring agricultural and weather-related disruptions is vital for forecasting domestic inflation, rural demand, and overall macroeconomic stability in emerging markets.",
           "gd_for": [
-            "Maintaining a robust growth trajectory positions India as a resilient anchor for the global economy amidst widespread uncertainty (economic).",
-            "Delaying projection updates until weather risks materialize ensures that economic forecasts remain grounded in empirical reality rather than speculation (practical)."
+            "Maintaining a robust growth trajectory positions India as a resilient anchor for the global economy amidst widespread uncertainty.",
+            "Delaying projection updates until weather risks materialize ensures that economic forecasts remain grounded in empirical reality rather than speculation."
           ],
           "gd_against": [
-            "Overlooking potential weather shocks in near-term assessments may leave policymakers and investors unprepared for sudden agricultural supply chain crises (practical).",
-            "Relying heavily on projected growth engines without accounting for climate anomalies can mask underlying vulnerabilities in food security and rural livelihoods (social)."
+            "Overlooking potential weather shocks in near-term assessments may leave policymakers and investors unprepared for sudden agricultural supply chain crises.",
+            "Relying heavily on projected growth engines without accounting for climate anomalies can mask underlying vulnerabilities in food security and rural livelihoods."
           ],
           "key_fact": "IMF to reassess India's growth projections in the January World Economic Outlook update",
           "fact_is_context": false,
@@ -422,12 +418,12 @@
           "summary": "Ofcom has outlined various age check methods ahead of a social media ban for under-16s. The regulator states that photo and digital ID, banking checks, or facial age estimation can help prove someone is 16 or over.",
           "why_it_matters": "This regulatory approach offers a global precedent for digital governance and child safety frameworks that technology platforms operating in India may eventually need to navigate.",
           "gd_for": [
-            "Strategic: Establishing standardized verification methods protects minors from online harms and aligns digital platforms with child safety mandates.",
-            "Practical: Utilizing existing infrastructure like banking checks and digital IDs makes implementation feasible for service providers."
+            "Establishing standardized verification methods protects minors from online harms and aligns digital platforms with child safety mandates.",
+            "Utilizing existing infrastructure like banking checks and digital IDs makes implementation feasible for service providers."
           ],
           "gd_against": [
-            "Economic: Compliance with rigorous age verification procedures creates additional operational and technological costs for digital platforms.",
-            "Ethical: Mandating digital IDs and facial estimation raises serious concerns regarding user privacy and data collection practices."
+            "Compliance with rigorous age verification procedures creates additional operational and technological costs for digital platforms.",
+            "Mandating digital IDs and facial estimation raises serious concerns regarding user privacy and data collection practices."
           ],
           "key_fact": "Ofcom says photo and digital ID, banking checks or facial age estimation can help prove someone is 16 or over.",
           "fact_is_context": false,
@@ -449,12 +445,12 @@
           "summary": "A strengthening El Niño in 2026 threatens rural India's livelihood systems. The phenomenon exposes vulnerabilities in water security, farming systems, and safeguards for vulnerable workers.",
           "why_it_matters": "Rural economic stability and agricultural output directly influence India's broader macroeconomic performance, rural demand, and inflation management.",
           "gd_for": [
-            "Strategic: Early warning and focus on El Niño vulnerabilities allow policymakers to proactively reinforce rural resilience before crises peak.",
-            "Social: Directing attention to safeguards for vulnerable workers prioritizes human welfare and agrarian community survival during climate shocks."
+            "Early warning and focus on El Niño vulnerabilities allow policymakers to proactively reinforce rural resilience before crises peak.",
+            "Directing attention to safeguards for vulnerable workers prioritizes human welfare and agrarian community survival during climate shocks."
           ],
           "gd_against": [
-            "Economic: Agricultural downturns triggered by climatic shocks strain public finances through relief packages and lower rural output.",
-            "Practical: Systemic deficiencies in rural water security and farming systems are difficult to resolve quickly enough to counter an active El Niño."
+            "Agricultural downturns triggered by climatic shocks strain public finances through relief packages and lower rural output.",
+            "Systemic deficiencies in rural water security and farming systems are difficult to resolve quickly enough to counter an active El Niño."
           ],
           "key_fact": "A strengthening El Niño threatens to expose the weaknesses in rural India’s water security, farming systems and safeguards for vulnerable workers",
           "fact_is_context": false,
@@ -473,12 +469,12 @@
           "summary": "Emerging markets could attract substantial solar and wind investments by the year 2040. However, high financing costs and perceived risks continue to pose significant hurdles to renewable energy expansion.",
           "why_it_matters": "Unlocking renewable energy finance in developing regions is central to global energy transition goals and capital allocation strategies for emerging market infrastructure.",
           "gd_for": [
-            "Economic: Reaching high investment volumes in emerging markets opens up vast commercial opportunities for clean energy deployment and capital returns.",
-            "Strategic: Scaling up solar and wind capacity diversifies energy portfolios and reduces long-term reliance on fossil fuels in developing economies."
+            "Reaching high investment volumes in emerging markets opens up vast commercial opportunities for clean energy deployment and capital returns.",
+            "Scaling up solar and wind capacity diversifies energy portfolios and reduces long-term reliance on fossil fuels in developing economies."
           ],
           "gd_against": [
-            "Financial: High financing costs make clean energy projects less commercially viable for developers in emerging markets.",
-            "Practical: Perceived risks in developing regions deter institutional investors from committing capital despite long-term environmental targets."
+            "High financing costs make clean energy projects less commercially viable for developers in emerging markets.",
+            "Perceived risks in developing regions deter institutional investors from committing capital despite long-term environmental targets."
           ],
           "key_fact": "Emerging markets could see $356 billion in solar and wind investments by 2040, but high financing costs and perceived risks threaten renewable energy expansion.",
           "fact_is_context": false,
@@ -497,11 +493,11 @@
           "summary": "ISRO is preparing for the launch of the NVS-03 satellite. The mission aims to restore NavIC's functionality, upgrade indigenous clocks, and improve regional navigation following recent launch setbacks.",
           "why_it_matters": "Robust indigenous satellite navigation is vital for India's strategic autonomy, defense preparedness, and commercial location-based services.",
           "gd_for": [
-            "Strategic: Upgrading indigenous clocks and restoring NavIC functionality reduces reliance on foreign global positioning systems for critical infrastructure.",
-            "Practical: Successful deployment addresses and overcomes recent launch setbacks, validating the reliability of India's space program."
+            "Upgrading indigenous clocks and restoring NavIC functionality reduces reliance on foreign global positioning systems for critical infrastructure.",
+            "Successful deployment addresses and overcomes recent launch setbacks, validating the reliability of India's space program."
           ],
           "gd_against": [
-            "Economic: Continued failures or delays in satellite launches misallocate public capital that could be deployed elsewhere.",
+            "Continued failures or delays in satellite launches misallocate public capital that could be deployed elsewhere.",
             "Operational: Relying on specialized space missions carries inherent technological risks that can impact regional navigation timelines."
           ],
           "key_fact": "ISRO’s NVS-03 launch could restore NavIC’s functionality, upgrading indigenous clocks and improving regional navigation amid recent launch setbacks.",
@@ -521,12 +517,12 @@
           "summary": "Citizens are increasingly pushing back against infrastructure projects that threaten local green cover in India. These grassroots efforts highlight community resistance to development initiatives impacting the environment.",
           "why_it_matters": "Balancing infrastructure development with ecological preservation is a critical governance challenge for sustaining long-term urban and economic growth in India.",
           "gd_for": [
-            "Social: Citizen pushback empowers local communities to protect their immediate environment and local ecology from degradation.",
-            "Ethical: Preserving green cover upholds ecological stewardship and prevents irreversible damage to natural habitats."
+            "Citizen pushback empowers local communities to protect their immediate environment and local ecology from degradation.",
+            "Preserving green cover upholds ecological stewardship and prevents irreversible damage to natural habitats."
           ],
           "gd_against": [
-            "Economic: Halting or delaying infrastructure projects due to conservation concerns can inflate project costs and stall national development.",
-            "Practical: Delays in land and infrastructure development can impede connectivity and industrial expansion required for economic progress."
+            "Halting or delaying infrastructure projects due to conservation concerns can inflate project costs and stall national development.",
+            "Delays in land and infrastructure development can impede connectivity and industrial expansion required for economic progress."
           ],
           "key_fact": "",
           "fact_is_context": false,

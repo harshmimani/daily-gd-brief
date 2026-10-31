@@ -441,6 +441,15 @@ class TestFreeFallbacks(unittest.TestCase):
         self.assertEqual(bb.unwrap_items({"gd_topic": {}, "concept": {}}), {"gd_topic": {}, "concept": {}})
 
 
+class TestCleanPoint(unittest.TestCase):
+    def test_strips_argument_tags(self):
+        self.assertEqual(bb.clean_point("Growth anchors the global economy (economic)."),
+                         "Growth anchors the global economy.")
+        self.assertEqual(bb.clean_point("Social: rural women gain jobs"), "Rural women gain jobs.")
+        self.assertEqual(bb.clean_point("It protects consumers [ethical]"), "It protects consumers.")
+        self.assertEqual(bb.clean_point("Costs rise for importers (see RBI data)."), "Costs rise for importers (see RBI data).")
+
+
 class TestMisc(unittest.TestCase):
     def test_safe_url(self):
         self.assertTrue(bb.safe_url("https://example.com/a"))

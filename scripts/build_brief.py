@@ -1240,9 +1240,9 @@ def make_client() -> GeminiClient:
     anthropic = os.environ.get("ANTHROPIC_API_KEY", "").strip() or None
     chain = [n for n, k in (("Claude", anthropic), ("Gemini + Gemma", gemini), ("Groq", groq)) if k]
     log("  Commentary providers: " + (" -> ".join(chain) or "none"))
-    if groq or anthropic:
-        return MultiClient(gemini, groq, anthropic)
-    return GeminiClient(gemini)
+    client = MultiClient(gemini, groq, anthropic) if (groq or anthropic) else GeminiClient(gemini)
+    client.providers = chain
+    return client
 
 
 # ---------------------------------------------------------------------------
@@ -1431,6 +1431,24 @@ def ground_topic(topic: dict | None, concept: dict | None, stories: list["Story"
 GROUNDING = {"removed": 0}
 
 
+ARG_TAG = re.compile(
+    r"\s*[\(\[]\s*(economic|social|strategic|ethical|practical|political|environmental|legal|"
+    r"geopolitical|financial|security|technological|moral|fiscal|governance)\s*[\)\]]\s*\.?\s*$", re.I)
+ARG_LEAD = re.compile(
+    r"^\s*(economic|social|strategic|ethical|practical|political|environmental|legal|geopolitical|"
+    r"financial|security|technological|moral|fiscal|governance)\s*(argument|angle|view)?\s*[:\-]\s*", re.I)
+
+
+def clean_point(text: str) -> str:
+    """Drop '(economic)'-style tags the model sometimes adds to debate points."""
+    t = ARG_LEAD.sub("", ARG_TAG.sub("", str(text).strip())).strip()
+    if t and t[0].islower():
+        t = t[0].upper() + t[1:]
+    if t and t[-1] not in ".!?":
+        t += "."
+    return t
+
+
 def enrich_batch(client: GeminiClient, stories: list[Story], label: str) -> int:
     if not stories:
         return 0
@@ -1448,6 +1466,7 @@ For EACH story below, write:
 - "gd_against": exactly 2 points making the strongest case AGAINST it, or the main risks.
   Each of the four points must be a different kind of argument (economic, social, strategic,
   ethical, practical), and both sides must be argued as well as their best advocates would.
+  Do not label the points with their argument type; just write the argument.
 - "key_fact": ONE quotable fact or number copied from the story text. If the story text has
   no concrete fact worth quoting, return an empty string.
 - "key_term": {{"term": "...", "meaning": "..."}}: one concept or term from the story worth
@@ -1494,8 +1513,8 @@ Stories:
             continue
         s.summary = summary
         s.why_it_matters = str(item.get("why_it_matters", "")).strip()
-        s.gd_for = [str(x).strip() for x in item.get("gd_for", []) if str(x).strip()][:2]
-        s.gd_against = [str(x).strip() for x in item.get("gd_against", []) if str(x).strip()][:2]
+        s.gd_for = [clean_point(x) for x in item.get("gd_for", []) if str(x).strip()][:2]
+        s.gd_against = [clean_point(x) for x in item.get("gd_against", []) if str(x).strip()][:2]
         s.key_fact = str(item.get("key_fact", "")).strip()
         kt = item.get("key_term")
         if isinstance(kt, dict) and str(kt.get("term", "")).strip() and str(kt.get("meaning", "")).strip():
@@ -1715,6 +1734,7 @@ def build_payload(
         "sources_ok": ok_sources,
         "sources_failed": failed_sources,
         "grounding": {"checked": ai_stories, "removed": GROUNDING["removed"]},
+        "ai_providers": getattr(client, "providers", []),
     }
     brief["reading_time_min"] = reading_time_minutes(brief)
     return brief
@@ -1789,6 +1809,7 @@ def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str])
     log(f"\n  {path.name}: {len(missing)} story(ies) without commentary"
         f"{', topic missing' if need_topic else ''}{', concept missing' if need_concept else ''}")
 
+    errors_before = len(client.errors)
     changed = False
     if need_topic or need_concept:
         topic, concept = generate_topic_and_concept(client, everything, recent_concepts)
@@ -1812,8 +1833,8 @@ def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str])
     brief["ai_enabled"] = True
     brief["ai_story_count"] = sum(1 for s in everything if s.ai)
     brief["ai_model"] = client.model_used or brief.get("ai_model")
-    brief["ai_errors"] = sorted(set(client.errors))[:10]
-    brief["ai_models_dropped"] = [f"{m}: {why}" for m, why in client.bad_models.items()]
+    brief["ai_errors"] = sorted(set(client.errors[errors_before:]))[:10]   # this brief's own errors
+    brief["ai_providers"] = getattr(client, "providers", [])
     brief["ai_backfilled_at"] = datetime.now(IST).isoformat()
     prev = brief.get("grounding") or {}
     brief["grounding"] = {"checked": brief["ai_story_count"],

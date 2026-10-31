@@ -9,7 +9,7 @@ on:
     # Backfill passes: 07:47, 10:17, 13:47 and 18:17 IST. Gemini's free tier is
     # often overloaded (HTTP 503) at dawn IST and clears later in the day. These
     # runs only fill in commentary the morning run missed (today first, then the
-    # last 7 days), and exit in seconds when nothing is missing.
+    # last 14 days), and exit in seconds when nothing is missing.
     - cron: "17 2 * * *"
     - cron: "47 4 * * *"
     - cron: "17 8 * * *"
@@ -77,7 +77,7 @@ jobs:
           GROQ_MODEL: ${{ vars.GROQ_MODEL }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           AI_DEADLINE: "900"
-          BACKFILL_DAYS: "7"
+          BACKFILL_DAYS: "14"   # runs exit in seconds when nothing is missing
         run: python -u scripts/build_brief.py --backfill
 
       # always() so that a failed or cancelled build still publishes whatever the

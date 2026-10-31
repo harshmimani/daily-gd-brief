@@ -5,11 +5,7 @@
   "ai_enabled": true,
   "ai_model": "gemini-3.5-flash-lite",
   "ai_story_count": 22,
-  "ai_errors": [
-    "batch 1/5: HTTP 503 on gemini-3.7-flash",
-    "batch 1/5: HTTP 503 on gemini-3.8-flash",
-    "batch 3/5: unparseable output"
-  ],
+  "ai_errors": [],
   "ai_models_dropped": [],
   "story_count": 22,
   "story_cap": 25,
