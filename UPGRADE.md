@@ -1,3 +1,10 @@
+# v5: evergreen palette and a living cover
+
+- Palette moves to deep evergreen and mint (consulting-style greens; no firm's branding is used). Brick red stays for the "against" side of each debate.
+- `cover-fx.js` (new): a WebGL contour map drifts behind the date and GD topic and leans toward the cursor or finger. It runs at about 30fps, pauses when the cover is off screen or the tab is hidden, shows a still frame when the device asks for reduced motion, and does nothing if WebGL is missing.
+- The date and topic rise in once on page load. The opening and closing line panels are frosted so the contours show through softly.
+- Service worker cache bumped to v5 and now includes cover-fx.js.
+
 # v4: the indigo redesign
 
 - New look: an indigo cover band holds the date and the GD topic; the reading page below is light, with marigold for emphasis and teal and brick for the two sides of each debate. Typefaces are Newsreader and Schibsted Grotesk.
