@@ -450,6 +450,49 @@ class TestCleanPoint(unittest.TestCase):
         self.assertEqual(bb.clean_point("Costs rise for importers (see RBI data)."), "Costs rise for importers (see RBI data).")
 
 
+class TestUpcomingEvents(unittest.TestCase):
+    SRC = ("Railway Minister will flag off the train on November 1. The GST Council meets on 15th November "
+           "to review rates. Elections are expected next year.")
+    PUB = datetime(2026, 10, 30, 12, tzinfo=timezone.utc)
+
+    def test_dates_written_in_the_article_are_kept(self):
+        ev = bb.grounded_events([{"date": "2026-11-01", "event": "Train flag-off"},
+                                 {"date": "2026-11-15", "event": "GST Council meeting"}], self.SRC, self.PUB)
+        self.assertEqual([e["date"] for e in ev], ["2026-11-01", "2026-11-15"])
+
+    def test_invented_or_past_dates_are_dropped(self):
+        ev = bb.grounded_events([{"date": "2026-12-05", "event": "Guessed date"},
+                                 {"date": "2026-10-01", "event": "Already happened"},
+                                 {"date": "not a date", "event": "x"}], self.SRC, self.PUB)
+        self.assertEqual(ev, [])
+
+    def test_business_impact_is_fact_checked(self):
+        s = make("RBI holds rates")
+        s.description = "The RBI held the repo rate."
+        s.summary = "The RBI held the repo rate."
+        s.business_impact = "Loan rates stay stable. Banks may lend 12.5% more next year."
+        bb.ground_story(s)
+        self.assertEqual(s.business_impact, "Loan rates stay stable.")
+
+
+class TestDerived(unittest.TestCase):
+    def test_build_derived_files(self):
+        import json, tempfile, build_derived as bd
+        root = Path(tempfile.mkdtemp())
+        (root / "data" / "archive").mkdir(parents=True)
+        brief = {"date": "2026-10-30", "concept": {"name": "Jevons Paradox", "explanation": "Efficiency can raise use."},
+                 "categories": [{"key": "economy", "title": "Indian Economy, Policy", "stories": [
+                     {"title": "Forex reserves fall", "url": "https://www.livemint.com/a", "source": "Mint", "ai": True,
+                      "summary": "Reserves fell.", "key_fact": "Reserves fell $1.2 billion.", "fact_is_context": False,
+                      "key_term": {"term": "Forex reserves", "meaning": "Foreign assets held by the RBI."},
+                      "upcoming": [{"date": "2026-11-12", "event": "CPI data release"}]}]}]}
+        (root / "data" / "archive" / "2026-10-30.json").write_text(json.dumps(brief))
+        stats = bd.build(root, today="2026-10-31")
+        self.assertEqual(stats, {"terms": 1, "concepts": 1, "cards": 3, "stories": 1, "news_events": 1})
+        ev = json.loads((root / "data" / "news-events.json").read_text())["events"][0]
+        self.assertEqual((ev["date"], ev["source"]), ("2026-11-12", "Mint"))
+
+
 class TestMisc(unittest.TestCase):
     def test_safe_url(self):
         self.assertTrue(bb.safe_url("https://example.com/a"))

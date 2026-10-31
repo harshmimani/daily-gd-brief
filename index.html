@@ -30,13 +30,18 @@
 <body>
   <header class="masthead">
     <div class="masthead-inner">
-      <div class="kicker" id="day-kicker">Morning edition</div>
+      <nav class="tabs" aria-label="Views">
+        <a class="tab" href="#today" data-tab-link="today"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16M4 10h16M4 14.5h10M4 19h7"/></svg><span>Today</span></a>
+        <a class="tab" href="#week" data-tab-link="week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M7.5 13.5h3M13.5 13.5h3M7.5 16.5h3"/></svg><span>This week</span></a>
+        <a class="tab" href="#upcoming" data-tab-link="upcoming"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Upcoming</span></a>
+        <a class="tab" href="#library" data-tab-link="library"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h4v15H5zM10.5 4.5h4v15h-4zM16 5.2l3.4-.9 3 14.6-3.4.8z" transform="translate(-1 0)"/></svg><span>Library</span></a>
+        <a class="tab" href="#review" data-tab-link="review"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6.5" width="13" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v10"/></svg><span>Review</span></a>
+      </nav>
       <div class="topbar-controls">
         <label class="sr-only" for="date-select">Choose a day</label>
         <select id="date-select" class="date-select" aria-label="Choose a day">
           <option value="">Today</option>
         </select>
-        <button id="week-btn" class="week-btn" type="button" title="The week in review">This week</button>
         <button id="saved-btn" class="icon-btn" type="button" aria-label="Saved stories" title="Saved stories">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>
           <span id="saved-count" class="badge-count" hidden></span>
@@ -46,6 +51,7 @@
           <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
       </div>
+      <div class="kicker" id="day-kicker">Morning edition</div>
       <h1 class="dateline" id="dateline">&nbsp;</h1>
       <div class="day-meta" id="day-meta"></div>
       <div class="cover" id="cover"></div>
@@ -62,7 +68,16 @@
     <p>Stories come only from an approved list of established publishers, refreshed every morning. Notes are written from each article's own text, and every number in them is checked against that text before publishing. Use them as a study aid and read the original before quoting.</p>
   </footer>
 
+  <nav class="tabbar" aria-label="Views">
+    <a class="tabbar-link" href="#today" data-tab-link="today"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16M4 10h16M4 14.5h10M4 19h7"/></svg><span>Today</span></a>
+    <a class="tabbar-link" href="#week" data-tab-link="week"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M7.5 13.5h3M13.5 13.5h3M7.5 16.5h3"/></svg><span>This week</span></a>
+    <a class="tabbar-link" href="#upcoming" data-tab-link="upcoming"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Upcoming</span></a>
+    <a class="tabbar-link" href="#library" data-tab-link="library"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h4v15H5zM10.5 4.5h4v15h-4zM16 5.2l3.4-.9 3 14.6-3.4.8z" transform="translate(-1 0)"/></svg><span>Library</span></a>
+    <a class="tabbar-link" href="#review" data-tab-link="review"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6.5" width="13" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v10"/></svg><span>Review</span></a>
+  </nav>
+
   <script src="cover-fx.js" defer></script>
+  <script src="tabs.js"></script>
   <script src="app.js"></script>
   <script>
     // Offline reading: cache the shell and the latest brief.

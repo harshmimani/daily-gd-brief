@@ -351,6 +351,8 @@ class Story:
     gd_against: list[str] = field(default_factory=list)
     key_fact: str = ""
     key_term: dict | None = None
+    business_impact: str = ""
+    upcoming: list[dict] = field(default_factory=list)
     ai: bool = False
 
     @property
@@ -375,6 +377,8 @@ class Story:
             "key_fact": self.key_fact,
             "fact_is_context": self.key_fact.strip().lower().startswith("context"),
             "key_term": self.key_term,
+            "business_impact": self.business_impact,
+            "upcoming": self.upcoming,
             "ai": self.ai,
         }
 
@@ -1385,6 +1389,43 @@ def keep_grounded(text: str, source: str, counter: list[int]) -> str:
     return " ".join(kept).strip()
 
 
+MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august",
+          "september", "october", "november", "december"]
+
+
+def date_in_text(d: datetime, text: str) -> bool:
+    """True if the text names this day and month ("15 November", "Nov 15", "November 15th")."""
+    low = (text or "").lower()
+    month = MONTHS[d.month - 1]
+    mon = month[:3]
+    day = str(d.day)
+    pat = (rf"\b{day}(st|nd|rd|th)?\s*(of\s+)?({month}|{mon}\.?)\b|"
+           rf"\b({month}|{mon}\.?)\s+{day}(st|nd|rd|th)?\b")
+    return re.search(pat, low) is not None
+
+
+def grounded_events(events: list, source: str, published: datetime | None) -> list[dict]:
+    """Keep only future events whose day and month are written in the article."""
+    base = (published or datetime.now(timezone.utc)).astimezone(IST).date()
+    out = []
+    for e in events or []:
+        try:
+            d = datetime.strptime(str(e.get("date", ""))[:10], "%Y-%m-%d")
+        except ValueError:
+            continue
+        what = re.sub(r"\s+", " ", str(e.get("event", ""))).strip()
+        if not what or len(what) > 140:
+            continue
+        if not (base < d.date() <= base + timedelta(days=400)):
+            continue
+        if not date_in_text(d, source):
+            continue
+        if unsupported_numbers(re.sub(r"\b\d{1,2}\b", "", what), source, _year_allow()):
+            continue
+        out.append({"date": d.strftime("%Y-%m-%d"), "event": what})
+    return out
+
+
 def ground_story(s: "Story") -> int:
     """Strip unsupported numbers from one story's commentary. Returns removals."""
     source = " ".join([s.title, s.description, s.snippet])
@@ -1396,6 +1437,8 @@ def ground_story(s: "Story") -> int:
     s.why_it_matters = keep_grounded(s.why_it_matters, source, removed)
     s.gd_for = [p for p in (keep_grounded(x, source, removed) for x in s.gd_for) if p]
     s.gd_against = [p for p in (keep_grounded(x, source, removed) for x in s.gd_against) if p]
+    s.business_impact = keep_grounded(s.business_impact, source, removed)
+    s.upcoming = grounded_events(s.upcoming, source, s.published)
     if s.key_term and unsupported_numbers(s.key_term.get("meaning", ""), source, _year_allow()):
         s.key_term = None
         removed[0] += 1
@@ -1472,6 +1515,11 @@ For EACH story below, write:
 - "key_term": {{"term": "...", "meaning": "..."}}: one concept or term from the story worth
   learning (for example "current account deficit", "PIL", "working capital"), with a one-sentence
   general definition and no numbers. Use null if nothing in the story qualifies.
+- "business_impact": 1 sentence on what the story means for companies, investors, markets or
+  the wider economy in India. Use an empty string if there is no real business angle.
+- "upcoming": a list of future events that the story text names with a SPECIFIC date, as
+  {{"date": "YYYY-MM-DD", "event": "short description"}}. Only dates written in the story text,
+  never estimates or vague timing ("next month", "soon"). Use [] if there are none.
 
 NEUTRALITY RULES:
 - Report, do not editorialise. No loaded or partisan words ("slams", "historic", "draconian",
@@ -1519,6 +1567,9 @@ Stories:
         kt = item.get("key_term")
         if isinstance(kt, dict) and str(kt.get("term", "")).strip() and str(kt.get("meaning", "")).strip():
             s.key_term = {"term": str(kt["term"]).strip()[:60], "meaning": str(kt["meaning"]).strip()[:280]}
+        s.business_impact = str(item.get("business_impact") or "").strip()[:400]
+        ups = item.get("upcoming")
+        s.upcoming = [u for u in ups if isinstance(u, dict)][:4] if isinstance(ups, list) else []
         GROUNDING["removed"] += ground_story(s)
         s.ai = True
         done += 1
@@ -1786,6 +1837,8 @@ def story_from_json(d: dict, category: str) -> Story:
         s.gd_against = list(d.get("gd_against") or [])
         s.key_fact = d.get("key_fact", "")
         s.key_term = d.get("key_term") if isinstance(d.get("key_term"), dict) else None
+        s.business_impact = d.get("business_impact") or ""
+        s.upcoming = d.get("upcoming") if isinstance(d.get("upcoming"), list) else []
         s.ai = True
     return s
 

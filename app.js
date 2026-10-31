@@ -124,6 +124,43 @@
     }
   }
 
+  // ---------- watchlist ----------
+  // Topics are keyword sets matched against headlines and summaries. The list a
+  // reader follows is kept in this browser only.
+  var WATCH_KEY = "gd-watch-v1";
+  var WATCH_TOPICS = [
+    { id: "rates", label: "RBI and interest rates", rx: /\b(rbi|repo|interest rates?|monetary policy|inflation|cpi|mpc)\b/i },
+    { id: "trade", label: "Trade and tariffs", rx: /\b(trade (deals?|pacts?|agreements?|talks|wars?|deficit|surplus)|ftas?|free trade|exports?|imports?|wto|import dut(y|ies)|customs dut(y|ies)|reciprocal tariffs?|tariffs? on)\b/i },
+    { id: "ai", label: "AI and tech policy", rx: /\b(ai|artificial intelligence|semiconductors?|chips?|data protection|deepfakes?|chatbots?)\b/i },
+    { id: "energy", label: "Energy and oil", rx: /\b(crude|oil|opec|fuel|lng|petrol|diesel|energy|power tariffs?)\b/i },
+    { id: "startups", label: "Startups and funding", rx: /\b(startups?|funding|venture capital|vc|ipos?|unicorns?|valuation)\b/i },
+    { id: "climate", label: "Climate", rx: /\b(climate|emissions?|cop ?\d+|net[- ]zero|carbon|heatwaves?|monsoon|biodiversity)\b/i },
+    { id: "china", label: "China", rx: /\b(china|chinese|beijing|xi jinping)\b/i },
+    { id: "us", label: "US policy", rx: /\b(trump|washington|white house|federal reserve|u\.s\.)\b/i },
+    { id: "jobs", label: "Jobs and welfare", rx: /\b(jobs?|employment|unemployment|labou?r|welfare|poverty|wages?)\b/i },
+    { id: "markets", label: "Markets", rx: /\b(sensex|nifty|stocks?|shares|sebi|bonds?|market cap|rupee)\b/i }
+  ];
+  function watchState() {
+    var st = readStore(WATCH_KEY, null);
+    if (!st || !Array.isArray(st.topics)) st = { topics: ["rates", "trade", "ai"], custom: [] };
+    if (!Array.isArray(st.custom)) st.custom = [];
+    return st;
+  }
+  function saveWatch(st) { writeStore(WATCH_KEY, st); }
+  function escRx(t) { return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function activeTopics() {
+    var st = watchState();
+    var list = WATCH_TOPICS.filter(function (t) { return st.topics.indexOf(t.id) !== -1; });
+    st.custom.forEach(function (w) {
+      if (w) list.push({ id: "c:" + w, label: w, rx: new RegExp("\\b" + escRx(w) + "\\b", "i"), custom: true });
+    });
+    return list;
+  }
+  function watchMatches(story) {
+    var text = (story.title || "") + " " + (story.summary || "");
+    return activeTopics().filter(function (t) { return t.rx.test(text); });
+  }
+
   // ---------- icons ----------
   var ICON = {
     star: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
@@ -281,6 +318,32 @@
     );
   }
 
+  function renderWatchToday(b) {
+    var hits = [];
+    (b.categories || []).forEach(function (c) {
+      (c.stories || []).forEach(function (s) {
+        var m = watchMatches(s);
+        if (m.length) hits.push({ s: s, t: m[0] });
+      });
+    });
+    var topics = activeTopics();
+    return (
+      '<section class="watch-card">' +
+        '<div class="watch-head"><div class="kicker">Your watchlist today</div>' +
+          '<a class="link-btn" href="#week">Edit topics</a></div>' +
+        (hits.length
+          ? "<ul>" + hits.slice(0, 5).map(function (h) {
+              return '<li><button type="button" class="watch-hit" data-goto="' + esc(h.s.url) + '">' +
+                '<span class="watch-topic">' + esc(h.t.label) + "</span>" + esc(h.s.title) + "</button></li>";
+            }).join("") + "</ul>" +
+            (hits.length > 5 ? '<p class="dim">' + (hits.length - 5) + " more marked in the brief below.</p>" : "")
+          : '<p class="dim">' + (topics.length
+              ? "Nothing on " + esc(topics.slice(0, 3).map(function (t) { return t.label; }).join(", ")) + " today."
+              : "Follow a few topics and matching stories show up here.") + "</p>") +
+      "</section>"
+    );
+  }
+
   function renderWeekTeaser() {
     if (archiveIndex.length < 3) return "";
     return (
@@ -288,7 +351,7 @@
         '<div class="kicker">The week in review</div>' +
         "<h2>Threads, topics and an 8-question quiz</h2>" +
         "<p>Everything from the last seven briefs on one page, so the week's news actually sticks.</p>" +
-        '<button class="text-btn" type="button" data-open-week="1">Open this week</button>' +
+        '<a class="text-btn" href="#week">Open this week</a>' +
       "</section>"
     );
   }
@@ -341,6 +404,9 @@
         "</div>";
     }
     var summary = s.summary && !/^Open the source link/i.test(s.summary) ? s.summary : "";
+    var watched = watchMatches(s);
+    var watchBadge = watched.length
+      ? '<span class="watch-pill" title="On your watchlist">' + esc(watched[0].label) + "</span>" : "";
     var readLink = url
       ? '<a class="read-link" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Read at ' + esc(s.source || host) + ' <span aria-hidden="true">&#8599;</span></a>'
       : "";
@@ -348,9 +414,10 @@
       '<article class="story' + (read ? " is-read" : "") + (s.ai ? "" : " is-plain") + '" data-url="' + esc(s.url) + '">' +
         "<h3>" + heading + "</h3>" +
         '<div class="src">' + esc(s.source) + (host ? " (" + esc(host) + ")" : "") +
-          (when ? ", " + esc(when) : "") + " " + coverage + "</div>" +
+          (when ? ", " + esc(when) : "") + " " + coverage + watchBadge + "</div>" +
         (summary ? '<p class="summary">' + esc(summary) + "</p>" : "") +
         (s.why_it_matters ? '<p class="matters"><strong>Why it matters:</strong> ' + esc(s.why_it_matters) + "</p>" : "") +
+        (s.business_impact ? '<p class="impact"><strong>Business impact:</strong> ' + esc(s.business_impact) + "</p>" : "") +
         angles +
         fact +
         (s.key_term && s.key_term.term
@@ -464,7 +531,8 @@
       renderQuick(b) +
       '<div class="layout">' +
         '<aside class="rail-left" aria-label="Sections">' + renderChips(b) + "</aside>" +
-        '<aside class="rail-right">' + renderConcept(b.concept) + renderWeekTeaser() + "</aside>" +
+        '<aside class="rail-right">' + renderWatchToday(b) + '<div id="next-up"></div>' +
+          renderConcept(b.concept) + renderWeekTeaser() + "</aside>" +
         '<div class="main">' +
           (b.categories || []).map(renderCategory).join("") +
           renderSearch();
@@ -619,8 +687,7 @@
         }
       });
     });
-    var teaser = app.querySelector("[data-open-week]");
-    if (teaser) teaser.addEventListener("click", function () { openWeek(); });
+    if (window.TB && TB.fillNextUp) TB.fillNextUp(document.getElementById("next-up"));
     wireSearch();
     updateProgress();
   }
@@ -702,7 +769,7 @@
   function loadDay(date) {
     var url = date ? "data/archive/" + date + ".json" : "data/latest.json";
     showStatus("Loading " + (date || "today's") + " brief…");
-    return fetchJSON(url).then(renderBrief).catch(function (err) {
+    return fetchJSON(url).then(function (b) { b._requested = date || ""; renderBrief(b); }).catch(function (err) {
       showStatus(
         "Could not load the brief (" + err.message + "). " +
         "If this is a fresh setup, run the workflow once from the Actions tab and wait a couple of minutes.",
@@ -924,7 +991,7 @@
         '<div class="hero-actions"><button class="text-btn" type="button" data-back-today="1">Back to today\'s brief</button></div>' +
       "</section>";
 
-    var html = "";
+    var html = '<div id="watch-week"></div>';
     if (themes.length) {
       html += '<section class="wk-block" aria-labelledby="threads-h"><h2 id="threads-h">Threads to follow</h2>' +
         '<div class="threads">' + themes.map(function (t) {
@@ -978,11 +1045,11 @@
         }).join("") + "</div></section>";
     }
 
-    if (!html) html = '<p class="plain" style="padding:2rem 0">Not enough briefs this week yet. Check back after a few more mornings.</p>';
     app.innerHTML = html;
+    if (window.TB && TB.fillWatchWeek) TB.fillWatchWeek(document.getElementById("watch-week"));
     document.title = "The Brief · Week of " + shortDate(dates[0]);
 
-    coverEl.querySelector("[data-back-today]").addEventListener("click", function () { leaveWeek(); });
+    coverEl.querySelector("[data-back-today]").addEventListener("click", function () { goTab("today"); });
     app.querySelectorAll("[data-open-day]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         leaveWeek(btn.dataset.openDay);
@@ -1019,7 +1086,6 @@
     archiveIndex.forEach(function (e) { have[e.date] = 1; });
     var wanted = dates.filter(function (d) { return have[d]; });
     showStatus("Putting the week together…");
-    if (location.hash !== "#week") history.replaceState(null, "", "#week");
     return Promise.all(wanted.map(function (d) {
       return fetchJSON("data/archive/" + d + ".json").catch(function () { return null; });
     })).then(function (list) {
@@ -1028,20 +1094,60 @@
     });
   }
   function leaveWeek(date) {
-    if (location.hash === "#week") history.replaceState(null, "", location.pathname + location.search);
     if (date) { dateSelect.value = date; dateSelect.dispatchEvent(new Event("change")); return; }
-    if (currentBrief) renderBrief(currentBrief); else loadDay("");
-    window.scrollTo({ top: 0 });
+    goTab("today");
   }
-  var weekBtnEl = document.getElementById("week-btn");
-  if (weekBtnEl) weekBtnEl.addEventListener("click", function () { openWeek(); });
+
+  // ---------- tabs and routing ----------
+  // Views live in the URL hash (#week, #upcoming, #library, #review) so each
+  // one can be bookmarked or shared. Today is the default.
+  var TABS = ["today", "week", "upcoming", "library", "review"];
+  function currentTab() {
+    var h = (location.hash || "").replace("#", "");
+    return TABS.indexOf(h) !== -1 ? h : "today";
+  }
+  function setActiveNav(tab) {
+    document.body.setAttribute("data-tab", tab);
+    document.querySelectorAll("[data-tab-link]").forEach(function (a) {
+      if (a.getAttribute("data-tab-link") === tab) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+  }
+  function goTab(tab) {
+    if (currentTab() === tab && tab === "today") { route(); return; }
+    location.hash = tab === "today" ? "today" : tab;
+  }
+  function route() {
+    var tab = currentTab();
+    setActiveNav(tab);
+    window.scrollTo({ top: 0 });
+    if (tab === "week") return openWeek();
+    if (tab !== "today" && window.TB && TB.views && TB.views[tab]) return TB.views[tab]();
+    if (currentBrief && (dateSelect.value || "") === (currentBrief._requested || "")) {
+      renderBrief(currentBrief);
+      return Promise.resolve();
+    }
+    return loadDay(dateSelect.value);
+  }
+  window.addEventListener("hashchange", route);
+
+  // Shared helpers for the extra views in tabs.js.
+  window.TB = window.TB || {};
+  Object.assign(window.TB, {
+    esc: esc, safeUrl: safeUrl, fetchJSON: fetchJSON, parseDay: parseDay, shortDate: shortDate,
+    todayIST: todayIST, showStatus: showStatus, readStore: readStore, writeStore: writeStore,
+    ICON: ICON, app: app, kickerEl: kickerEl, datelineEl: datelineEl, metaEl: metaEl, coverEl: coverEl,
+    archive: function () { return archiveIndex; }, goTab: goTab,
+    watch: { topics: WATCH_TOPICS, state: watchState, save: saveWatch, active: activeTopics, matches: watchMatches }
+  });
 
   dateSelect.addEventListener("change", function () {
     var date = dateSelect.value;
     var params = new URLSearchParams(window.location.search);
     if (date) params.set("date", date); else params.delete("date");
     var qs = params.toString();
-    history.replaceState(null, "", window.location.pathname + (qs ? "?" + qs : ""));
+    history.replaceState(null, "", window.location.pathname + (qs ? "?" + qs : "") + "#today");
+    setActiveNav("today");
     loadDay(date);
     window.scrollTo({ top: 0 });
   });
@@ -1050,8 +1156,6 @@
   loadIndex().then(function () {
     if (wanted && dateSelect.querySelector('option[value="' + wanted + '"]')) dateSelect.value = wanted;
     else wanted = "";
-    return loadDay(wanted).then(function () {
-      if (location.hash === "#week") openWeek();
-    });
+    return route();
   });
 })();

@@ -1,3 +1,15 @@
+# v10: five tabs (Today, This week, Upcoming, Library, Review)
+
+- **Navigation.** Tabs in the header on desktop and an app-style bar at the bottom on phones. Each view has its own link (#week, #upcoming, #library, #review).
+- **Upcoming.** `data/calendar.json` holds 37 hand-checked events (RBI and Fed decisions, MoSPI data releases, the Budget, Parliament, the census, elections, COP31, APEC, G20, Davos), each with its source and a status: confirmed, scheduled, expected or date not announced. The cover counts down to the next key event. Filters by type, and "Add to my calendar" downloads an .ics file of every dated event in the filter. Below it, "Dates spotted in the news" lists future dates that stories state outright.
+- **Dated events from the news.** The model may list future events a story names, but each date is kept only if its day and month appear in the article text, it lies within about a year of publication, and its description carries no unsupported numbers.
+- **Business impact.** One fact-checked sentence per story on what it means for companies, investors or markets.
+- **Library.** Every "Term to know" and concept of the day, searchable, A to Z, each linked to the story it came from.
+- **Review.** Spaced repetition over facts, terms and concepts: cards return 1, 3, 7, 14 and 30 days after they appeared; "Again" brings one back tomorrow. Sessions of up to 12 cards, a daily streak, and a deliberate stop once the day's session is done. Progress is stored in the reader's browser.
+- **Watchlist.** Follow preset topics or your own keywords on "This week": each gets a 14-day activity strip and its recent stories, and matching stories are marked in Today's brief with a "Your watchlist today" card.
+- `scripts/build_derived.py` (new) builds `library.json`, `review.json`, `stories.json` and `news-events.json` from the archive after every run. It reads only the briefs; nothing in it is model-generated.
+- 5 new tests (42 total).
+
 # v9: a real desktop layout
 
 - **Cover as a spread on wide screens:** date and GD topic on the left, "Open with" and "Close with" on the right, the four stakeholder views across the bottom.

@@ -80,6 +80,10 @@ jobs:
           BACKFILL_DAYS: "14"   # runs exit in seconds when nothing is missing
         run: python -u scripts/build_brief.py --backfill
 
+      - name: Update library, review deck and calendar data
+        if: always()
+        run: python -u scripts/build_derived.py
+
       # always() so that a failed or cancelled build still publishes whatever the
       # script managed to write before it stopped (it writes a headlines-only
       # brief before calling Gemini).
