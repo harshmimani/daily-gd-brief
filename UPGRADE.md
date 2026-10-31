@@ -1,3 +1,73 @@
+# v9: a real desktop layout
+
+- **Cover as a spread on wide screens:** date and GD topic on the left, "Open with" and "Close with" on the right, the four stakeholder views across the bottom.
+- **Three columns below it:** sections and reading progress on the left, stories in the middle, the concept of the day and a "week in review" card on the right (sticky).
+- **In 60 seconds as headline numbers:** six tiles, one per section, each leading with its figure in large type. Clock times are skipped and figures with units are preferred. On phones the tiles become a swipeable row.
+- **A colour per section,** used in the nav, the tiles and the section headings, in both light and dark themes.
+- The concept card keeps its Indian example and GD usage behind a disclosure so the rail fits on one screen.
+
+# v8: slicing and free fallbacks
+
+Why notes went missing (40 days of logs): Gemini's free tier was overloaded (HTTP 503) on 34 days, a retired model (404) wasted a slot on 27, and 9-story requests timed out on 14. Only 12 of 40 days had full notes.
+
+- **Slicing.** A slice of 5 stories that fails is split in half and retried, down to single stories. Small requests get through busy servers and finish well inside the 90-second timeout.
+- **Gemma fallback (no new key).** `gemma-4-31b-it` and `gemma-4-26b-a4b-it` run on the existing Gemini key and are tried after the Gemini flash models. They have no JSON mode, so their output is parsed leniently.
+- **Groq fallback (free key, optional).** Add a repository secret `GROQ_API_KEY` from console.groq.com. Its free tier (about 30 requests a minute, 8,000 tokens a minute, 1,000 requests a day) is far above the brief's ~10 calls a day; the client paces itself under the per-minute token limit. When Groq is present, Gemini gets one quick pass per call so its back-offs cannot use up the time budget. Default model `openai/gpt-oss-120b`; override with the `GROQ_MODEL` variable.
+- All fallbacks pass through the same fact check, so a different model never means looser standards.
+- 4 new tests (37 total).
+
+# v7: the week in review, a stricter editor, and Claude support
+
+- **This week** (button in the header, or add `#week` to the link): the last seven briefs on one page. Threads that ran on several days, every GD topic with its opening and closing lines, the week's concepts as recall cards, and an 8-question quiz. The quiz is built only from verified quotes in the briefs, and every answer choice shares the correct answer's currency and unit. Nothing on the page is generated; it is all computed from the archive in the browser.
+- **Editorial standard.** The prompt now asks for a neutral, case-note-quality briefing: claims attributed to whoever makes them, no loaded or partisan wording, every party treated the same way, and the strongest case argued on both sides with four different kinds of argument.
+- **Term to know.** Each story can carry one concept worth learning, with a plain one-sentence definition (numbers in it are fact-checked like everything else).
+- **Claude as the writer.** Add a repository secret `ANTHROPIC_API_KEY` and Claude writes the notes, with Gemini as the fallback. The default model is `claude-sonnet-5-5`; set the repository variable `CLAUDE_MODEL` to `claude-haiku-5-5` for the cheapest option. A bad key is detected once and the run falls back to Gemini instead of retrying.
+- 3 new tests (33 total).
+
+# v6: sources you can trust, numbers you can quote
+
+- **Approved publishers only.** `TRUSTED_DOMAINS` lists every outlet the brief may use. Links are checked after Google News decoding and redirects; anything else, and sponsored or "brand" posts, is dropped.
+- **No outside facts.** The commentary prompt no longer asks for "background statistics". The model may only quote what the article says, and leaves the quote empty when there is nothing concrete.
+- **Automatic number check.** After the model writes, every number and code (G20, COP17) in summaries, debate points, quotes, the GD topic and the concept is compared with the article text. Sentences with anything unsupported are removed. The result is recorded in each brief's `grounding` field and shown under "How this brief was built".
+- **More source text.** Snippets now include the article's opening paragraphs (up to about 1,800 characters), so the model has real material and the checker has more to compare against.
+- 6 new tests (30 total).
+
+# v5: evergreen palette and a living cover
+
+- Palette moves to deep evergreen and mint (consulting-style greens; no firm's branding is used). Brick red stays for the "against" side of each debate.
+- `cover-fx.js` (new): a WebGL contour map drifts behind the date and GD topic and leans toward the cursor or finger. It runs at about 30fps, pauses when the cover is off screen or the tab is hidden, shows a still frame when the device asks for reduced motion, and does nothing if WebGL is missing.
+- The date and topic rise in once on page load. The opening and closing line panels are frosted so the contours show through softly.
+- Service worker cache bumped to v5 and now includes cover-fx.js.
+
+# v4: the indigo redesign
+
+- New look: an indigo cover band holds the date and the GD topic; the reading page below is light, with marigold for emphasis and teal and brick for the two sides of each debate. Typefaces are Newsreader and Schibsted Grotesk.
+- "In 60 seconds": one quotable number from each section, right under the topic. Tapping one jumps to its story.
+- Desktop gets a sticky side rail with sections and reading progress; phones keep the sticky chip bar.
+- All sections open by default. Background facts no longer repeat "Context:" after their label.
+- `data/` for 31 Oct 2026 now carries full commentary (written by hand after that morning's Gemini run failed).
+
+# v3: commentary that actually arrives, and a cleaner masthead
+
+## The problem
+Between 18 and 31 Oct, 6 of 14 briefs shipped with zero AI commentary and most
+others were partial. Every failure had the same cause: Gemini's free tier
+returns HTTP 503 ("overloaded") around 05:47 IST, and v2 benched a model on its
+*first* 503. Four 503s plus the retired gemini-2.5-flash (404) emptied the
+rotation within about a minute, with 9 of the 10 budgeted minutes unused.
+
+## What changed
+| File | Change |
+|---|---|
+| `scripts/build_brief.py` | 503/500/timeouts are retried with back-off and the model stays in the rotation (benched only after 4 in a row). Lite models are interleaved with full ones. Retired 2.5-flash replaced by Google's `-latest` aliases. Batches of 5 instead of 9, and every empty story is retried, not just the first batch. New `--backfill` mode. |
+| `.github/workflows/daily-brief.yml` | Four backfill runs (07:47, 10:17, 13:47, 18:17 IST) fill in anything the morning run missed, today first, then the last 7 days. Manual runs get a build/backfill choice. |
+| `index.html`, `style.css`, `app.js` | "Daily GD Brief" masthead removed; the date is now the headline. No more "AI commentary was not available" text or warning badges. Plain stories show the RSS summary and a "Full story" link; today's brief shows one quiet line while analysis is pending. Category chips are sticky. |
+| `scripts/test_build_brief.py` | Tests for the new retry rules and backfill (24 total). |
+| `sw.js`, `manifest.webmanifest` | Cache bumped to v3 so phones pick up the new page; app renamed "The Brief". |
+
+No new secrets or dependencies. After merging, run the workflow once with
+mode = backfill to repair the last week's briefs.
+
 # Daily GD Brief — v2 upgrade
 
 Everything in this upgrade is drop-in. No new dependencies, no change to

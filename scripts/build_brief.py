@@ -25,6 +25,7 @@ import concurrent.futures as cf
 import html
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -61,17 +62,24 @@ REQUIRE_DATE = True             # drop entries with no usable publish date
 # --- Gemini budget ---------------------------------------------------------
 # The free tier is small and slow. Everything below exists so that a bad quota
 # day costs a few minutes, not a cancelled job.
-GEMINI_FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
+# Google's rolling aliases always point at a live model, so they are the safest fallbacks.
+# Gemma runs on the same Gemini key and is usually far less loaded at peak hours.
+GEMINI_FALLBACK_MODELS = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemma-4-31b-it", "gemma-4-26b-a4b-it"]
 GEMINI_DELAY_SECONDS = 6        # free tier allows ~10 requests/minute
 GEMINI_MAX_RETRIES = 2
-GEMINI_TIMEOUT = 60             # seconds per request
-GEMINI_MAX_MODELS = 5           # candidates to try before giving up
+GEMINI_TIMEOUT = 90             # seconds per request (small slices finish well inside this)
+GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"    # free tier: 30 req/min, 8k tokens/min, 1,000 req/day
+GROQ_TPM_BUDGET = 7000          # stay under Groq's 8,000 tokens/minute free limit
+GEMINI_MAX_MODELS = 8           # candidates in the rotation
+MAX_5XX_PER_MODEL = 4           # consecutive overload/timeouts before a model is benched
+MAX_OVERLOAD_WAIT = 45          # longest single back-off after a 503 (seconds)
 MAX_RATE_LIMIT_PER_MODEL = 2    # 429s on ONE model before dropping that model
 MAX_RATE_LIMIT_HITS = 8         # 429s across all models before giving up on AI
 MAX_RATE_WAIT = 75              # longest single wait for a per-minute limit
 AI_DEADLINE_SECONDS = int(os.environ.get("AI_DEADLINE", "480"))  # 8 minutes
 CURATION_SHORTLIST = 12         # stories per category sent to the AI curator
-ENRICH_BATCH_SIZE = 9           # stories per enrichment call
+CLAUDE_DEFAULT_MODEL = "claude-sonnet-5-5"   # set the CLAUDE_MODEL variable to override
+ENRICH_BATCH_SIZE = 5           # stories per enrichment call (small = partial wins on bad days)
 
 BROWSER_HEADERS = {
     "User-Agent": (
@@ -101,6 +109,34 @@ JUNK_URL = re.compile(
     r"fashion|food|web-?stories)/",
     re.I,
 )
+
+# Only these publishers may appear in the brief. A story whose link (after
+# Google News decoding and redirects) lands anywhere else is dropped.
+TRUSTED_DOMAINS = (
+    "bbc.co.uk", "bbc.com", "aljazeera.com", "reuters.com", "thehindu.com",
+    "indianexpress.com", "thediplomat.com", "livemint.com", "economictimes.indiatimes.com",
+    "business-standard.com", "pib.gov.in", "rbi.org.in", "inc42.com", "yourstory.com",
+    "techcrunch.com", "technologyreview.com", "downtoearth.org.in", "carbonbrief.org",
+    "mongabay.com", "sciencedaily.com", "nature.com", "theprint.in", "scroll.in",
+)
+# Paid or promotional placements that some publisher feeds mix in.
+SPONSORED_URL = re.compile(
+    r"/(brand-?solutions?|brand-?stor(?:y|ies)|brand-?post|sponsored|partner-?content|"
+    r"partnered|advertorial|spotlight|press-?releases?|impact-?feature|ettech-?spotlight)/",
+    re.I,
+)
+SPONSORED_TITLE = re.compile(r"\b(sponsored|advertorial|partner content|brand story|in association with)\b", re.I)
+
+
+def host_of(url: str) -> str:
+    m = re.match(r"https?://([^/:?#]+)", (url or "").strip(), re.I)
+    return m.group(1).lower() if m else ""
+
+
+def is_trusted(url: str) -> bool:
+    h = host_of(url)
+    return any(h == d or h.endswith("." + d) for d in TRUSTED_DOMAINS)
+
 
 # Headlines that suggest a genuinely NEW development, so it is fine to run a
 # story again even if we covered the same subject a day or two ago.
@@ -314,6 +350,7 @@ class Story:
     gd_for: list[str] = field(default_factory=list)
     gd_against: list[str] = field(default_factory=list)
     key_fact: str = ""
+    key_term: dict | None = None
     ai: bool = False
 
     @property
@@ -322,7 +359,7 @@ class Story:
         parts = [self.description]
         if self.snippet and self.snippet[:60].lower() not in self.description.lower():
             parts.append(self.snippet)
-        return " ".join(p for p in parts if p)[:700]
+        return " ".join(p for p in parts if p)[:1400]
 
     def to_json(self) -> dict:
         return {
@@ -337,6 +374,7 @@ class Story:
             "gd_against": self.gd_against,
             "key_fact": self.key_fact,
             "fact_is_context": self.key_fact.strip().lower().startswith("context"),
+            "key_term": self.key_term,
             "ai": self.ai,
         }
 
@@ -461,22 +499,38 @@ META_DESC_ALT = re.compile(
 )
 
 
+PARA = re.compile(r"<p[^>]*>(.*?)</p>", re.I | re.S)
+
+
 def fetch_snippet(url: str) -> str:
-    if not safe_url(url):
+    """Meta description plus the article's opening paragraphs: the text the
+    commentary is written from and checked against."""
+    if not safe_url(url) or not is_trusted(url):
         return ""
     try:
         r = requests.get(url, headers=BROWSER_HEADERS, timeout=SNIPPET_TIMEOUT, stream=True)
-        if r.status_code != 200:
+        if r.status_code != 200 or not is_trusted(r.url):
             return ""
-        chunk = r.raw.read(180_000, decode_content=True) or b""
+        chunk = r.raw.read(400_000, decode_content=True) or b""
         text = chunk.decode("utf-8", errors="ignore")
+        parts: list[str] = []
         for rx in (META_DESC, META_DESC_ALT):
             m = rx.search(text)
             if m:
-                return strip_html(m.group(1))[:400]
+                parts.append(strip_html(m.group(1)))
+                break
+        body = 0
+        for m in PARA.finditer(text):
+            ptxt = strip_html(m.group(1))
+            if len(ptxt) < 80 or re.search(r"(subscribe|sign up|cookie|newsletter|copyright|all rights reserved)", ptxt, re.I):
+                continue
+            parts.append(ptxt)
+            body += len(ptxt)
+            if body > 1400:
+                break
+        return " ".join(parts)[:1800]
     except Exception:  # noqa: BLE001
         return ""
-    return ""
 
 
 def add_snippets(stories: list[Story]) -> int:
@@ -534,6 +588,10 @@ def fetch_feed(cat_key: str, feed: dict) -> tuple[list[Story], str, str | None]:
             continue
         if JUNK_PATTERNS.search(title) or JUNK_URL.search(link):
             continue
+        if SPONSORED_URL.search(link) or SPONSORED_TITLE.search(title):
+            continue
+        if not via_gnews and not is_trusted(link):
+            continue          # e.g. a feed linking out to a partner or aggregator site
         published = entry_datetime(e)
         if published is None and REQUIRE_DATE:
             continue
@@ -767,6 +825,30 @@ def parse_quota_error(response) -> tuple[str, float, bool]:
     return message, retry_delay, per_day
 
 
+def parse_json_text(text: str):
+    """Parse model output as JSON, tolerating code fences or a sentence around it."""
+    text = re.sub(r"^```(?:json)?|```$", "", (text or "").strip(), flags=re.M).strip()
+    try:
+        return json.loads(text)
+    except Exception:  # noqa: BLE001
+        pass
+    starts = [i for i in (text.find("["), text.find("{")) if i != -1]
+    if not starts:
+        raise ValueError("no JSON found")
+    start = min(starts)
+    end = max(text.rfind("]"), text.rfind("}"))
+    return json.loads(text[start:end + 1])
+
+
+def unwrap_items(parsed):
+    """Providers in JSON-object mode wrap arrays as {"items": [...]}; undo that."""
+    if isinstance(parsed, dict) and len(parsed) == 1:
+        only = next(iter(parsed.values()))
+        if isinstance(only, list):
+            return only
+    return parsed
+
+
 class GeminiClient:
     def __init__(self, api_key: str | None):
         self.api_key = api_key
@@ -777,8 +859,10 @@ class GeminiClient:
         self.errors: list[str] = []
         self.bad_models: dict[str, str] = {}     # model -> why it was dropped
         self.model_429: dict[str, int] = {}
+        self.model_5xx: dict[str, int] = {}      # consecutive transient failures
         self.deadline = time.monotonic() + AI_DEADLINE_SECONDS
         self.stopped = False
+        self.gemini_passes = 3
 
     @property
     def enabled(self) -> bool:
@@ -841,10 +925,21 @@ class GeminiClient:
             )
 
         available.sort(key=rank)
-        ordered = ([forced] if forced else []) + available + GEMINI_FALLBACK_MODELS
+        # Interleave full and lite models. When the newest flash models are overloaded
+        # (HTTP 503, which happens most mornings IST), the lite tier usually still
+        # answers, and a lite answer beats no answer.
+        full = [m for m in available if "lite" not in m.lower()]
+        lite = [m for m in available if "lite" in m.lower()]
+        mixed: list[str] = []
+        while full or lite:
+            mixed += full[:2]
+            full = full[2:]
+            mixed += lite[:1]
+            lite = lite[1:]
+        ordered = ([forced] if forced else []) + mixed + GEMINI_FALLBACK_MODELS
         ordered = list(dict.fromkeys(ordered))
         if available:
-            log(f"  Gemini models available: {', '.join(available[:6])}{' ...' if len(available) > 6 else ''}")
+            log(f"  Gemini models available: {', '.join(available[:8])}{' ...' if len(available) > 8 else ''}")
         return ordered[:GEMINI_MAX_MODELS]
 
     # -- the one call ------------------------------------------------------
@@ -857,97 +952,297 @@ class GeminiClient:
         if self.candidates is None:
             self.candidates = self.discover_models()
 
-        models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
-        models = [m for m in models if m not in self.bad_models]
-        if not models:
-            self._stop("every candidate model is unavailable (" +
-                       ", ".join(f"{m}: {why}" for m, why in list(self.bad_models.items())[:4]) + ")")
-            return None
-        for model in models:
-            for attempt in range(GEMINI_MAX_RETRIES):
-                if self.budget_left <= 10:
-                    self._stop("time budget exhausted")
+        # Transient failures (503 overloaded, 500, timeouts) are the normal state of
+        # the free tier at peak hours. They are retried with back-off and the model
+        # stays in the rotation; only 400/403/404 and daily quotas bench a model.
+        overload_round = 0
+        for _pass in range(self.gemini_passes):
+            models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
+            models = [m for m in models if m not in self.bad_models]
+            if not models:
+                self._stop("every candidate model is unavailable (" +
+                           ", ".join(f"{m}: {why}" for m, why in list(self.bad_models.items())[:4]) + ")")
+                return None
+            for model in models:
+                result, outcome = self._try_model(model, prompt, label)
+                if outcome == "ok":
+                    return result
+                if outcome == "stop":
                     return None
-                if self.rate_limited >= MAX_RATE_LIMIT_HITS:
-                    self._stop(f"rate limited {self.rate_limited} times across models")
-                    return None
-                if self.calls:
-                    time.sleep(min(GEMINI_DELAY_SECONDS, max(0.0, self.budget_left - 5)))
-                self.calls += 1
-                try:
-                    r = requests.post(
-                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-                        headers={"x-goog-api-key": self.api_key or ""},
-                        json={
-                            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                            "generationConfig": {"responseMimeType": "application/json"},
-                        },
-                        timeout=GEMINI_TIMEOUT,
-                    )
-                except Exception as exc:  # noqa: BLE001
-                    log(f"  Gemini {model}: network error ({type(exc).__name__})")
-                    self.errors.append(f"{label}: network {type(exc).__name__}")
-                    continue
-
-                if r.status_code == 200:
-                    try:
-                        parts = r.json()["candidates"][0]["content"]["parts"]
-                        text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
-                        text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
-                        self.model_used = model
-                        return json.loads(text)
-                    except Exception as exc:  # noqa: BLE001
-                        log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
-                        self.errors.append(f"{label}: unparseable output")
-                        continue
-
-                if r.status_code == 429:
-                    self.rate_limited += 1
-                    self.model_429[model] = self.model_429.get(model, 0) + 1
-                    message, retry_delay, per_day = parse_quota_error(r)
-                    log(f"  Gemini rate limit on {model}: {message[:150]}")
-                    self.errors.append(f"{label}: 429 on {model} ({message[:60]})")
-                    if per_day:
-                        # A daily quota will not clear today. Drop this model for the run.
-                        self.bad_models[model] = "daily quota exhausted"
-                        log(f"  {model} has hit its DAILY free-tier quota; switching model")
-                        break
-                    if self.model_429[model] >= MAX_RATE_LIMIT_PER_MODEL:
-                        self.bad_models[model] = "rate limited repeatedly"
-                        log(f"  {model} keeps rate limiting; switching model")
-                        break
-                    # Per-minute limits clear on their own: honour Google's retryDelay.
-                    wait = retry_delay if retry_delay else 20 * (attempt + 1)
-                    wait = min(wait, MAX_RATE_WAIT, max(0.0, self.budget_left - 25))
+                if outcome == "transient":
+                    overload_round += 1
+                    wait = min(MAX_OVERLOAD_WAIT, 4 * (2 ** min(overload_round, 4))) + random.uniform(0, 3)
+                    wait = min(wait, max(0.0, self.budget_left - 30))
                     if wait <= 0:
-                        self._stop("no time left to wait out a rate limit")
+                        self._stop("time budget exhausted while models were overloaded")
                         return None
-                    log(f"  waiting {wait:.0f}s for the per-minute limit to clear")
+                    log(f"  backing off {wait:.0f}s before the next model")
                     time.sleep(wait)
-                    continue
-
-                if r.status_code >= 500:
-                    # Brand-new models are often overloaded for days. Stop paying
-                    # the round-trip cost for them on every later call.
-                    self.bad_models[model] = f"HTTP {r.status_code} (overloaded)"
-                    log(f"  Gemini {model}: HTTP {r.status_code} (overloaded); dropping it for this run")
-                    self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
-                    break
-
-                if r.status_code in (400, 403, 404):
-                    detail = ""
-                    try:
-                        detail = ": " + r.json()["error"]["message"][:140]
-                    except Exception:  # noqa: BLE001
-                        pass
-                    self.bad_models[model] = f"HTTP {r.status_code}"
-                    log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
-                    self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
-                    break
-
-                log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
         self.errors.append(f"{label}: all models failed")
         return None
+
+    def _try_model(self, model: str, prompt: str, label: str):
+        """One model, up to GEMINI_MAX_RETRIES attempts. Returns (result, outcome)
+        where outcome is ok | transient | next | stop."""
+        for attempt in range(GEMINI_MAX_RETRIES):
+            if self.budget_left <= 10:
+                self._stop("time budget exhausted")
+                return None, "stop"
+            if self.rate_limited >= MAX_RATE_LIMIT_HITS:
+                self._stop(f"rate limited {self.rate_limited} times across models")
+                return None, "stop"
+            if self.calls:
+                time.sleep(min(GEMINI_DELAY_SECONDS, max(0.0, self.budget_left - 5)))
+            self.calls += 1
+            try:
+                r = requests.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                    headers={"x-goog-api-key": self.api_key or ""},
+                    json={
+                        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                        # Gemma models do not accept JSON mode; their output is parsed leniently.
+                        "generationConfig": {} if model.startswith("gemma") else {"responseMimeType": "application/json"},
+                    },
+                    timeout=GEMINI_TIMEOUT,
+                )
+            except Exception as exc:  # noqa: BLE001
+                log(f"  Gemini {model}: network error ({type(exc).__name__})")
+                self.errors.append(f"{label}: network {type(exc).__name__}")
+                return None, self._transient(model, f"network {type(exc).__name__}")
+
+            if r.status_code == 200:
+                try:
+                    parts = r.json()["candidates"][0]["content"]["parts"]
+                    text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                    parsed = parse_json_text(text)
+                except Exception as exc:  # noqa: BLE001
+                    log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
+                    self.errors.append(f"{label}: unparseable output")
+                    continue
+                self.model_used = model
+                self.model_5xx[model] = 0
+                return parsed, "ok"
+
+            if r.status_code == 429:
+                self.rate_limited += 1
+                self.model_429[model] = self.model_429.get(model, 0) + 1
+                message, retry_delay, per_day = parse_quota_error(r)
+                log(f"  Gemini rate limit on {model}: {message[:150]}")
+                self.errors.append(f"{label}: 429 on {model} ({message[:60]})")
+                if per_day:
+                    self.bad_models[model] = "daily quota exhausted"
+                    log(f"  {model} has hit its DAILY free-tier quota; switching model")
+                    return None, "next"
+                if self.model_429[model] >= MAX_RATE_LIMIT_PER_MODEL:
+                    log(f"  {model} keeps rate limiting; trying another model")
+                    return None, "next"
+                wait = retry_delay if retry_delay else 20 * (attempt + 1)
+                wait = min(wait, MAX_RATE_WAIT, max(0.0, self.budget_left - 25))
+                if wait <= 0:
+                    self._stop("no time left to wait out a rate limit")
+                    return None, "stop"
+                log(f"  waiting {wait:.0f}s for the per-minute limit to clear")
+                time.sleep(wait)
+                continue
+
+            if r.status_code >= 500:
+                log(f"  Gemini {model}: HTTP {r.status_code} (overloaded)")
+                self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
+                return None, self._transient(model, f"HTTP {r.status_code} (overloaded)")
+
+            if r.status_code in (400, 403, 404):
+                detail = ""
+                try:
+                    detail = ": " + r.json()["error"]["message"][:140]
+                except Exception:  # noqa: BLE001
+                    pass
+                self.bad_models[model] = f"HTTP {r.status_code}"
+                log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
+                self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
+                return None, "next"
+
+            log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
+        return None, "next"
+
+    def _transient(self, model: str, why: str) -> str:
+        self.model_5xx[model] = self.model_5xx.get(model, 0) + 1
+        if self.model_5xx[model] >= MAX_5XX_PER_MODEL:
+            self.bad_models[model] = f"{why} x{self.model_5xx[model]}"
+            log(f"  {model} failed {self.model_5xx[model]} times in a row; benching it for this run")
+        return "transient"
+
+
+class MultiClient(GeminiClient):
+    """Provider chain with one interface: Claude (if a key is set), then Gemini and
+    Gemma on the Gemini key, then Groq's free tier. When another provider is
+    available, Gemini gets a single pass so its overload back-offs cannot eat
+    the whole time budget."""
+
+    def __init__(self, gemini_key: str | None, groq_key: str | None = None, anthropic_key: str | None = None):
+        super().__init__(gemini_key)
+        self.groq_key = groq_key
+        self.groq_model = os.environ.get("GROQ_MODEL", "").strip() or GROQ_DEFAULT_MODEL
+        self.groq_failures = 0
+        self.groq_window: list[tuple[float, int]] = []   # (time, tokens) for the per-minute budget
+        self.groq_reasoning = True
+        self.anthropic_key = anthropic_key
+        self.claude_model = os.environ.get("CLAUDE_MODEL", "").strip() or CLAUDE_DEFAULT_MODEL
+        self.claude_failures = 0
+        self.gemini_out = False
+        if groq_key or anthropic_key:
+            self.gemini_passes = 1
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.anthropic_key or self.api_key or self.groq_key) and os.environ.get("SKIP_AI") != "1"
+
+    def _stop(self, reason: str) -> None:
+        # Gemini giving up should hand over to Groq, not end the AI phase.
+        if "time" not in reason and self.groq_key and self.groq_failures < 3 and not self.gemini_out:
+            self.gemini_out = True
+            self.errors.append(f"Gemini: {reason}")
+            log(f"  Gemini out for this run ({reason}); continuing with Groq")
+            return
+        super()._stop(reason)
+
+    def generate_json(self, prompt: str, label: str = "call"):
+        if self.stopped or not self.enabled:
+            return None
+        if self.anthropic_key and self.claude_failures < 3:
+            r = self._claude(prompt, label)
+            if r is not None:
+                return r
+        if self.api_key and not self.gemini_out:
+            r = super().generate_json(prompt, label)
+            if r is not None:
+                return r
+        if self.groq_key and self.groq_failures < 3 and not self.stopped:
+            return self._groq(prompt, label)
+        return None
+
+    # -- Groq (OpenAI-compatible) -------------------------------------------
+    def _groq_wait(self, estimate: int) -> None:
+        now = time.monotonic()
+        self.groq_window = [(t, n) for t, n in self.groq_window if now - t < 60]
+        used = sum(n for _, n in self.groq_window)
+        if used + estimate > GROQ_TPM_BUDGET and self.groq_window:
+            wait = 61 - (now - self.groq_window[0][0])
+            wait = min(wait, max(0.0, self.budget_left - 20))
+            if wait > 0:
+                log(f"  Groq: pausing {wait:.0f}s to stay inside the free per-minute limit")
+                time.sleep(wait)
+
+    def _groq(self, prompt: str, label: str):
+        estimate = len(prompt) // 4 + 1500
+        for attempt in range(3):
+            if self.budget_left <= 15:
+                self._stop("time budget exhausted")
+                return None
+            self._groq_wait(estimate)
+            body = {
+                "model": self.groq_model,
+                "messages": [
+                    {"role": "system", "content": "Return only valid JSON. If the task asks for a JSON array, "
+                                                  "return an object of the form {\"items\": [ ... ]}."},
+                    {"role": "user", "content": prompt},
+                ],
+                "response_format": {"type": "json_object"},
+                "temperature": 0.3,
+                "max_tokens": 4000,
+            }
+            if self.groq_reasoning and "gpt-oss" in self.groq_model:
+                body["reasoning_effort"] = "low"
+            self.calls += 1
+            try:
+                r = requests.post("https://api.groq.com/openai/v1/chat/completions",
+                                  headers={"Authorization": f"Bearer {self.groq_key}",
+                                           "Content-Type": "application/json"},
+                                  json=body, timeout=90)
+            except Exception as exc:  # noqa: BLE001
+                self.errors.append(f"{label}: Groq network {type(exc).__name__}")
+                time.sleep(min(5 * (attempt + 1), max(0.0, self.budget_left - 20)))
+                continue
+            if r.status_code == 200:
+                try:
+                    data = r.json()
+                    used = int((data.get("usage") or {}).get("total_tokens") or estimate)
+                    self.groq_window.append((time.monotonic(), used))
+                    parsed = unwrap_items(parse_json_text(data["choices"][0]["message"]["content"]))
+                    self.model_used = f"{self.groq_model} (Groq)"
+                    return parsed
+                except Exception:  # noqa: BLE001
+                    self.errors.append(f"{label}: Groq returned unparseable output")
+                    continue
+            msg = ""
+            try:
+                msg = str(r.json().get("error", {}).get("message", ""))[:140]
+            except Exception:  # noqa: BLE001
+                pass
+            log(f"  Groq {self.groq_model}: HTTP {r.status_code} {msg}")
+            self.errors.append(f"{label}: Groq HTTP {r.status_code}")
+            if r.status_code == 400 and "reasoning" in msg.lower() and self.groq_reasoning:
+                self.groq_reasoning = False
+                continue
+            if r.status_code in (401, 403, 404):
+                self.groq_failures = 99
+                return None
+            wait = float(r.headers.get("retry-after", 0) or 0) or 10 * (attempt + 1)
+            time.sleep(min(wait, 60, max(0.0, self.budget_left - 20)))
+        self.groq_failures += 1
+        return None
+
+    # -- Claude (optional, off unless ANTHROPIC_API_KEY is set) -------------
+    def _claude(self, prompt: str, label: str):
+        for attempt in range(3):
+            if self.budget_left <= 15:
+                self._stop("time budget exhausted")
+                return None
+            self.calls += 1
+            try:
+                r = requests.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={"x-api-key": self.anthropic_key or "", "anthropic-version": "2023-06-01",
+                             "content-type": "application/json"},
+                    json={"model": self.claude_model, "max_tokens": 8000,
+                          "system": "You return only valid JSON, with no prose before or after it.",
+                          "messages": [{"role": "user", "content": prompt}]},
+                    timeout=120,
+                )
+            except Exception as exc:  # noqa: BLE001
+                self.errors.append(f"{label}: Claude network {type(exc).__name__}")
+                time.sleep(min(5 * (attempt + 1), max(0.0, self.budget_left - 20)))
+                continue
+            if r.status_code == 200:
+                try:
+                    text = "".join(b.get("text", "") for b in r.json().get("content", []) if b.get("type") == "text")
+                    parsed = parse_json_text(text)
+                    self.model_used = self.claude_model
+                    return parsed
+                except Exception:  # noqa: BLE001
+                    self.errors.append(f"{label}: Claude returned unparseable output")
+                    continue
+            self.errors.append(f"{label}: Claude HTTP {r.status_code}")
+            if r.status_code in (400, 401, 403, 404):
+                self.claude_failures = 99
+                return None
+            wait = float(r.headers.get("retry-after", 0) or 0) or 8 * (attempt + 1)
+            time.sleep(min(wait, 45, max(0.0, self.budget_left - 20)))
+        self.claude_failures += 1
+        return None
+
+
+ClaudeClient = MultiClient     # kept for older references
+
+
+def make_client() -> GeminiClient:
+    gemini = os.environ.get("GEMINI_API_KEY", "").strip() or None
+    groq = os.environ.get("GROQ_API_KEY", "").strip() or None
+    anthropic = os.environ.get("ANTHROPIC_API_KEY", "").strip() or None
+    chain = [n for n, k in (("Claude", anthropic), ("Gemini + Gemma", gemini), ("Groq", groq)) if k]
+    log("  Commentary providers: " + (" -> ".join(chain) or "none"))
+    if groq or anthropic:
+        return MultiClient(gemini, groq, anthropic)
+    return GeminiClient(gemini)
 
 
 # ---------------------------------------------------------------------------
@@ -1031,21 +1326,146 @@ def story_block(stories: list[Story], with_category: bool = False) -> str:
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# Grounding check: every number the model writes must appear in the source
+# ---------------------------------------------------------------------------
+
+NUM_TOKEN = re.compile(r"(?<![\w.])[$₹€£]?\d[\d,]*(?:\.\d+)?")
+# Codes like G20, Q2, COP17, NVS-03, 5G. Lower-case units ("500bn", "16km") are
+# left to the number check, which already compares their digits.
+CODE_TOKEN = re.compile(r"\b(?:[A-Za-z][A-Za-z-]*\d[\w-]*|\d+[A-Z]{1,3})\b")
+
+
+def _norm_num(tok: str) -> str:
+    t = re.sub(r"[$₹€£,]", "", tok)
+    if "." in t:
+        t = t.rstrip("0").rstrip(".")
+    return t
+
+
+def numbers_in(text: str) -> set[str]:
+    return {_norm_num(t) for t in NUM_TOKEN.findall(text or "")}
+
+
+def unsupported_numbers(text: str, source: str, allowed: set[str] | None = None) -> list[str]:
+    """Numbers/codes in `text` that do not occur in `source`."""
+    src_nums = numbers_in(source) | (allowed or set())
+    src_low = (source or "").lower()
+    bad = []
+    for n in numbers_in(text):
+        if n in src_nums:
+            continue
+        if n.isdigit() and int(n) <= 12:
+            continue                       # "two points", "Q3", small counts
+        bad.append(n)
+    for code in CODE_TOKEN.findall(text or ""):
+        if code.lower() not in src_low and not re.fullmatch(r"\d+(st|nd|rd|th|s)", code, re.I):
+            bad.append(code)
+    return bad
+
+
+def _year_allow() -> set[str]:
+    y = datetime.now(IST).year
+    return {str(y), str(y - 1)}
+
+
+SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'])")
+
+
+def keep_grounded(text: str, source: str, counter: list[int]) -> str:
+    """Drop any sentence that carries a number the source does not contain."""
+    if not text:
+        return text
+    kept = []
+    for sent in SENT_SPLIT.split(text.strip()):
+        if unsupported_numbers(sent, source, _year_allow()):
+            counter[0] += 1
+            continue
+        kept.append(sent)
+    return " ".join(kept).strip()
+
+
+def ground_story(s: "Story") -> int:
+    """Strip unsupported numbers from one story's commentary. Returns removals."""
+    source = " ".join([s.title, s.description, s.snippet])
+    removed = [0]
+    summary = keep_grounded(s.summary, source, removed)
+    if not summary:
+        summary = s.description or s.snippet[:300]
+    s.summary = summary
+    s.why_it_matters = keep_grounded(s.why_it_matters, source, removed)
+    s.gd_for = [p for p in (keep_grounded(x, source, removed) for x in s.gd_for) if p]
+    s.gd_against = [p for p in (keep_grounded(x, source, removed) for x in s.gd_against) if p]
+    if s.key_term and unsupported_numbers(s.key_term.get("meaning", ""), source, _year_allow()):
+        s.key_term = None
+        removed[0] += 1
+    if s.key_fact:
+        fact = re.sub(r"^context:\s*", "", s.key_fact, flags=re.I)
+        if s.key_fact.lower().startswith("context") or unsupported_numbers(fact, source, _year_allow()):
+            s.key_fact = ""
+            removed[0] += 1
+    return removed[0]
+
+
+def ground_topic(topic: dict | None, concept: dict | None, stories: list["Story"]) -> int:
+    source = " ".join(" ".join([s.title, s.description, s.snippet]) for s in stories)
+    removed = [0]
+    for obj, keys in ((topic, ("topic", "why_now", "opening_line", "closing_line")),
+                      (concept, ("explanation", "indian_example", "use_in_gd"))):
+        if not isinstance(obj, dict):
+            continue
+        for k in keys:
+            if isinstance(obj.get(k), str):
+                if k == "topic":
+                    if unsupported_numbers(obj[k], source, _year_allow()):
+                        obj[k] = re.sub(r"\s*[$₹€£]?\d[\d,.]*%?", "", obj[k]).strip()
+                        removed[0] += 1
+                else:
+                    obj[k] = keep_grounded(obj[k], source, removed)
+        if isinstance(obj.get("perspectives"), list):
+            obj["perspectives"] = [p for p in (keep_grounded(str(x), source, removed)
+                                               for x in obj["perspectives"]) if p]
+    return removed[0]
+
+
+GROUNDING = {"removed": 0}
+
+
 def enrich_batch(client: GeminiClient, stories: list[Story], label: str) -> int:
     if not stories:
         return 0
-    prompt = f"""You are a coach preparing an Indian MBA student for placement group discussions (GDs) and interviews.
+    prompt = f"""You are a senior editor writing a neutral daily current-affairs briefing for Indian MBA
+students and professionals. Readers use it to understand the world and to speak well in group
+discussions and interviews. Think of the standard of a top business school case note: precise,
+balanced and instructive.
 Today's date: {datetime.now(IST).strftime('%d %B %Y')}.
 
 For EACH story below, write:
-- "summary": 2-3 short sentences in simple English explaining what happened. Use ONLY the
-  information given. Never invent numbers, dates or names.
-- "why_it_matters": 1-2 sentences, with an India angle where relevant.
-- "gd_for": exactly 2 short points supporting the development / the "pro" side.
-- "gd_against": exactly 2 short points opposing it, or alternative perspectives / risks.
-- "key_fact": ONE quotable fact or number taken from the story text above. If the story text
-  contains no usable number, give a well-known background statistic and START the string with
-  "Context: " so the student knows to verify it.
+- "summary": 2-3 short sentences in plain English: what happened, who did it, and what changes.
+- "why_it_matters": 1-2 sentences linking the story to a larger trend or decision that matters
+  for India's economy, business, governance or society.
+- "gd_for": exactly 2 points making the strongest case FOR the development or decision.
+- "gd_against": exactly 2 points making the strongest case AGAINST it, or the main risks.
+  Each of the four points must be a different kind of argument (economic, social, strategic,
+  ethical, practical), and both sides must be argued as well as their best advocates would.
+- "key_fact": ONE quotable fact or number copied from the story text. If the story text has
+  no concrete fact worth quoting, return an empty string.
+- "key_term": {{"term": "...", "meaning": "..."}}: one concept or term from the story worth
+  learning (for example "current account deficit", "PIL", "working capital"), with a one-sentence
+  general definition and no numbers. Use null if nothing in the story qualifies.
+
+NEUTRALITY RULES:
+- Report, do not editorialise. No loaded or partisan words ("slams", "historic", "draconian",
+  "anti-national", "landmark") unless quoting someone, and then say who.
+- Attribute claims and positions to whoever holds them ("the government says", "critics argue",
+  "the company expects"). Never present one side's claim as settled fact.
+- Treat all parties, governments and companies the same way.
+
+STRICT RULES (every output is checked automatically against the story text):
+- Use ONLY the headline and Details given for that story. Do not add outside knowledge.
+- Never write a number, percentage, amount, date, name or quotation that is not in the
+  story text. Arguments in gd_for / gd_against must be reasoning, not new statistics.
+- If the Details are thin, write a shorter summary rather than filling gaps.
 
 Return ONLY a JSON array with one object per story, in the same order, each with an "index"
 field matching the story number.
@@ -1077,23 +1497,46 @@ Stories:
         s.gd_for = [str(x).strip() for x in item.get("gd_for", []) if str(x).strip()][:2]
         s.gd_against = [str(x).strip() for x in item.get("gd_against", []) if str(x).strip()][:2]
         s.key_fact = str(item.get("key_fact", "")).strip()
+        kt = item.get("key_term")
+        if isinstance(kt, dict) and str(kt.get("term", "")).strip() and str(kt.get("meaning", "")).strip():
+            s.key_term = {"term": str(kt["term"]).strip()[:60], "meaning": str(kt["meaning"]).strip()[:280]}
+        GROUNDING["removed"] += ground_story(s)
         s.ai = True
         done += 1
     log(f"  {label}: {done}/{len(stories)} stories enriched")
     return done
 
 
+def enrich_slice(client: GeminiClient, stories: list[Story], label: str, depth: int = 0) -> int:
+    """Try a slice; if it comes back empty, split it in half and try each half,
+    down to single stories. Small requests get through busy servers and never
+    time out."""
+    if not stories or client.stopped:
+        return 0
+    done = enrich_batch(client, stories, label)
+    left = [s for s in stories if not s.ai]
+    if left and len(stories) > 1 and depth < 3 and not client.stopped and client.budget_left > 45:
+        mid = (len(left) + 1) // 2
+        log(f"  {label}: splitting {len(left)} story(ies) into smaller slices")
+        done += enrich_slice(client, left[:mid], f"{label}.a", depth + 1)
+        done += enrich_slice(client, left[mid:], f"{label}.b", depth + 1)
+    return done
+
+
 def enrich_all(client: GeminiClient, stories: list[Story]) -> None:
-    """Enrich every chosen story in batches, then one retry pass for the gaps."""
+    """Enrich every chosen story in slices, then one retry pass for the gaps."""
     batches = [stories[i:i + ENRICH_BATCH_SIZE] for i in range(0, len(stories), ENRICH_BATCH_SIZE)]
     for n, batch in enumerate(batches, 1):
         if client.stopped:
             break
-        enrich_batch(client, batch, f"batch {n}/{len(batches)}")
+        enrich_slice(client, batch, f"batch {n}/{len(batches)}")
     missing = [s for s in stories if not s.ai]
-    if missing and not client.stopped and client.budget_left > 60:
-        log(f"  Retrying {len(missing)} story(ies) that came back empty")
-        enrich_batch(client, missing[:ENRICH_BATCH_SIZE], "retry")
+    for n in range(0, len(missing), ENRICH_BATCH_SIZE):
+        if client.stopped or client.budget_left < 60:
+            break
+        if n == 0:
+            log(f"  Retrying {len(missing)} story(ies) that came back empty")
+        enrich_batch(client, missing[n:n + ENRICH_BATCH_SIZE], f"retry {n // ENRICH_BATCH_SIZE + 1}")
 
 
 def generate_topic_and_concept(client: GeminiClient, all_stories: list[Story], recent_concepts: list[str]):
@@ -1112,16 +1555,24 @@ Provide:
 - "topic": the GD topic phrased as B-schools phrase it (a statement or question, under 15 words)
 - "why_now": 1-2 sentences on why this is topical
 - "opening_line": a confident 2-sentence opening a student can say to start the GD (frame the topic, give one fact)
-- "closing_line": a strong 2-sentence closing that summarises and takes a balanced stand
-- "perspectives": 3 short bullet points giving different stakeholder perspectives (government, industry, citizens, global)
+- "closing_line": a strong 2-sentence closing that weighs both sides fairly and lands on a
+  reasoned, balanced position rather than a partisan one
+- "perspectives": 3-4 points, each "Stakeholder: their view", covering genuinely different
+  stakeholders (for example government, industry, citizens, critics, global partners), each
+  stated fairly in terms that stakeholder would accept
+Write neutrally: attribute positions, avoid loaded words, and treat all parties the same way.
 
 Task 2 — "Concept of the Day": pick one business / economics / strategy / finance concept that helps
 in GDs and interviews, ideally connected to today's news. Do NOT use these recently covered
 concepts: {avoid}. Provide:
 - "name": concept name
 - "explanation": 3-4 simple sentences explaining it as if to a smart friend
-- "indian_example": a concrete Indian company, policy or market example (2-3 sentences)
+- "indian_example": a concrete Indian company, policy or market example (2-3 sentences);
+  describe it qualitatively and do not quote figures you cannot be sure of
 - "use_in_gd": 1-2 sentences on how to drop this concept into a GD or interview answer
+
+Do not use any number in the topic, opening or closing lines that is not in today's headlines
+or story details; every number is checked automatically and unsupported ones are removed.
 
 Return ONLY JSON: {{"gd_topic": {{...}}, "concept": {{...}}}}
 """
@@ -1160,8 +1611,7 @@ def fallback_topic(all_stories: list[Story]) -> dict:
     return {
         "topic": title,
         "why_now": (
-            "Chosen automatically from today's most-covered India-relevant stories, because AI "
-            "commentary was unavailable for this brief."
+            "The most widely covered India-relevant story of the day."
         ),
         "opening_line": (
             "Let me frame the discussion. This issue matters because it affects policy, industry "
@@ -1264,6 +1714,7 @@ def build_payload(
         ],
         "sources_ok": ok_sources,
         "sources_failed": failed_sources,
+        "grounding": {"checked": ai_stories, "removed": GROUNDING["removed"]},
     }
     brief["reading_time_min"] = reading_time_minutes(brief)
     return brief
@@ -1286,6 +1737,132 @@ def write_files(brief: dict) -> None:
         }
     )
     save_index(index)
+
+
+# ---------------------------------------------------------------------------
+# Backfill: re-run only the AI steps on briefs that already exist
+# ---------------------------------------------------------------------------
+
+BACKFILL_DAYS = int(os.environ.get("BACKFILL_DAYS", "7"))
+
+
+def story_from_json(d: dict, category: str) -> Story:
+    published = None
+    if d.get("published"):
+        try:
+            published = datetime.fromisoformat(d["published"])
+        except ValueError:
+            pass
+    s = Story(
+        title=d.get("title", ""), url=d.get("url", ""), source=d.get("source", ""),
+        category=category, published=published,
+        description="" if d.get("ai") else d.get("summary", ""),
+        weight=1, cluster_size=int(d.get("sources_count") or 1),
+    )
+    if d.get("ai"):
+        s.summary = d.get("summary", "")
+        s.why_it_matters = d.get("why_it_matters", "")
+        s.gd_for = list(d.get("gd_for") or [])
+        s.gd_against = list(d.get("gd_against") or [])
+        s.key_fact = d.get("key_fact", "")
+        s.key_term = d.get("key_term") if isinstance(d.get("key_term"), dict) else None
+        s.ai = True
+    return s
+
+
+def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str]) -> bool:
+    """Fill in commentary, topic and concept that the morning run could not get.
+    Returns True if the file changed."""
+    brief = json.loads(path.read_text(encoding="utf-8"))
+    GROUNDING["removed"] = 0
+    cats = brief.get("categories") or []
+    for c in cats:     # never re-publish a story from outside the trusted list
+        c["stories"] = [d for d in c.get("stories", [])
+                        if is_trusted(d.get("url", "")) or str(d.get("url", "")).startswith("https://news.google.com/")]
+    stories = {c["key"]: [story_from_json(d, c["key"]) for d in c.get("stories", [])] for c in cats}
+    everything = [s for c in cats for s in stories[c["key"]]]
+    missing = [s for s in everything if not s.ai]
+    need_topic = not brief.get("gd_topic") or (brief.get("gd_topic") or {}).get("fallback")
+    need_concept = not (brief.get("concept") or {}).get("name")
+    if not (missing or need_topic or need_concept):
+        return False
+    log(f"\n  {path.name}: {len(missing)} story(ies) without commentary"
+        f"{', topic missing' if need_topic else ''}{', concept missing' if need_concept else ''}")
+
+    changed = False
+    if need_topic or need_concept:
+        topic, concept = generate_topic_and_concept(client, everything, recent_concepts)
+        GROUNDING["removed"] += ground_topic(topic, concept, everything)
+        if topic and need_topic:
+            brief["gd_topic"], changed = topic, True
+        if concept and need_concept:
+            brief["concept"], changed = concept, True
+    if missing:
+        before = sum(1 for s in everything if s.ai)
+        enrich_all(client, missing)
+        changed = changed or sum(1 for s in everything if s.ai) > before
+    if not changed:
+        return False
+
+    for c in cats:
+        for s in stories[c["key"]]:
+            if not s.summary:
+                s.summary = s.description or "Open the source link to read the full story."
+        c["stories"] = [s.to_json() for s in stories[c["key"]]]
+    brief["ai_enabled"] = True
+    brief["ai_story_count"] = sum(1 for s in everything if s.ai)
+    brief["ai_model"] = client.model_used or brief.get("ai_model")
+    brief["ai_errors"] = sorted(set(client.errors))[:10]
+    brief["ai_models_dropped"] = [f"{m}: {why}" for m, why in client.bad_models.items()]
+    brief["ai_backfilled_at"] = datetime.now(IST).isoformat()
+    prev = brief.get("grounding") or {}
+    brief["grounding"] = {"checked": brief["ai_story_count"],
+                          "removed": int(prev.get("removed", 0)) + GROUNDING["removed"]}
+    brief["reading_time_min"] = reading_time_minutes(brief)
+
+    payload = json.dumps(brief, indent=2, ensure_ascii=False)
+    path.write_text(payload, encoding="utf-8")
+    latest = DATA_DIR / "latest.json"
+    try:
+        if json.loads(latest.read_text(encoding="utf-8")).get("date") == brief.get("date"):
+            latest.write_text(payload, encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
+    index = load_index()
+    for e in index:
+        if e.get("date") == brief.get("date"):
+            e["gd_topic"] = (brief.get("gd_topic") or {}).get("topic", e.get("gd_topic", ""))
+            e["concept"] = (brief.get("concept") or {}).get("name", e.get("concept", ""))
+            e["ai"] = bool(brief["ai_story_count"])
+    save_index(index)
+    log(f"  {path.name}: now {brief['ai_story_count']}/{brief.get('story_count')} stories with commentary")
+    return True
+
+
+def backfill() -> int:
+    client = make_client()
+    if not client.enabled:
+        log("Backfill skipped: no GEMINI_API_KEY")
+        return 0
+    today = datetime.now(IST).date()
+    files = []
+    for n in range(BACKFILL_DAYS):
+        f = ARCHIVE_DIR / f"{(today - timedelta(days=n)).isoformat()}.json"
+        if f.exists():
+            files.append(f)          # newest first: today's brief gets the budget first
+    log(f"Backfill: checking {len(files)} brief(s) from the last {BACKFILL_DAYS} days, "
+        f"AI phase capped at {AI_DEADLINE_SECONDS}s")
+    recent_concepts = [e.get("concept") for e in load_index()[:14] if e.get("concept")]
+    updated = 0
+    for f in files:
+        if client.stopped:
+            break
+        try:
+            updated += backfill_brief(client, f, recent_concepts)
+        except Exception as exc:  # noqa: BLE001
+            log(f"  {f.name}: backfill failed ({type(exc).__name__}: {exc})")
+    log(f"\nBackfill done: {updated} brief(s) updated, {client.calls} Gemini call(s)")
+    return 0
 
 
 # ---------------------------------------------------------------------------
@@ -1312,7 +1889,7 @@ def main() -> int:
     for c in CATEGORIES:
         log(f"  {c['title']:42} {len(by_cat[c['key']]):3} candidates -> {len(shortlist[c['key']])} shortlisted")
 
-    client = GeminiClient(os.environ.get("GEMINI_API_KEY", "").strip() or None)
+    client = make_client()
 
     if client.enabled:
         log("\n3) Curating the shortlist with Gemini")
@@ -1335,6 +1912,16 @@ def main() -> int:
             for s, url in zip(gnews_stories, ex.map(lambda x: decode_gnews_link(x.url), gnews_stories)):
                 if safe_url(url):
                     s.url = url
+    untrusted = [s for s in chosen_all
+                 if not s.url.startswith("https://news.google.com/")
+                 and (not is_trusted(s.url) or SPONSORED_URL.search(s.url))]
+    if untrusted:
+        for s in untrusted:
+            log(f"  Dropped (untrusted source): {s.title[:70]} -> {host_of(s.url)}")
+        bad = {id(s) for s in untrusted}
+        for k in selected:
+            selected[k] = [s for s in selected[k] if id(s) not in bad]
+        chosen_all = [s for s in chosen_all if id(s) not in bad]
     log(f"  {len(gnews_stories)} Google News link(s) resolved; "
         f"{add_snippets(chosen_all)} article snippet(s) fetched")
 
@@ -1352,6 +1939,7 @@ def main() -> int:
         log("\n6) Writing the GD topic and concept of the day")
         recent_concepts = [e.get("concept") for e in load_index()[:14] if e.get("concept")]
         topic, concept = generate_topic_and_concept(client, chosen_all, recent_concepts)
+        GROUNDING["removed"] += ground_topic(topic, concept, chosen_all)
         if topic:
             log(f"  Topic: {topic.get('topic', '')[:90]}")
         else:
@@ -1382,4 +1970,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if "--backfill" in sys.argv or os.environ.get("BACKFILL") == "1":
+        sys.exit(backfill())
     sys.exit(main())

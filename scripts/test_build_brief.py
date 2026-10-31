@@ -165,9 +165,13 @@ class TestGeminiFailover(unittest.TestCase):
         self.calls = []
         bb.GEMINI_DELAY_SECONDS_ORIG = bb.GEMINI_DELAY_SECONDS
         bb.GEMINI_DELAY_SECONDS = 0
+        self.sleeps = []
+        self._sleep = bb.time.sleep
+        bb.time.sleep = self.sleeps.append       # never actually wait in tests
 
     def tearDown(self):
         bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+        bb.time.sleep = self._sleep
 
     def client(self, responder):
         client = bb.GeminiClient("fake-key")
@@ -181,7 +185,8 @@ class TestGeminiFailover(unittest.TestCase):
         bb.requests.post = fake_post
         return client
 
-    def test_overloaded_model_is_dropped_for_the_whole_run(self):
+    def test_one_503_does_not_bench_a_model(self):
+        """The Oct failure mode: one 503 per model used to wipe out the whole AI phase."""
         def responder(model):
             if model == "m-new":
                 return FakeResponse(503, text="overloaded")
@@ -190,7 +195,34 @@ class TestGeminiFailover(unittest.TestCase):
         client = self.client(responder)
         self.assertIsNotNone(client.generate_json("p", "one"))
         self.assertIsNotNone(client.generate_json("p", "two"))
-        self.assertEqual(self.calls.count("m-new"), 1, "503 model must not be retried")
+        self.assertNotIn("m-new", client.bad_models)
+        self.assertEqual(client.model_used, "m-mid", "the model that answered should be preferred")
+        self.assertEqual(self.calls.count("m-new"), 1, "second call should start with the working model")
+
+    def test_recovers_when_every_model_is_briefly_overloaded(self):
+        attempts = {"n": 0}
+
+        def responder(model):
+            attempts["n"] += 1
+            if attempts["n"] <= 4:                  # first sweep: everyone is overloaded
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, ok_payload({"ok": True}))
+
+        client = self.client(responder)
+        self.assertEqual(client.generate_json("p", "one"), {"ok": True})
+        self.assertFalse(client.stopped)
+        self.assertTrue(any(w > 0 for w in self.sleeps), "should back off between overloaded models")
+
+    def test_persistently_overloaded_model_is_eventually_benched(self):
+        def responder(model):
+            if model == "m-new":
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, ok_payload({"ok": True}))
+
+        client = self.client(responder)
+        for _ in range(bb.MAX_5XX_PER_MODEL):
+            client.model_used = None                 # force m-new to be tried first
+            client.generate_json("p", "x")
         self.assertIn("m-new", client.bad_models)
 
     def test_daily_quota_switches_model_instead_of_stopping(self):
@@ -214,6 +246,199 @@ class TestGeminiFailover(unittest.TestCase):
         self.assertIn("Quota", msg)
         self.assertGreater(delay, 27)
         self.assertFalse(per_day)
+
+
+class TestBackfill(unittest.TestCase):
+    def test_fills_only_missing_commentary(self):
+        import json, tempfile
+        tmp = Path(tempfile.mkdtemp())
+        orig = (bb.DATA_DIR, bb.ARCHIVE_DIR)
+        bb.DATA_DIR, bb.ARCHIVE_DIR = tmp, tmp / "archive"
+        bb.ARCHIVE_DIR.mkdir()
+        done = {"title": "Already done", "url": "https://www.thehindu.com/a1", "source": "X", "summary": "AI text",
+                "why_it_matters": "w", "gd_for": ["a"], "gd_against": ["b"], "key_fact": "k", "ai": True}
+        todo = {"title": "RBI holds repo rate", "url": "https://www.livemint.com/a2", "source": "Mint",
+                "summary": "RSS text", "why_it_matters": "", "gd_for": [], "gd_against": [],
+                "key_fact": "", "ai": False}
+        brief = {"date": "2026-10-31", "story_count": 2, "gd_topic": {"topic": "t"},
+                 "concept": {"name": "c"}, "categories": [{"key": "economy", "title": "E",
+                                                           "stories": [done, todo]}]}
+        path = bb.ARCHIVE_DIR / "2026-10-31.json"
+        path.write_text(json.dumps(brief))
+        (tmp / "latest.json").write_text(json.dumps(brief))
+        prompts = []
+
+        class Fake:
+            stopped, budget_left, errors, bad_models, model_used, calls = False, 999, [], {}, "m", 1
+
+            def generate_json(self, prompt, label=""):
+                prompts.append(prompt)
+                return [{"index": 0, "summary": "New AI summary", "why_it_matters": "Because",
+                         "gd_for": ["p1", "p2"], "gd_against": ["c1", "c2"], "key_fact": "6.5%"}]
+        try:
+            self.assertTrue(bb.backfill_brief(Fake(), path, []))
+            out = json.loads((tmp / "latest.json").read_text())
+            s0, s1 = out["categories"][0]["stories"]
+            self.assertEqual(s0["summary"], "AI text", "existing commentary must be left alone")
+            self.assertTrue(s1["ai"])
+            self.assertEqual(s1["summary"], "New AI summary")
+            self.assertEqual(out["ai_story_count"], 2)
+            self.assertEqual(len(prompts), 1)
+            self.assertNotIn("Already done", prompts[0])
+            self.assertFalse(bb.backfill_brief(Fake(), path, []), "nothing left to do")
+        finally:
+            bb.DATA_DIR, bb.ARCHIVE_DIR = orig
+
+
+class TestGrounding(unittest.TestCase):
+    SRC = ("India's forex reserves fell $1.2 billion to $719.74 billion in the week ended October 24, "
+           "according to the RBI. Poverty fell from 27.1% to 2.6% (World Bank). Rs 8,387 crore profit. G20 talks.")
+
+    def test_supported_numbers_pass(self):
+        self.assertEqual(bb.unsupported_numbers("Reserves fell $1.2 billion to $719.74 billion.", self.SRC), [])
+        self.assertEqual(bb.unsupported_numbers("Profit was ₹8,387 crore at the G20.", self.SRC), [])
+        self.assertEqual(bb.unsupported_numbers("Poverty is now 2.60%.", self.SRC), [])
+
+    def test_invented_numbers_are_caught(self):
+        self.assertIn("650", bb.unsupported_numbers("Reserves peaked at $650 billion.", self.SRC))
+        self.assertIn("COP29", bb.unsupported_numbers("As agreed at COP29.", self.SRC))
+
+    def test_unit_suffix_is_not_a_code(self):
+        self.assertEqual(bb.unsupported_numbers("A $1.2bn fall.", self.SRC), [])
+
+    def test_sentence_with_invented_number_is_dropped(self):
+        n = [0]
+        out = bb.keep_grounded("Reserves fell $1.2 billion. Analysts expect $800 billion by March.", self.SRC, n)
+        self.assertEqual(out, "Reserves fell $1.2 billion.")
+        self.assertEqual(n[0], 1)
+
+    def test_story_grounding(self):
+        s = make("India forex reserves fall $1.2 billion to $719.74 billion")
+        s.description = self.SRC
+        s.summary = "Reserves fell to $719.74 billion. This is the lowest since 2019 at $600 billion."
+        s.gd_for = ["Reserves are still large.", "Imports are covered for 11.5 months."]
+        s.key_fact = "Context: India holds the 4th largest reserves globally at $700bn."
+        removed = bb.ground_story(s)
+        self.assertEqual(s.summary, "Reserves fell to $719.74 billion.")
+        self.assertEqual(s.gd_for, ["Reserves are still large."])
+        self.assertEqual(s.key_fact, "", "background 'Context:' facts are no longer allowed")
+        self.assertEqual(removed, 3)
+
+    def test_trusted_domains(self):
+        self.assertTrue(bb.is_trusted("https://www.thehindu.com/news/x"))
+        self.assertTrue(bb.is_trusted("https://economictimes.indiatimes.com/news/x"))
+        self.assertFalse(bb.is_trusted("https://randomnews.example.com/x"))
+        self.assertFalse(bb.is_trusted("https://thehindu.com.evil.io/x"))
+        self.assertTrue(bb.SPONSORED_URL.search("https://economictimes.indiatimes.com/brand-solutions/x/123.cms"))
+
+
+class TestClaudeClient(unittest.TestCase):
+    def setUp(self):
+        self._post, self._sleep = bb.requests.post, bb.time.sleep
+        bb.time.sleep = lambda *_: None
+        bb.GEMINI_DELAY_SECONDS_ORIG, bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS, 0
+
+    def tearDown(self):
+        bb.requests.post, bb.time.sleep = self._post, self._sleep
+        bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+
+    def test_claude_success(self):
+        calls = []
+
+        def post(url, **kw):
+            calls.append(url)
+            return FakeResponse(200, {"content": [{"type": "text", "text": '```json\n{"ok": 1}\n```'}]})
+        bb.requests.post = post
+        c = bb.MultiClient(None, None, "sk-test")
+        self.assertEqual(c.generate_json("p"), {"ok": 1})
+        self.assertIn("api.anthropic.com", calls[0])
+        self.assertEqual(c.model_used, bb.CLAUDE_DEFAULT_MODEL)
+
+    def test_bad_key_falls_back_to_gemini(self):
+        def post(url, **kw):
+            if "anthropic" in url:
+                return FakeResponse(401, {"error": {"message": "invalid x-api-key"}})
+            return FakeResponse(200, ok_payload({"from": "gemini"}))
+        bb.requests.post = post
+        c = bb.MultiClient("gem-key", None, "sk-bad")
+        c.candidates = ["m1"]
+        self.assertEqual(c.generate_json("p"), {"from": "gemini"})
+        self.assertEqual(c.claude_failures, 99, "a bad key must not be retried all morning")
+
+    def test_key_term_with_invented_number_is_dropped(self):
+        s = make("RBI keeps repo rate unchanged")
+        s.description = "The RBI kept the repo rate unchanged."
+        s.summary = "The RBI kept the repo rate unchanged."
+        s.key_term = {"term": "Repo rate", "meaning": "The rate at which the RBI lends to banks, now 5.5%."}
+        bb.ground_story(s)
+        self.assertIsNone(s.key_term)
+
+
+class TestFreeFallbacks(unittest.TestCase):
+    def setUp(self):
+        self._post, self._sleep = bb.requests.post, bb.time.sleep
+        bb.time.sleep = lambda *_: None
+        bb.GEMINI_DELAY_SECONDS_ORIG, bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS, 0
+
+    def tearDown(self):
+        bb.requests.post, bb.time.sleep = self._post, self._sleep
+        bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+
+    def test_groq_takes_over_when_gemini_is_overloaded(self):
+        hits = []
+
+        def post(url, **kw):
+            hits.append(url)
+            if "googleapis" in url:
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, {"choices": [{"message": {"content": '{"items": [{"index": 0}]}'}}],
+                                      "usage": {"total_tokens": 900}})
+        bb.requests.post = post
+        c = bb.MultiClient("gem", "groq-key")
+        c.candidates = ["m1", "m2"]
+        self.assertEqual(c.generate_json("p"), [{"index": 0}], "Groq's {items:[...]} is unwrapped")
+        self.assertTrue(any("groq.com" in h for h in hits))
+        self.assertLessEqual(sum("googleapis" in h for h in hits), 2, "only one quick pass on Gemini")
+        self.assertIn("Groq", c.model_used)
+
+    def test_gemma_is_called_without_json_mode(self):
+        bodies = {}
+
+        def post(url, json=None, **kw):
+            model = url.split("/models/")[1].split(":")[0]
+            bodies[model] = json
+            if model.startswith("gemini"):
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, {"candidates": [{"content": {"parts": [{"text": 'Here you go:\n```json\n[{"index": 0}]\n```'}]}}]})
+        bb.requests.post = post
+        c = bb.GeminiClient("gem")
+        c.candidates = ["gemini-x", "gemma-4-31b-it"]
+        self.assertEqual(c.generate_json("p"), [{"index": 0}])
+        self.assertEqual(bodies["gemma-4-31b-it"]["generationConfig"], {})
+        self.assertIn("responseMimeType", bodies["gemini-x"]["generationConfig"])
+
+    def test_failed_slice_is_split_down(self):
+        sizes = []
+
+        class Fake:
+            stopped, budget_left, errors, bad_models, model_used, calls = False, 999, [], {}, "m", 0
+
+            def generate_json(self, prompt, label=""):
+                n = prompt.count("\n[")
+                sizes.append(n)
+                if n > 2:
+                    return None                       # big slices fail, like a busy server
+                return [{"index": i, "summary": "Short summary."} for i in range(n)]
+        stories = [make(f"Story number {i} about trade and growth") for i in range(5)]
+        bb.enrich_slice(Fake(), stories, "batch 1/1")
+        self.assertTrue(all(s.ai for s in stories))
+        self.assertEqual(sizes[0], 5)
+        self.assertLessEqual(max(sizes[1:]), 3)
+
+    def test_parse_json_text_tolerates_prose(self):
+        self.assertEqual(bb.parse_json_text('Sure! {"a": 1} Hope this helps.'), {"a": 1})
+        self.assertEqual(bb.unwrap_items({"items": [1, 2]}), [1, 2])
+        self.assertEqual(bb.unwrap_items({"gd_topic": {}, "concept": {}}), {"gd_topic": {}, "concept": {}})
 
 
 class TestMisc(unittest.TestCase):
