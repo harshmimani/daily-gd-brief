@@ -3,25 +3,14 @@
   "date_label": "Sunday, 25 October 2026",
   "generated_at": "2026-10-25T10:18:48.954294+05:30",
   "ai_enabled": true,
-  "ai_model": "gemini-3.5-flash",
-  "ai_story_count": 18,
+  "ai_model": "gemini-3.5-flash-lite",
+  "ai_story_count": 22,
   "ai_errors": [
-    "batch 3/3: HTTP 404 on gemini-2.5-flash",
-    "batch 3/3: HTTP 503 on gemini-3.5-flash",
-    "batch 3/3: all models failed",
-    "curation: network ReadTimeout",
-    "every candidate model is unavailable (gemini-3.6-flash: HTTP 503 (overloaded), gemini-3.8-flash: HTTP 503 (overloaded), gemini-3.7-flash: HTTP 503 (overloaded), gemini-3.5-flash: HTTP 503 (overloaded))",
-    "topic+concept: HTTP 503 on gemini-3.6-flash",
-    "topic+concept: HTTP 503 on gemini-3.7-flash",
-    "topic+concept: HTTP 503 on gemini-3.8-flash"
+    "batch 1/5: HTTP 503 on gemini-3.7-flash",
+    "batch 1/5: HTTP 503 on gemini-3.8-flash",
+    "batch 3/5: unparseable output"
   ],
-  "ai_models_dropped": [
-    "gemini-3.6-flash: HTTP 503 (overloaded)",
-    "gemini-3.8-flash: HTTP 503 (overloaded)",
-    "gemini-3.7-flash: HTTP 503 (overloaded)",
-    "gemini-3.5-flash: HTTP 503 (overloaded)",
-    "gemini-2.5-flash: HTTP 404"
-  ],
+  "ai_models_dropped": [],
   "story_count": 22,
   "story_cap": 25,
   "gd_topic": {
@@ -64,6 +53,7 @@
           ],
           "key_fact": "Context: India is one of the world's largest providers of generic medicines to foreign markets.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -84,6 +74,7 @@
           ],
           "key_fact": "Context: China is currently the largest bilateral trading partner of the Russian Federation.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -104,6 +95,7 @@
           ],
           "key_fact": "Context: India imports around 85% of its total crude oil requirements, heavily relying on West Asian stability.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         }
       ]
@@ -130,6 +122,7 @@
           ],
           "key_fact": "Inflation in rural areas was found to be higher than in urban areas.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         },
         {
@@ -150,6 +143,7 @@
           ],
           "key_fact": "Context: India's IT and software services sector contributes over 7% to the nation's total GDP.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -170,6 +164,7 @@
           ],
           "key_fact": "Context: The Financial Stability and Development Council (FSDC) is an apex-level body chaired by India's Union Finance Minister.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -190,6 +185,7 @@
           ],
           "key_fact": "Context: Germany is India's largest trading partner in the European Union.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -210,6 +206,7 @@
           ],
           "key_fact": "Foreign Direct Investment remains robust, driven by significant inflows from major sources like the US and Singapore.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         },
         {
@@ -230,6 +227,7 @@
           ],
           "key_fact": "Context: France represents the second-largest national economy within the European Union.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         }
       ]
@@ -256,6 +254,7 @@
           ],
           "key_fact": "Context: Electric vehicles currently account for around 2.5% of total passenger vehicle sales in India.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -276,6 +275,7 @@
           ],
           "key_fact": "BPCL's net profit fell 22.5% to Rs 4,993 crore in the September quarter.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         },
         {
@@ -296,6 +296,7 @@
           ],
           "key_fact": "Tata Motors maintained its offer of Rs 1,531 per share to acquire over 80% of Iveco.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         },
         {
@@ -316,6 +317,7 @@
           ],
           "key_fact": "Over 70 Indian new-age tech companies have crossed the IPO milestone and are listed on bourses.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         }
       ]
@@ -342,6 +344,7 @@
           ],
           "key_fact": "Union IT Minister Ashwini Vaishnaw set October 23, 2028, as the target date for India's domestic smartphone brand.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         },
         {
@@ -362,6 +365,7 @@
           ],
           "key_fact": "Context: Industry reports estimate that over 80% of corporate artificial intelligence projects fail to reach deployment.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -382,6 +386,7 @@
           ],
           "key_fact": "OpenAI paused frontier model training after a configuration error gave a research model internet access in September.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         }
       ]
@@ -408,6 +413,7 @@
           ],
           "key_fact": "Scientists from IMD and IITM linked the Pacific's 'Victoria Mode' to expanding semi-arid zones in north-west India.",
           "fact_is_context": false,
+          "key_term": null,
           "ai": true
         },
         {
@@ -428,6 +434,7 @@
           ],
           "key_fact": "Context: The Rosebank offshore oil field holds an estimated 300 million barrels of recoverable oil reserves.",
           "fact_is_context": true,
+          "key_term": null,
           "ai": true
         },
         {
@@ -436,13 +443,23 @@
           "source": "Science Daily",
           "published": "2026-10-24T18:20:06+05:30",
           "sources_count": 1,
-          "summary": "Tiny samples from asteroid Bennu are rewriting scientists&apos; understanding of how our Solar System formed. New evidence suggests that Bennu was born where material from the inner and outer Solar System mixed, with Jupiter playing a surprising role in shaping its formation.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
-          "key_fact": "",
+          "summary": "Tiny samples from asteroid Bennu are rewriting scientists' understanding of how our Solar System formed. New evidence suggests that Bennu was born where material from the inner and outer Solar System mixed, with Jupiter playing a surprising role in shaping its formation.",
+          "why_it_matters": "Fundamental scientific discoveries regarding planetary formation help expand human knowledge of the universe, influencing deep-space research and long-term technological and scientific capabilities.",
+          "gd_for": [
+            "Scientific research into asteroid samples provides valuable empirical data on the origins of the Solar System.",
+            "Investigating the role of Jupiter in shaping planetary bodies enhances our theoretical models of space evolution."
+          ],
+          "gd_against": [
+            "Deep-space exploration initiatives require significant resource allocation that could potentially be directed toward immediate domestic priorities.",
+            "Theoretical findings regarding celestial bodies offer limited direct commercial or practical utility for contemporary economic challenges."
+          ],
+          "key_fact": "4.5-billion-year-old",
           "fact_is_context": false,
-          "ai": false
+          "key_term": {
+            "term": "asteroid",
+            "meaning": "A small rocky body orbiting the sun, composed of materials left over from the formation of the solar system."
+          },
+          "ai": true
         }
       ]
     },
@@ -456,13 +473,23 @@
           "source": "The Hindu",
           "published": "2026-10-25T06:35:02+05:30",
           "sources_count": 1,
-          "summary": "MoRTH orders forensic audit of VAHAN, SARATHI, e-Challan, PUCC portals; tightens data-sharing after leak reports and app misuse.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
+          "summary": "The Ministry of Road Transport and Highways (MoRTH) ordered a forensic audit of critical portals including VAHAN, SARATHI, e-Challan, and PUCC. The ministry also tightened data-sharing protocols following reports of a data leak and application misuse.",
+          "why_it_matters": "Strengthening cybersecurity and data governance for major national digital infrastructure is crucial for protecting citizen privacy and maintaining trust in e-governance systems.",
+          "gd_for": [
+            "Conducting a forensic audit proactively identifies security vulnerabilities and protects sensitive citizen database assets from misuse.",
+            "Tightening data-sharing practices ensures better compliance with privacy standards across transport administration platforms."
+          ],
+          "gd_against": [
+            "Restricting data sharing too severely could impede operational efficiency and hinder legitimate business applications that rely on vehicle verification data.",
+            "Security incidents on core government portals expose systemic vulnerabilities that undermine public confidence in digital public infrastructure."
+          ],
           "key_fact": "",
           "fact_is_context": false,
-          "ai": false
+          "key_term": {
+            "term": "forensic audit",
+            "meaning": "An examination and evaluation of a firm's or entity's financial or digital records to derive evidence for use in legal proceedings or administrative investigations."
+          },
+          "ai": true
         },
         {
           "title": "Ladakh body rejects Centre’s draft, alleges region turned into ‘testing lab’",
@@ -470,13 +497,20 @@
           "source": "Indian Express",
           "published": "2026-10-24T20:28:25+05:30",
           "sources_count": 2,
-          "summary": "Open the source link to read the full story.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
+          "summary": "The Ladakh body rejected the Centre's draft proposal regarding the region. Furthermore, the body alleged that the region has been turned into a testing lab.",
+          "why_it_matters": "Governance disputes in sensitive border regions directly impact regional stability, administrative integration, and local socio-political trust in national governance frameworks.",
+          "gd_for": [
+            "Local consultative bodies ensure that regional aspirations and community grievances are actively represented in national policy decisions.",
+            "Critically evaluating administrative drafts prevents the implementation of unsuited policies in sensitive geographical zones."
+          ],
+          "gd_against": [
+            "Persistent deadlocks between local bodies and the central government can delay vital developmental projects and governance reforms in the region.",
+            "Public rejection of official drafts without consensus-building heightens political friction in strategically important border areas."
+          ],
           "key_fact": "",
           "fact_is_context": false,
-          "ai": false
+          "key_term": null,
+          "ai": true
         },
         {
           "title": "Siddaramaiah ‘sting operation’: Delhi-based man arrested and released on bail",
@@ -484,13 +518,23 @@
           "source": "The Hindu",
           "published": "2026-10-24T23:32:27+05:30",
           "sources_count": 1,
-          "summary": "Delhi man arrested in Siddaramaiah sting case; probe targets video upload link, pendrive source, and party-affiliated social media team.",
-          "why_it_matters": "",
-          "gd_for": [],
-          "gd_against": [],
+          "summary": "A Delhi-based man was arrested and subsequently released on bail in connection with the Siddaramaiah sting case. The ongoing probe is examining the video upload link, the source of the pendrive, and an associated party-affiliated social media team.",
+          "why_it_matters": "Incidents involving political sting operations and digital media dissemination highlight the growing challenges of digital disinformation and accountability in political discourse.",
+          "gd_for": [
+            "Law enforcement investigations into unauthorized media leaks and targeted videos maintain accountability and legal standards in public communications.",
+            "Tracing the origin of digital content helps uncover coordinated networks involved in spreading politically sensitive material."
+          ],
+          "gd_against": [
+            "Arresting individuals linked to digital content uploads can raise concerns regarding freedom of expression and the proportionality of state action.",
+            "Focusing investigative resources on political sting operations can divert law enforcement attention from larger economic and criminal offenses."
+          ],
           "key_fact": "",
           "fact_is_context": false,
-          "ai": false
+          "key_term": {
+            "term": "bail",
+            "meaning": "The temporary release of an accused person awaiting trial, sometimes on condition that a sum of money be lodged to guarantee their appearance in court."
+          },
+          "ai": true
         }
       ]
     }
@@ -525,5 +569,10 @@
     "Scroll.in (no entries)",
     "The Print (no entries)"
   ],
-  "reading_time_min": 16
+  "reading_time_min": 18,
+  "ai_backfilled_at": "2026-10-31T20:04:37.863526+05:30",
+  "grounding": {
+    "checked": 22,
+    "removed": 0
+  }
 }
