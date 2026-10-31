@@ -1,3 +1,11 @@
+# v4: the indigo redesign
+
+- New look: an indigo cover band holds the date and the GD topic; the reading page below is light, with marigold for emphasis and teal and brick for the two sides of each debate. Typefaces are Newsreader and Schibsted Grotesk.
+- "In 60 seconds": one quotable number from each section, right under the topic. Tapping one jumps to its story.
+- Desktop gets a sticky side rail with sections and reading progress; phones keep the sticky chip bar.
+- All sections open by default. Background facts no longer repeat "Context:" after their label.
+- `data/` for 31 Oct 2026 now carries full commentary (written by hand after that morning's Gemini run failed).
+
 # v3: commentary that actually arrives, and a cleaner masthead
 
 ## The problem

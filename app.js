@@ -12,6 +12,7 @@
   var kickerEl = document.getElementById("day-kicker");
   var datelineEl = document.getElementById("dateline");
   var metaEl = document.getElementById("day-meta");
+  var coverEl = document.getElementById("cover");
   var openState = {};          // which categories are expanded
   var archiveIndex = [];       // list of past briefs
   var currentBrief = null;
@@ -186,11 +187,12 @@
     var d = parseDay(b.date);
     var weekday = d ? d.toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }) : "";
     var no = editionNumber(b.date);
-    kickerEl.textContent = weekday ? weekday + (no ? ", edition " + no : "") : "Morning edition";
+    kickerEl.textContent = weekday || "Morning edition";
     datelineEl.textContent = d
       ? d.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: "UTC" })
       : (b.date_label || b.date || "");
     var parts = [];
+    if (no) parts.push("Edition " + no);
     if (b.reading_time_min) parts.push(b.reading_time_min + " min read");
     if (b.story_count) parts.push(b.story_count + " stories");
     if ((b.sources_ok || []).length) parts.push(b.sources_ok.length + " sources");
@@ -213,7 +215,9 @@
   }
   function renderLens(p) {
     var m = /^([^:]{3,40}):\s+(.+)$/.exec(p);
-    return m ? "<li><strong>" + esc(m[1]) + "</strong>" + esc(m[2]) + "</li>" : "<li>" + esc(p) + "</li>";
+    if (!m) return "<li>" + esc(p) + "</li>";
+    var view = m[2].charAt(0).toUpperCase() + m[2].slice(1);
+    return "<li><strong>" + esc(m[1]) + "</strong>" + esc(view) + "</li>";
   }
 
   function renderStaleNotice(b) {
@@ -246,6 +250,30 @@
           renderLine("Close with", t.closing_line, true) + "</div>") +
         perspectives +
         '<div class="hero-actions"><button class="text-btn" type="button" data-share-topic="1">' + ICON.share + "<span>Share topic</span></button></div>" +
+      "</section>"
+    );
+  }
+
+  // "In 60 seconds": the lead story of each section, reduced to one quotable line.
+  function renderQuick(b) {
+    var items = [];
+    (b.categories || []).forEach(function (c) {
+      var pool = (c.stories || []).filter(function (x) { return x.ai && x.key_fact && !x.fact_is_context; });
+      var money = /%|\$|₹|Rs\b|crore|billion|trillion|lakh|\bbn\b/i;
+      var s = pool.filter(function (x) { return money.test(x.key_fact); })[0] || pool[0];
+      if (s) items.push({ cat: c.title.split(/[,&:]/)[0].trim(), s: s });
+    });
+    if (items.length < 3) return "";
+    return (
+      '<section class="quick" aria-labelledby="quick-h">' +
+        '<h2 id="quick-h">In 60 seconds</h2>' +
+        '<p class="quick-sub">One number from each section worth carrying into the room.</p>' +
+        "<ul>" + items.map(function (it) {
+          return '<li><button type="button" class="quick-item" data-goto="' + esc(it.s.url) + '">' +
+            '<span class="quick-cat">' + esc(it.cat) + "</span>" +
+            '<span class="quick-fact">' + esc(it.s.key_fact) + "</span>" +
+            "</button></li>";
+        }).join("") + "</ul>" +
       "</section>"
     );
   }
@@ -289,8 +317,8 @@
       fact =
         '<div class="fact' + (s.fact_is_context ? " context" : "") + '">' +
           '<span class="mark" aria-hidden="true">&ldquo;</span>' +
-          "<div><strong>" + (s.fact_is_context ? "Background (verify before quoting):" : "Quote this:") +
-          "</strong> " + esc(s.key_fact) + "</div>" +
+          "<div><strong>" + (s.fact_is_context ? "Background, verify before quoting" : "Quote this") +
+          "</strong> " + esc(s.fact_is_context ? s.key_fact.replace(/^context:\s*/i, "") : s.key_fact) + "</div>" +
         "</div>";
     }
     var summary = s.summary && !/^Open the source link/i.test(s.summary) ? s.summary : "";
@@ -317,7 +345,7 @@
   }
 
   function renderCategory(c, index) {
-    var open = openState.hasOwnProperty(c.key) ? openState[c.key] : index === 0;
+    var open = openState.hasOwnProperty(c.key) ? openState[c.key] : true;
     var list = c.stories || [];
     var stories = list.map(renderStory).join("");
     if (!stories) stories = '<p class="plain" style="padding:1rem 0">No fresh stories were found in this category today.</p>';
@@ -405,12 +433,13 @@
     }
     renderMasthead(b);
 
+    // The cover (inside the indigo band) carries the notices and the GD topic.
+    if (coverEl) coverEl.innerHTML = renderStaleNotice(b) + aiNote + renderHero(b.gd_topic);
+
     var html =
-      renderStaleNotice(b) +
-      aiNote +
-      renderHero(b.gd_topic) +
-      renderConcept(b.concept) +
       renderChips(b) +
+      renderQuick(b) +
+      renderConcept(b.concept) +
 
       (b.categories || []).map(renderCategory).join("") +
       renderSearch();
@@ -526,6 +555,40 @@
       });
     });
 
+    app.querySelectorAll("[data-goto]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var target = app.querySelector('.story[data-url="' + CSS.escape(btn.dataset.goto) + '"]');
+        if (!target) return;
+        var det = target.closest("details");
+        if (det) det.open = true;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        target.classList.add("is-flash");
+        setTimeout(function () { target.classList.remove("is-flash"); }, 1600);
+      });
+    });
+    var shareTopicBtn = coverEl && coverEl.querySelector("[data-share-topic]");
+    if (shareTopicBtn && b.gd_topic && !shareTopicBtn.dataset.wired) {
+      shareTopicBtn.dataset.wired = "1";
+      shareTopicBtn.addEventListener("click", function () {
+        shareOrCopy("Today's GD topic",
+          b.gd_topic.topic + "\n\n" + (b.gd_topic.opening_line || ""), location.href, shareTopicBtn);
+      });
+    }
+    if (coverEl) coverEl.querySelectorAll("button.copy").forEach(function (btn) {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = "1";
+      btn.addEventListener("click", function () {
+        var text = btn.getAttribute("data-copy");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            var lbl = btn.querySelector("span") || btn;
+            lbl.textContent = "Copied";
+            btn.classList.add("is-done");
+            setTimeout(function () { lbl.textContent = "Copy"; btn.classList.remove("is-done"); }, 1500);
+          });
+        }
+      });
+    });
     wireSearch();
     updateProgress();
   }
