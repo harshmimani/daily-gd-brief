@@ -3,7 +3,7 @@
    Today's brief: network-first, falling back to the cached copy.
    Archived days: cache-first (they never change). */
 
-var VERSION = "gd-brief-v6";
+var VERSION = "gd-brief-v7";
 var SHELL = ["./", "index.html", "app.js", "cover-fx.js", "style.css", "icon.svg", "manifest.webmanifest"];
 
 self.addEventListener("install", function (e) {

@@ -332,6 +332,48 @@ class TestGrounding(unittest.TestCase):
         self.assertTrue(bb.SPONSORED_URL.search("https://economictimes.indiatimes.com/brand-solutions/x/123.cms"))
 
 
+class TestClaudeClient(unittest.TestCase):
+    def setUp(self):
+        self._post, self._sleep = bb.requests.post, bb.time.sleep
+        bb.time.sleep = lambda *_: None
+        bb.GEMINI_DELAY_SECONDS_ORIG, bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS, 0
+
+    def tearDown(self):
+        bb.requests.post, bb.time.sleep = self._post, self._sleep
+        bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+
+    def test_claude_success(self):
+        calls = []
+
+        def post(url, **kw):
+            calls.append(url)
+            return FakeResponse(200, {"content": [{"type": "text", "text": '```json\n{"ok": 1}\n```'}]})
+        bb.requests.post = post
+        c = bb.ClaudeClient("sk-test", None)
+        self.assertEqual(c.generate_json("p"), {"ok": 1})
+        self.assertIn("api.anthropic.com", calls[0])
+        self.assertEqual(c.model_used, bb.CLAUDE_DEFAULT_MODEL)
+
+    def test_bad_key_falls_back_to_gemini(self):
+        def post(url, **kw):
+            if "anthropic" in url:
+                return FakeResponse(401, {"error": {"message": "invalid x-api-key"}})
+            return FakeResponse(200, ok_payload({"from": "gemini"}))
+        bb.requests.post = post
+        c = bb.ClaudeClient("sk-bad", "gem-key")
+        c.candidates = ["m1"]
+        self.assertEqual(c.generate_json("p"), {"from": "gemini"})
+        self.assertEqual(c.claude_failures, 99, "a bad key must not be retried all morning")
+
+    def test_key_term_with_invented_number_is_dropped(self):
+        s = make("RBI keeps repo rate unchanged")
+        s.description = "The RBI kept the repo rate unchanged."
+        s.summary = "The RBI kept the repo rate unchanged."
+        s.key_term = {"term": "Repo rate", "meaning": "The rate at which the RBI lends to banks, now 5.5%."}
+        bb.ground_story(s)
+        self.assertIsNone(s.key_term)
+
+
 class TestMisc(unittest.TestCase):
     def test_safe_url(self):
         self.assertTrue(bb.safe_url("https://example.com/a"))

@@ -1,3 +1,11 @@
+# v7: the week in review, a stricter editor, and Claude support
+
+- **This week** (button in the header, or add `#week` to the link): the last seven briefs on one page. Threads that ran on several days, every GD topic with its opening and closing lines, the week's concepts as recall cards, and an 8-question quiz. The quiz is built only from verified quotes in the briefs, and every answer choice shares the correct answer's currency and unit. Nothing on the page is generated; it is all computed from the archive in the browser.
+- **Editorial standard.** The prompt now asks for a neutral, case-note-quality briefing: claims attributed to whoever makes them, no loaded or partisan wording, every party treated the same way, and the strongest case argued on both sides with four different kinds of argument.
+- **Term to know.** Each story can carry one concept worth learning, with a plain one-sentence definition (numbers in it are fact-checked like everything else).
+- **Claude as the writer.** Add a repository secret `ANTHROPIC_API_KEY` and Claude writes the notes, with Gemini as the fallback. The default model is `claude-sonnet-5-5`; set the repository variable `CLAUDE_MODEL` to `claude-haiku-5-5` for the cheapest option. A bad key is detected once and the run falls back to Gemini instead of retrying.
+- 3 new tests (33 total).
+
 # v6: sources you can trust, numbers you can quote
 
 - **Approved publishers only.** `TRUSTED_DOMAINS` lists every outlet the brief may use. Links are checked after Google News decoding and redirects; anything else, and sponsored or "brand" posts, is dropped.

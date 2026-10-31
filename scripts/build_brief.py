@@ -75,6 +75,7 @@ MAX_RATE_LIMIT_HITS = 8         # 429s across all models before giving up on AI
 MAX_RATE_WAIT = 75              # longest single wait for a per-minute limit
 AI_DEADLINE_SECONDS = int(os.environ.get("AI_DEADLINE", "480"))  # 8 minutes
 CURATION_SHORTLIST = 12         # stories per category sent to the AI curator
+CLAUDE_DEFAULT_MODEL = "claude-sonnet-5-5"   # set the CLAUDE_MODEL variable to override
 ENRICH_BATCH_SIZE = 5           # stories per enrichment call (small = partial wins on bad days)
 
 BROWSER_HEADERS = {
@@ -346,6 +347,7 @@ class Story:
     gd_for: list[str] = field(default_factory=list)
     gd_against: list[str] = field(default_factory=list)
     key_fact: str = ""
+    key_term: dict | None = None
     ai: bool = False
 
     @property
@@ -369,6 +371,7 @@ class Story:
             "gd_against": self.gd_against,
             "key_fact": self.key_fact,
             "fact_is_context": self.key_fact.strip().lower().startswith("context"),
+            "key_term": self.key_term,
             "ai": self.ai,
         }
 
@@ -1041,6 +1044,88 @@ class GeminiClient:
         return "transient"
 
 
+class ClaudeClient(GeminiClient):
+    """Claude via the Messages API, with Gemini as a fallback when it fails.
+    Exposes the same interface the rest of the pipeline uses."""
+
+    def __init__(self, anthropic_key: str | None, gemini_key: str | None):
+        super().__init__(gemini_key)
+        self.anthropic_key = anthropic_key
+        self.claude_model = os.environ.get("CLAUDE_MODEL", "").strip() or CLAUDE_DEFAULT_MODEL
+        self.claude_failures = 0
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.anthropic_key or self.api_key) and os.environ.get("SKIP_AI") != "1"
+
+    def generate_json(self, prompt: str, label: str = "call"):
+        if self.stopped or not self.enabled:
+            return None
+        if self.anthropic_key and self.claude_failures < 3:
+            result = self._claude(prompt, label)
+            if result is not None:
+                return result
+        if self.api_key:
+            log(f"  {label}: falling back to Gemini")
+            return super().generate_json(prompt, label)
+        return None
+
+    def _claude(self, prompt: str, label: str):
+        for attempt in range(3):
+            if self.budget_left <= 15:
+                self._stop("time budget exhausted")
+                return None
+            self.calls += 1
+            try:
+                r = requests.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={"x-api-key": self.anthropic_key or "", "anthropic-version": "2023-06-01",
+                             "content-type": "application/json"},
+                    json={"model": self.claude_model, "max_tokens": 8000,
+                          "system": "You return only valid JSON, with no prose before or after it.",
+                          "messages": [{"role": "user", "content": prompt}]},
+                    timeout=120,
+                )
+            except Exception as exc:  # noqa: BLE001
+                self.errors.append(f"{label}: Claude network {type(exc).__name__}")
+                time.sleep(min(5 * (attempt + 1), max(0.0, self.budget_left - 20)))
+                continue
+            if r.status_code == 200:
+                try:
+                    text = "".join(b.get("text", "") for b in r.json().get("content", []) if b.get("type") == "text")
+                    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+                    parsed = json.loads(text)
+                    self.model_used = self.claude_model
+                    return parsed
+                except Exception:  # noqa: BLE001
+                    self.errors.append(f"{label}: Claude returned unparseable output")
+                    continue
+            msg = ""
+            try:
+                msg = r.json().get("error", {}).get("message", "")[:120]
+            except Exception:  # noqa: BLE001
+                pass
+            self.errors.append(f"{label}: Claude HTTP {r.status_code} {msg}".strip())
+            log(f"  Claude {self.claude_model}: HTTP {r.status_code} {msg}")
+            if r.status_code in (400, 401, 403, 404):
+                self.claude_failures = 99        # bad key, model or request: stop trying Claude
+                return None
+            wait = float(r.headers.get("retry-after", 0) or 0) or 8 * (attempt + 1)
+            time.sleep(min(wait, 45, max(0.0, self.budget_left - 20)))
+        self.claude_failures += 1
+        return None
+
+
+def make_client() -> GeminiClient:
+    anthropic = os.environ.get("ANTHROPIC_API_KEY", "").strip() or None
+    gemini = os.environ.get("GEMINI_API_KEY", "").strip() or None
+    if anthropic:
+        log(f"  Commentary: Claude ({os.environ.get('CLAUDE_MODEL', '').strip() or CLAUDE_DEFAULT_MODEL})"
+            + (", Gemini as fallback" if gemini else ""))
+        return ClaudeClient(anthropic, gemini)
+    return GeminiClient(gemini)
+
+
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
@@ -1192,6 +1277,9 @@ def ground_story(s: "Story") -> int:
     s.why_it_matters = keep_grounded(s.why_it_matters, source, removed)
     s.gd_for = [p for p in (keep_grounded(x, source, removed) for x in s.gd_for) if p]
     s.gd_against = [p for p in (keep_grounded(x, source, removed) for x in s.gd_against) if p]
+    if s.key_term and unsupported_numbers(s.key_term.get("meaning", ""), source, _year_allow()):
+        s.key_term = None
+        removed[0] += 1
     if s.key_fact:
         fact = re.sub(r"^context:\s*", "", s.key_fact, flags=re.I)
         if s.key_fact.lower().startswith("context") or unsupported_numbers(fact, source, _year_allow()):
@@ -1227,16 +1315,32 @@ GROUNDING = {"removed": 0}
 def enrich_batch(client: GeminiClient, stories: list[Story], label: str) -> int:
     if not stories:
         return 0
-    prompt = f"""You are a coach preparing an Indian MBA student for placement group discussions (GDs) and interviews.
+    prompt = f"""You are a senior editor writing a neutral daily current-affairs briefing for Indian MBA
+students and professionals. Readers use it to understand the world and to speak well in group
+discussions and interviews. Think of the standard of a top business school case note: precise,
+balanced and instructive.
 Today's date: {datetime.now(IST).strftime('%d %B %Y')}.
 
 For EACH story below, write:
-- "summary": 2-3 short sentences in simple English explaining what happened.
-- "why_it_matters": 1-2 sentences, with an India angle where relevant.
-- "gd_for": exactly 2 short points supporting the development / the "pro" side.
-- "gd_against": exactly 2 short points opposing it, or alternative perspectives / risks.
+- "summary": 2-3 short sentences in plain English: what happened, who did it, and what changes.
+- "why_it_matters": 1-2 sentences linking the story to a larger trend or decision that matters
+  for India's economy, business, governance or society.
+- "gd_for": exactly 2 points making the strongest case FOR the development or decision.
+- "gd_against": exactly 2 points making the strongest case AGAINST it, or the main risks.
+  Each of the four points must be a different kind of argument (economic, social, strategic,
+  ethical, practical), and both sides must be argued as well as their best advocates would.
 - "key_fact": ONE quotable fact or number copied from the story text. If the story text has
   no concrete fact worth quoting, return an empty string.
+- "key_term": {{"term": "...", "meaning": "..."}}: one concept or term from the story worth
+  learning (for example "current account deficit", "PIL", "working capital"), with a one-sentence
+  general definition and no numbers. Use null if nothing in the story qualifies.
+
+NEUTRALITY RULES:
+- Report, do not editorialise. No loaded or partisan words ("slams", "historic", "draconian",
+  "anti-national", "landmark") unless quoting someone, and then say who.
+- Attribute claims and positions to whoever holds them ("the government says", "critics argue",
+  "the company expects"). Never present one side's claim as settled fact.
+- Treat all parties, governments and companies the same way.
 
 STRICT RULES (every output is checked automatically against the story text):
 - Use ONLY the headline and Details given for that story. Do not add outside knowledge.
@@ -1274,6 +1378,9 @@ Stories:
         s.gd_for = [str(x).strip() for x in item.get("gd_for", []) if str(x).strip()][:2]
         s.gd_against = [str(x).strip() for x in item.get("gd_against", []) if str(x).strip()][:2]
         s.key_fact = str(item.get("key_fact", "")).strip()
+        kt = item.get("key_term")
+        if isinstance(kt, dict) and str(kt.get("term", "")).strip() and str(kt.get("meaning", "")).strip():
+            s.key_term = {"term": str(kt["term"]).strip()[:60], "meaning": str(kt["meaning"]).strip()[:280]}
         GROUNDING["removed"] += ground_story(s)
         s.ai = True
         done += 1
@@ -1313,8 +1420,12 @@ Provide:
 - "topic": the GD topic phrased as B-schools phrase it (a statement or question, under 15 words)
 - "why_now": 1-2 sentences on why this is topical
 - "opening_line": a confident 2-sentence opening a student can say to start the GD (frame the topic, give one fact)
-- "closing_line": a strong 2-sentence closing that summarises and takes a balanced stand
-- "perspectives": 3 short bullet points giving different stakeholder perspectives (government, industry, citizens, global)
+- "closing_line": a strong 2-sentence closing that weighs both sides fairly and lands on a
+  reasoned, balanced position rather than a partisan one
+- "perspectives": 3-4 points, each "Stakeholder: their view", covering genuinely different
+  stakeholders (for example government, industry, citizens, critics, global partners), each
+  stated fairly in terms that stakeholder would accept
+Write neutrally: attribute positions, avoid loaded words, and treat all parties the same way.
 
 Task 2 — "Concept of the Day": pick one business / economics / strategy / finance concept that helps
 in GDs and interviews, ideally connected to today's news. Do NOT use these recently covered
@@ -1519,6 +1630,7 @@ def story_from_json(d: dict, category: str) -> Story:
         s.gd_for = list(d.get("gd_for") or [])
         s.gd_against = list(d.get("gd_against") or [])
         s.key_fact = d.get("key_fact", "")
+        s.key_term = d.get("key_term") if isinstance(d.get("key_term"), dict) else None
         s.ai = True
     return s
 
@@ -1593,7 +1705,7 @@ def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str])
 
 
 def backfill() -> int:
-    client = GeminiClient(os.environ.get("GEMINI_API_KEY", "").strip() or None)
+    client = make_client()
     if not client.enabled:
         log("Backfill skipped: no GEMINI_API_KEY")
         return 0
@@ -1642,7 +1754,7 @@ def main() -> int:
     for c in CATEGORIES:
         log(f"  {c['title']:42} {len(by_cat[c['key']]):3} candidates -> {len(shortlist[c['key']])} shortlisted")
 
-    client = GeminiClient(os.environ.get("GEMINI_API_KEY", "").strip() or None)
+    client = make_client()
 
     if client.enabled:
         log("\n3) Curating the shortlist with Gemini")

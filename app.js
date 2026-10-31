@@ -334,6 +334,9 @@
         (s.why_it_matters ? '<p class="matters"><strong>Why it matters:</strong> ' + esc(s.why_it_matters) + "</p>" : "") +
         angles +
         fact +
+        (s.key_term && s.key_term.term
+          ? '<p class="term"><span class="term-label">Term to know</span><strong>' + esc(s.key_term.term) + "</strong> " + esc(s.key_term.meaning || "") + "</p>"
+          : "") +
         '<div class="story-actions">' +
           readLink +
           '<button class="icon-act" type="button" data-act="save" aria-pressed="' + saved + '" aria-label="Save for revision" title="Save for revision">' + ICON.star + "</button>" +
@@ -700,6 +703,312 @@
     }).catch(function () { /* archive is optional */ });
   }
 
+  // ======================================================================
+  // This week: themes, GD topics, concept cards and a quiz built only from
+  // the week's verified facts. Everything is computed in the browser from
+  // the archived briefs, so nothing here is generated or invented.
+  // ======================================================================
+  var STOP = ("A An The And Or Of In On At To For From With By As Is Are Was Were Be Been After Before Over Under Into " +
+    "Amid Says Said New How Why What Who When Will Can May Could Should Its It His Her Their Our Your This That " +
+    "These Those Than Then Not No Yes Up Down Out Off Explained Live Updates Report Reports Day Week Year Govt " +
+    "Q1 Q2 Q3 Q4 Mr Ms Dr Top Big First Last Next Talks Deal Plan Bid Set Gets Get To").split(" ");
+  var STOPSET = {};
+  STOP.forEach(function (w) { STOPSET[w.toLowerCase()] = 1; });
+  // Words too common to be a "thread" on their own.
+  var GENERIC = ("india indian indians centre central government govt delhi new world global country nation national " +
+    "state states people company companies market markets bank banks business year years week today news report " +
+    "minister ministry pm chief court police city cities top key sector firms firm india's us u.s").split(" ");
+  var GENSET = {};
+  GENERIC.forEach(function (w) { GENSET[w] = 1; });
+  var LABELS = { ai: "AI", fta: "FTA", gst: "GST", ipo: "IPO", repo: "Repo rate", tariffs: "Tariffs", tariff: "Tariffs",
+    crude: "Crude oil", oil: "Crude oil", forex: "Forex reserves", rupee: "Rupee", startups: "Startups", startup: "Startups" };
+  var KEYWORDS = ["tariff", "tariffs", "fta", "inflation", "repo", "gst", "ipo", "ai", "climate", "election",
+    "budget", "rupee", "forex", "crude", "oil", "semiconductor", "startup", "startups", "monsoon", "ceasefire"];
+
+  function weekDates(endIso) {
+    var end = parseDay(endIso);
+    if (!end) return [];
+    var out = [];
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(end.getTime() - i * 86400000);
+      out.push(d.toISOString().slice(0, 10));
+    }
+    return out;
+  }
+
+  function themesFor(briefs) {
+    var seen = {};          // phrase -> {days:{}, items:[]}
+    briefs.forEach(function (b) {
+      (b.categories || []).forEach(function (c) {
+        (c.stories || []).forEach(function (s) {
+          var title = String(s.title || "").replace(/[‘’]/g, "'");
+          var found = {};
+          var words = title.split(/[^A-Za-z0-9'-]+/).filter(Boolean);
+          for (var i = 0; i < words.length; i++) {
+            var w = words[i].replace(/'s$/, "");
+            var low = w.toLowerCase();
+            if (KEYWORDS.indexOf(low) !== -1) { found[LABELS[low] || (low.charAt(0).toUpperCase() + low.slice(1))] = 1; continue; }
+            if (!/^[A-Z]/.test(w) || STOPSET[low] || w.length < 3) continue;
+            // join consecutive capitalised words: "West Asia", "Tata Motors"
+            var phrase = w;
+            while (i + 1 < words.length && /^[A-Z]/.test(words[i + 1]) && !STOPSET[words[i + 1].toLowerCase()]) {
+              phrase += " " + words[i + 1].replace(/'s$/, "");
+              i++;
+              if (phrase.split(" ").length >= 3) break;
+            }
+            if (phrase.indexOf(" ") === -1 && GENSET[phrase.toLowerCase()]) continue;
+            found[phrase] = 1;
+          }
+          Object.keys(found).forEach(function (p) {
+            var key = p.toLowerCase();
+            if (!seen[key]) seen[key] = { label: p, days: {}, items: [] };
+            seen[key].days[b.date] = 1;
+            if (seen[key].items.length < 4) seen[key].items.push({ s: s, date: b.date });
+          });
+        });
+      });
+    });
+    var list = Object.keys(seen).map(function (k) { return seen[k]; })
+      .filter(function (t) { return Object.keys(t.days).length >= 2; })
+      .sort(function (a, b) {
+        var sa = Object.keys(a.days).length * 2 + (a.label.indexOf(" ") !== -1 ? 1.5 : 0) + a.items.length * .1;
+        var sb = Object.keys(b.days).length * 2 + (b.label.indexOf(" ") !== -1 ? 1.5 : 0) + b.items.length * .1;
+        return sb - sa;
+      });
+    // drop themes contained in a stronger one ("Iran" vs "Iran War" keeps the first seen)
+    var out = [];
+    list.forEach(function (t) {
+      var low = t.label.toLowerCase();
+      if (out.some(function (o) { var l = o.label.toLowerCase(); return l.indexOf(low) !== -1 || low.indexOf(l) !== -1; })) return;
+      if (out.length < 6) out.push(t);
+    });
+    return out;
+  }
+
+  // ---- quiz -------------------------------------------------------------
+  var NUM_RX = /(?:[$₹€£]\s?|Rs\.?\s?)?\d[\d,]*(?:\.\d+)?(?:\s?(?:%|per cent|bn|billion|crore|lakh|million|trillion|tonnes|km)\b|B\b|%)?/g;
+  var MONTH_BEFORE = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*$/i;
+  function pickNumber(fact) {
+    var best = null, m;
+    NUM_RX.lastIndex = 0;
+    while ((m = NUM_RX.exec(fact))) {
+      var tok = m[0].replace(/[,.]+$/, "").trim();
+      var before = fact.slice(0, m.index);
+      var plain = tok.replace(/[^\d.]/g, "");
+      var hasUnit = /[%$₹€£]|Rs|bn|billion|crore|lakh|million|trillion|B$/i.test(tok);
+      if (/^(19|20)\d\d$/.test(plain) && !hasUnit) continue;     // a year
+      if (MONTH_BEFORE.test(before)) continue;                    // "October 24"
+      if (!hasUnit && !(parseFloat(plain) > 12) && plain.indexOf(".") === -1) continue;
+      var score = (hasUnit ? 2 : 0) + tok.length / 10;
+      if (!best || score > best.score) best = { tok: tok, score: score };
+    }
+    return best && best.tok;
+  }
+  // Answer choices must share currency and unit: "$719.74 billion" never sits
+  // beside "Rs 8,387 crore".
+  function kindOf(tok) {
+    var cur = /[$]/.test(tok) ? "usd" : /₹|Rs/.test(tok) ? "inr" : /€/.test(tok) ? "eur" : /£/.test(tok) ? "gbp" : "";
+    var unit = (tok.match(/%|per cent|bn|billion|crore|lakh|million|trillion|tonnes|km|B$/i) || [""])[0].toLowerCase();
+    if (unit === "per cent") unit = "%";
+    if (unit === "bn" || unit === "b") unit = "billion";
+    return cur + "|" + unit;
+  }
+  function scaleTok(tok, f) {
+    return tok.replace(/\d[\d,]*(?:\.\d+)?/, function (n) {
+      var dec = (n.split(".")[1] || "").length;
+      var v = parseFloat(n.replace(/,/g, "")) * f;
+      var s = v.toFixed(dec);
+      return n.indexOf(",") !== -1 ? Number(s).toLocaleString("en-IN", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : s;
+    });
+  }
+  function seeded(seed) {
+    var x = 0;
+    for (var i = 0; i < seed.length; i++) x = (x * 31 + seed.charCodeAt(i)) >>> 0;
+    return function () { x = (x * 1664525 + 1013904223) >>> 0; return x / 4294967296; };
+  }
+  function buildQuiz(briefs, seed) {
+    var rnd = seeded(seed);
+    var facts = [];
+    briefs.forEach(function (b) {
+      (b.categories || []).forEach(function (c) {
+        (c.stories || []).forEach(function (s) {
+          if (!s.ai || !s.key_fact || s.fact_is_context) return;
+          var tok = pickNumber(s.key_fact);
+          if (tok) facts.push({ s: s, tok: tok, kind: kindOf(tok), date: b.date, cat: c.key });
+        });
+      });
+    });
+    // spread across sections and days
+    facts.sort(function () { return rnd() - 0.5; });
+    var chosen = [], usedCat = {};
+    facts.forEach(function (f) {
+      if (chosen.length >= 8) return;
+      var k = f.cat + f.date;
+      if (usedCat[k]) return;
+      usedCat[k] = 1;
+      chosen.push(f);
+    });
+    return chosen.map(function (f) {
+      var pool = facts.filter(function (o) { return o !== f && o.kind === f.kind && o.tok !== f.tok; })
+        .map(function (o) { return o.tok; });
+      var opts = [];
+      pool.sort(function () { return rnd() - 0.5; }).forEach(function (t) {
+        if (opts.length < 3 && opts.indexOf(t) === -1) opts.push(t);
+      });
+      [0.5, 1.5, 2, 0.75].forEach(function (k) {
+        var t = scaleTok(f.tok, k);
+        if (opts.length < 3 && t !== f.tok && opts.indexOf(t) === -1) opts.push(t);
+      });
+      opts.push(f.tok);
+      opts.sort(function () { return rnd() - 0.5; });
+      return {
+        prompt: f.s.key_fact.replace(f.tok, "_____"),
+        answer: f.tok, options: opts, story: f.s, date: f.date
+      };
+    });
+  }
+
+  var weekState = null;
+
+  function renderWeek(briefs, dates) {
+    var first = parseDay(dates[0]), last = parseDay(dates[dates.length - 1]);
+    var fmt = function (d, opt) { return d.toLocaleDateString("en-IN", Object.assign({ timeZone: "UTC" }, opt)); };
+    var range = first.getUTCMonth() === last.getUTCMonth()
+      ? fmt(first, { day: "numeric" }) + "–" + fmt(last, { day: "numeric", month: "long" })
+      : fmt(first, { day: "numeric", month: "short" }) + " – " + fmt(last, { day: "numeric", month: "short" });
+    var stories = 0;
+    briefs.forEach(function (b) { stories += b.story_count || 0; });
+
+    kickerEl.textContent = "The week in review";
+    datelineEl.textContent = range;
+    metaEl.textContent = briefs.length + " briefs, " + stories + " stories, every fact from a vetted source";
+
+    var themes = themesFor(briefs);
+    var quiz = buildQuiz(briefs, dates[dates.length - 1]);
+    weekState = { quiz: quiz, answered: 0, correct: 0 };
+
+    coverEl.innerHTML =
+      '<section class="hero week-hero" aria-labelledby="themes-h">' +
+        '<div class="kicker">What kept coming back</div>' +
+        '<h2 id="themes-h">' + (themes.length
+          ? esc(themes.slice(0, 3).map(function (t) { return t.label; }).join(", ")) + (themes.length > 3 ? " and more" : "")
+          : "A quieter week") + "</h2>" +
+        '<p class="why">The stories that ran on more than one day. Follow a thread to see how it developed.</p>' +
+        '<div class="hero-actions"><button class="text-btn" type="button" data-back-today="1">Back to today\'s brief</button></div>' +
+      "</section>";
+
+    var html = "";
+    if (themes.length) {
+      html += '<section class="wk-block" aria-labelledby="threads-h"><h2 id="threads-h">Threads to follow</h2>' +
+        '<div class="threads">' + themes.map(function (t) {
+          var days = Object.keys(t.days).length;
+          return '<details class="thread"><summary><span class="thread-name">' + esc(t.label) + "</span>" +
+            '<span class="thread-days">' + days + " days</span></summary><ul>" +
+            t.items.map(function (it) {
+              var u = safeUrl(it.s.url);
+              return "<li>" + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(it.s.title) + "</a>" : esc(it.s.title)) +
+                '<span class="dim">' + esc(it.s.source) + ", " + esc(shortDate(it.date)) + "</span></li>";
+            }).join("") + "</ul></details>";
+        }).join("") + "</div></section>";
+    }
+
+    var topics = briefs.filter(function (b) { return b.gd_topic && b.gd_topic.topic && !b.gd_topic.fallback; });
+    if (topics.length) {
+      html += '<section class="wk-block" aria-labelledby="topics-h"><h2 id="topics-h">This week\'s GD topics</h2>' +
+        '<p class="wk-sub">Say each one out loud. Could you open and close on it?</p><ol class="wk-topics">' +
+        topics.map(function (b) {
+          return '<li><details><summary><span class="wk-date">' + esc(shortDate(b.date)) + "</span>" +
+            '<span class="wk-topic">' + esc(b.gd_topic.topic) + "</span></summary>" +
+            (b.gd_topic.opening_line ? '<p><strong>Open with:</strong> ' + esc(b.gd_topic.opening_line) + "</p>" : "") +
+            (b.gd_topic.closing_line ? '<p><strong>Close with:</strong> ' + esc(b.gd_topic.closing_line) + "</p>" : "") +
+            '<button class="link-btn" type="button" data-open-day="' + esc(b.date) + '">Open that day\'s brief</button>' +
+            "</details></li>";
+        }).join("") + "</ol></section>";
+    }
+
+    if (quiz.length >= 3) {
+      html += '<section class="wk-block quiz" aria-labelledby="quiz-h"><h2 id="quiz-h">Test yourself</h2>' +
+        '<p class="wk-sub">Fill the gap in each fact from this week. <span class="quiz-score" aria-live="polite">0 of ' + quiz.length + "</span></p>" +
+        quiz.map(function (q, i) {
+          return '<div class="q" data-q="' + i + '"><p class="q-prompt">' + esc(q.prompt) + "</p>" +
+            '<div class="q-opts">' + q.options.map(function (o) {
+              return '<button class="q-opt" type="button" data-opt="' + esc(o) + '">' + esc(o) + "</button>";
+            }).join("") + "</div>" +
+            '<p class="q-src" hidden>From ' + esc(q.story.source) + ", " + esc(shortDate(q.date)) + ": " + esc(q.story.title) + "</p></div>";
+        }).join("") + "</section>";
+    }
+
+    var concepts = briefs.filter(function (b) { return b.concept && b.concept.name; });
+    if (concepts.length) {
+      html += '<section class="wk-block" aria-labelledby="concepts-h"><h2 id="concepts-h">Concepts to recall</h2>' +
+        '<p class="wk-sub">Try to explain each one before you open it.</p><div class="cards">' +
+        concepts.map(function (b) {
+          return '<details class="card"><summary><span class="wk-date">' + esc(shortDate(b.date)) + "</span>" +
+            '<span class="card-name">' + esc(b.concept.name) + "</span></summary>" +
+            "<p>" + esc(b.concept.explanation || "") + "</p>" +
+            (b.concept.use_in_gd ? '<p class="dim"><strong>In a GD:</strong> ' + esc(b.concept.use_in_gd) + "</p>" : "") +
+            "</details>";
+        }).join("") + "</div></section>";
+    }
+
+    if (!html) html = '<p class="plain" style="padding:2rem 0">Not enough briefs this week yet. Check back after a few more mornings.</p>';
+    app.innerHTML = html;
+    document.title = "The Brief · Week of " + shortDate(dates[0]);
+
+    coverEl.querySelector("[data-back-today]").addEventListener("click", function () { leaveWeek(); });
+    app.querySelectorAll("[data-open-day]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        leaveWeek(btn.dataset.openDay);
+      });
+    });
+    app.querySelectorAll(".q").forEach(function (box) {
+      var q = quiz[+box.dataset.q];
+      box.querySelectorAll(".q-opt").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (box.classList.contains("is-done")) return;
+          box.classList.add("is-done");
+          var right = b.dataset.opt === q.answer;
+          weekState.answered++;
+          if (right) weekState.correct++;
+          box.querySelectorAll(".q-opt").forEach(function (o) {
+            if (o.dataset.opt === q.answer) o.classList.add("is-right");
+            else if (o === b) o.classList.add("is-wrong");
+            o.disabled = true;
+          });
+          box.querySelector(".q-prompt").textContent = q.story.key_fact;
+          box.querySelector(".q-src").hidden = false;
+          var sc = app.querySelector(".quiz-score");
+          sc.textContent = weekState.correct + " of " + quiz.length +
+            (weekState.answered === quiz.length ? (weekState.correct >= quiz.length - 1 ? ". Sharp week." : ". Re-read the ones you missed.") : "");
+        });
+      });
+    });
+  }
+
+  function openWeek() {
+    var end = (currentBrief && currentBrief.date) || todayIST();
+    var dates = weekDates(end);
+    var have = {};
+    archiveIndex.forEach(function (e) { have[e.date] = 1; });
+    var wanted = dates.filter(function (d) { return have[d]; });
+    showStatus("Putting the week together…");
+    if (location.hash !== "#week") history.replaceState(null, "", "#week");
+    return Promise.all(wanted.map(function (d) {
+      return fetchJSON("data/archive/" + d + ".json").catch(function () { return null; });
+    })).then(function (list) {
+      renderWeek(list.filter(Boolean), dates);
+      window.scrollTo({ top: 0 });
+    });
+  }
+  function leaveWeek(date) {
+    if (location.hash === "#week") history.replaceState(null, "", location.pathname + location.search);
+    if (date) { dateSelect.value = date; dateSelect.dispatchEvent(new Event("change")); return; }
+    if (currentBrief) renderBrief(currentBrief); else loadDay("");
+    window.scrollTo({ top: 0 });
+  }
+  var weekBtnEl = document.getElementById("week-btn");
+  if (weekBtnEl) weekBtnEl.addEventListener("click", function () { openWeek(); });
+
   dateSelect.addEventListener("change", function () {
     var date = dateSelect.value;
     var params = new URLSearchParams(window.location.search);
@@ -714,6 +1023,8 @@
   loadIndex().then(function () {
     if (wanted && dateSelect.querySelector('option[value="' + wanted + '"]')) dateSelect.value = wanted;
     else wanted = "";
-    return loadDay(wanted);
+    return loadDay(wanted).then(function () {
+      if (location.hash === "#week") openWeek();
+    });
   });
 })();
