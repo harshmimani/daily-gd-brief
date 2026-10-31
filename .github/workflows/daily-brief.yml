@@ -6,7 +6,21 @@ on:
     # busiest at :00 and can delay (or drop) runs queued then. The early start
     # also leaves slack, so a late run still lands before you read the brief.
     - cron: "17 0 * * *"
+    # Backfill passes: 07:47, 10:17, 13:47 and 18:17 IST. Gemini's free tier is
+    # often overloaded (HTTP 503) at dawn IST and clears later in the day. These
+    # runs only fill in commentary the morning run missed (today first, then the
+    # last 7 days), and exit in seconds when nothing is missing.
+    - cron: "17 2 * * *"
+    - cron: "47 4 * * *"
+    - cron: "17 8 * * *"
+    - cron: "47 12 * * *"
   workflow_dispatch:      # adds the manual "Run workflow" button in the Actions tab
+    inputs:
+      mode:
+        description: "build = fresh brief, backfill = only fill missing commentary"
+        type: choice
+        options: [build, backfill]
+        default: build
 
 # Lets the workflow push the new JSON files back to the repository.
 permissions:
@@ -39,6 +53,7 @@ jobs:
         run: python -u scripts/test_build_brief.py
 
       - name: Build today's brief
+        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '17 0 * * *') || (github.event_name == 'workflow_dispatch' && inputs.mode != 'backfill') }}
         timeout-minutes: 20
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -46,6 +61,16 @@ jobs:
           AI_DEADLINE: "600"                        # seconds for the whole Gemini phase
           # SKIP_CURATION: "1"                      # uncomment to save 1 call on a tight quota
         run: python -u scripts/build_brief.py
+
+      - name: Backfill missing commentary
+        if: ${{ (github.event_name == 'schedule' && github.event.schedule != '17 0 * * *') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'backfill') }}
+        timeout-minutes: 20
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          AI_DEADLINE: "900"
+          BACKFILL_DAYS: "7"
+        run: python -u scripts/build_brief.py --backfill
 
       # always() so that a failed or cancelled build still publishes whatever the
       # script managed to write before it stopped (it writes a headlines-only
@@ -59,7 +84,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nothing changed, nothing to commit."
           else
-            git commit -m "Daily brief: $(TZ=Asia/Kolkata date +%Y-%m-%d)"
+            if [ "${{ github.event.schedule }}" = "17 0 * * *" ] || [ "${{ inputs.mode }}" = "build" ]; then
+              git commit -m "Daily brief: $(TZ=Asia/Kolkata date +%Y-%m-%d)"
+            else
+              git commit -m "Backfill commentary: $(TZ=Asia/Kolkata date +%Y-%m-%d\ %H:%M)"
+            fi
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi

@@ -1,0 +1,1657 @@
+From e5ddbe70ce969b7667636d3b44c72c827dbf9d3e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 31 Oct 2026 07:10:31 +0000
+Subject: [PATCH 1/2] v3: resilient Gemini retries, backfill runs, date-led
+ masthead, no fallback nag
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011ShgZog66qtteDXZduRQwJ
+---
+ .github/workflows/daily-brief.yml |  31 ++-
+ UPGRADE.md                        |  21 ++
+ app.js                            |  83 +++++--
+ index.html                        |  16 +-
+ manifest.webmanifest              |   4 +-
+ scripts/build_brief.py            | 352 ++++++++++++++++++++++--------
+ scripts/test_build_brief.py       |  78 ++++++-
+ style.css                         | 164 ++++++++------
+ sw.js                             |   2 +-
+ 9 files changed, 556 insertions(+), 195 deletions(-)
+
+diff --git a/.github/workflows/daily-brief.yml b/.github/workflows/daily-brief.yml
+index f2813b4..13d859c 100644
+--- a/.github/workflows/daily-brief.yml
++++ b/.github/workflows/daily-brief.yml
+@@ -6,7 +6,21 @@ on:
+     # busiest at :00 and can delay (or drop) runs queued then. The early start
+     # also leaves slack, so a late run still lands before you read the brief.
+     - cron: "17 0 * * *"
++    # Backfill passes: 07:47, 10:17, 13:47 and 18:17 IST. Gemini's free tier is
++    # often overloaded (HTTP 503) at dawn IST and clears later in the day. These
++    # runs only fill in commentary the morning run missed (today first, then the
++    # last 7 days), and exit in seconds when nothing is missing.
++    - cron: "17 2 * * *"
++    - cron: "47 4 * * *"
++    - cron: "17 8 * * *"
++    - cron: "47 12 * * *"
+   workflow_dispatch:      # adds the manual "Run workflow" button in the Actions tab
++    inputs:
++      mode:
++        description: "build = fresh brief, backfill = only fill missing commentary"
++        type: choice
++        options: [build, backfill]
++        default: build
+ 
+ # Lets the workflow push the new JSON files back to the repository.
+ permissions:
+@@ -39,6 +53,7 @@ jobs:
+         run: python -u scripts/test_build_brief.py
+ 
+       - name: Build today's brief
++        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '17 0 * * *') || (github.event_name == 'workflow_dispatch' && inputs.mode != 'backfill') }}
+         timeout-minutes: 20
+         env:
+           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+@@ -47,6 +62,16 @@ jobs:
+           # SKIP_CURATION: "1"                      # uncomment to save 1 call on a tight quota
+         run: python -u scripts/build_brief.py
+ 
++      - name: Backfill missing commentary
++        if: ${{ (github.event_name == 'schedule' && github.event.schedule != '17 0 * * *') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'backfill') }}
++        timeout-minutes: 20
++        env:
++          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
++          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
++          AI_DEADLINE: "900"
++          BACKFILL_DAYS: "7"
++        run: python -u scripts/build_brief.py --backfill
++
+       # always() so that a failed or cancelled build still publishes whatever the
+       # script managed to write before it stopped (it writes a headlines-only
+       # brief before calling Gemini).
+@@ -59,7 +84,11 @@ jobs:
+           if git diff --cached --quiet; then
+             echo "Nothing changed, nothing to commit."
+           else
+-            git commit -m "Daily brief: $(TZ=Asia/Kolkata date +%Y-%m-%d)"
++            if [ "${{ github.event.schedule }}" = "17 0 * * *" ] || [ "${{ inputs.mode }}" = "build" ]; then
++              git commit -m "Daily brief: $(TZ=Asia/Kolkata date +%Y-%m-%d)"
++            else
++              git commit -m "Backfill commentary: $(TZ=Asia/Kolkata date +%Y-%m-%d\ %H:%M)"
++            fi
+             git pull --rebase origin "${GITHUB_REF_NAME}"
+             git push
+           fi
+diff --git a/UPGRADE.md b/UPGRADE.md
+index 53bda9e..29e0b0e 100644
+--- a/UPGRADE.md
++++ b/UPGRADE.md
+@@ -1,3 +1,24 @@
++# v3: commentary that actually arrives, and a cleaner masthead
++
++## The problem
++Between 18 and 31 Oct, 6 of 14 briefs shipped with zero AI commentary and most
++others were partial. Every failure had the same cause: Gemini's free tier
++returns HTTP 503 ("overloaded") around 05:47 IST, and v2 benched a model on its
++*first* 503. Four 503s plus the retired gemini-2.5-flash (404) emptied the
++rotation within about a minute, with 9 of the 10 budgeted minutes unused.
++
++## What changed
++| File | Change |
++|---|---|
++| `scripts/build_brief.py` | 503/500/timeouts are retried with back-off and the model stays in the rotation (benched only after 4 in a row). Lite models are interleaved with full ones. Retired 2.5-flash replaced by Google's `-latest` aliases. Batches of 5 instead of 9, and every empty story is retried, not just the first batch. New `--backfill` mode. |
++| `.github/workflows/daily-brief.yml` | Four backfill runs (07:47, 10:17, 13:47, 18:17 IST) fill in anything the morning run missed, today first, then the last 7 days. Manual runs get a build/backfill choice. |
++| `index.html`, `style.css`, `app.js` | "Daily GD Brief" masthead removed; the date is now the headline. No more "AI commentary was not available" text or warning badges. Plain stories show the RSS summary and a "Full story" link; today's brief shows one quiet line while analysis is pending. Category chips are sticky. |
++| `scripts/test_build_brief.py` | Tests for the new retry rules and backfill (24 total). |
++| `sw.js`, `manifest.webmanifest` | Cache bumped to v3 so phones pick up the new page; app renamed "The Brief". |
++
++No new secrets or dependencies. After merging, run the workflow once with
++mode = backfill to repair the last week's briefs.
++
+ # Daily GD Brief — v2 upgrade
+ 
+ Everything in this upgrade is drop-in. No new dependencies, no change to
+diff --git a/app.js b/app.js
+index 9510fe7..10d5d2a 100644
+--- a/app.js
++++ b/app.js
+@@ -9,6 +9,9 @@
+   var app = document.getElementById("app");
+   var dateSelect = document.getElementById("date-select");
+   var themeToggle = document.getElementById("theme-toggle");
++  var kickerEl = document.getElementById("day-kicker");
++  var datelineEl = document.getElementById("dateline");
++  var metaEl = document.getElementById("day-meta");
+   var openState = {};          // which categories are expanded
+   var archiveIndex = [];       // list of past briefs
+   var currentBrief = null;
+@@ -120,6 +123,34 @@
+     }
+   }
+ 
++  // ---------- masthead ----------
++  function parseDay(iso) {
++    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
++    return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 6)) : null;
++  }
++  function shortDate(iso, label) {
++    var d = parseDay(iso);
++    return d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" }) : (label || "");
++  }
++  function editionNumber(iso) {
++    if (!archiveIndex.length || !iso) return 0;
++    return archiveIndex.filter(function (e) { return e.date <= iso; }).length;
++  }
++  function renderMasthead(b) {
++    var d = parseDay(b.date);
++    var weekday = d ? d.toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }) : "";
++    var no = editionNumber(b.date);
++    kickerEl.textContent = [weekday, no ? "No. " + no : ""].filter(Boolean).join("  \u00b7  ") || "Morning edition";
++    datelineEl.textContent = d
++      ? d.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: "UTC" })
++      : (b.date_label || b.date || "");
++    var parts = [];
++    if (b.reading_time_min) parts.push(b.reading_time_min + " min read");
++    if (b.story_count) parts.push(b.story_count + " stories");
++    if ((b.sources_ok || []).length) parts.push(b.sources_ok.length + " sources");
++    metaEl.innerHTML = parts.map(function (p) { return "<span>" + esc(p) + "</span>"; }).join("");
++  }
++
+   // ---------- rendering pieces ----------
+   function renderLine(label, text, copyable) {
+     if (!text) return "";
+@@ -153,11 +184,12 @@
+       : "";
+     return (
+       '<section class="hero" aria-labelledby="gd-topic">' +
+-        '<div class="kicker">Today\'s likely GD topic' + (t.fallback ? " (picked automatically)" : "") + "</div>" +
++        '<div class="kicker">' + (t.fallback ? "Most-covered story today" : "Today\'s likely GD topic") + "</div>" +
+         '<h2 id="gd-topic">' + esc(t.topic) + "</h2>" +
+-        (t.why_now ? '<p class="why">' + esc(t.why_now) + "</p>" : "") +
+-        renderLine("Suggested opening", t.opening_line, true) +
+-        renderLine("Strong closing", t.closing_line, true) +
++        // Automatic topics carry template text (and older ones an apology); skip it.
++        (t.why_now && !t.fallback ? '<p class="why">' + esc(t.why_now) + "</p>" : "") +
++        (t.fallback ? "" : renderLine("Suggested opening", t.opening_line, true)) +
++        (t.fallback ? "" : renderLine("Strong closing", t.closing_line, true)) +
+         perspectives +
+         '<div class="hero-actions"><button class="text-btn" type="button" data-share-topic="1">Share this topic</button></div>' +
+       "</section>"
+@@ -207,17 +239,21 @@
+           "</strong> " + esc(s.key_fact) + "</div>" +
+         "</div>";
+     }
++    var summary = s.summary && !/^Open the source link/i.test(s.summary) ? s.summary : "";
++    var readLink = url
++      ? '<a class="read-link" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Read at ' + esc(s.source || host) + ' <span aria-hidden="true">&#8599;</span></a>'
++      : "";
+     return (
+-      '<article class="story' + (read ? " is-read" : "") + '" data-url="' + esc(s.url) + '">' +
++      '<article class="story' + (read ? " is-read" : "") + (s.ai ? "" : " is-plain") + '" data-url="' + esc(s.url) + '">' +
+         "<h3>" + heading + "</h3>" +
+         '<div class="src">' + esc(s.source) + (host ? " (" + esc(host) + ")" : "") +
+           (when ? ", " + esc(when) : "") + " " + coverage + "</div>" +
+-        (s.summary ? '<p class="summary">' + esc(s.summary) + "</p>" : "") +
++        (summary ? '<p class="summary">' + esc(summary) + "</p>" : "") +
+         (s.why_it_matters ? '<p class="matters"><strong>Why it matters:</strong> ' + esc(s.why_it_matters) + "</p>" : "") +
+         angles +
+         fact +
+-        (!s.ai && !s.why_it_matters ? '<p class="plain">AI commentary was not available for this story. Read the article and note one fact and one counter-argument.</p>' : "") +
+         '<div class="story-actions">' +
++          readLink +
+           '<button class="chip-btn" type="button" data-act="save">' + (saved ? "★ Saved" : "☆ Save") + "</button>" +
+           '<button class="chip-btn" type="button" data-act="read">' + (read ? "Mark unread" : "Mark read") + "</button>" +
+           '<button class="chip-btn" type="button" data-act="share">Share</button>' +
+@@ -295,25 +331,23 @@
+   // ---------- page ----------
+   function renderBrief(b) {
+     currentBrief = b;
+-    var sourcesOk = (b.sources_ok || []).length;
+     var aiNote = "";
+-    if (!b.ai_enabled) {
+-      aiNote = '<span class="badge warn">AI commentary off for this day (no API key)</span>';
+-    } else if (!b.ai_story_count) {
+-      aiNote = '<span class="badge warn">AI commentary unavailable for this day (quota or error)</span>';
+-    } else if (b.ai_story_count < b.story_count) {
+-      aiNote = '<span class="badge">AI commentary on ' + b.ai_story_count + " of " + b.story_count + " stories</span>";
++    // Commentary that the morning run missed is filled in by later runs (07:47 to
++    // 18:17 IST). Say so quietly on today's brief; say nothing on past days.
++    var pending = (b.story_count || 0) - (b.ai_story_count || 0);
++    var hourIST = Number(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata", hour: "numeric", hour12: false }));
++    if (b.ai_enabled && pending > 0 && b.date === todayIST() && hourIST < 19) {
++      aiNote = '<p class="pending-note"><span class="dot" aria-hidden="true"></span>' +
++        (b.ai_story_count ? "Analysis on " + pending + " more " + (pending === 1 ? "story" : "stories") + " lands later today."
++                          : "Today\'s analysis is still being written. Headlines first, notes later this morning.") +
++        "</p>";
+     }
++    renderMasthead(b);
+     var savedCount = Object.keys(savedMap()).length;
+ 
+     var html =
+       renderStaleNotice(b) +
+-      '<section class="day">' +
+-        "<h1>" + esc(b.date_label || b.date) + "</h1>" +
+-        '<div class="meta"><span>' + esc(b.reading_time_min) + " min read</span><span>" +
+-          esc(b.story_count) + " stories</span><span>" + sourcesOk + " sources</span></div>" +
+-        (aiNote ? "<div>" + aiNote + "</div>" : "") +
+-      "</section>" +
++      aiNote +
+       renderHero(b.gd_topic) +
+       renderConcept(b.concept) +
+       renderChips(b) +
+@@ -333,14 +367,14 @@
+           "<p>Worked: " + esc((b.sources_ok || []).join(", ") || "none") + "</p>" +
+           (failed.length ? "<p>Could not fetch: " + esc(failed.join(", ")) + "</p>" : "") +
+           (b.ai_model ? "<p>Commentary model: " + esc(b.ai_model) + "</p>" : "") +
+-          (aiErrors.length ? "<p>AI notes: " + esc(aiErrors.join("; ")) + "</p>" : "") +
++          (aiErrors.length ? "<p>Model log: " + esc(aiErrors.join("; ")) + "</p>" : "") +
+           (b.story_cap ? "<p>Daily cap: " + esc(b.story_cap) + " stories</p>" : "") +
+           "<p>Generated " + esc(new Date(b.generated_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })) + " IST</p>" +
+         "</details>" +
+       "</div>";
+ 
+     app.innerHTML = html;
+-    document.title = "Daily GD Brief, " + (b.date_label || b.date);
++    document.title = "The Brief \u00b7 " + shortDate(b.date, b.date_label);
+     wireUp(b);
+   }
+ 
+@@ -503,7 +537,10 @@
+       archiveIndex.forEach(function (entry) {
+         var opt = document.createElement("option");
+         opt.value = entry.date;
+-        opt.textContent = entry.label || entry.date;
++        var d = parseDay(entry.date);
++        opt.textContent = d
++          ? d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })
++          : (entry.label || entry.date);
+         if (entry.gd_topic) opt.title = entry.gd_topic;
+         dateSelect.appendChild(opt);
+       });
+diff --git a/index.html b/index.html
+index f9af127..80c3494 100644
+--- a/index.html
++++ b/index.html
+@@ -7,12 +7,12 @@
+   <meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+   <meta name="theme-color" content="#0F1620" media="(prefers-color-scheme: dark)">
+   <meta name="description" content="A daily, curated news brief with GD angles for MBA placement preparation.">
+-  <title>Daily GD Brief</title>
++  <title>The Brief</title>
+   <link rel="icon" href="icon.svg" type="image/svg+xml">
+   <link rel="apple-touch-icon" href="icon.svg">
+   <link rel="manifest" href="manifest.webmanifest">
+   <meta name="apple-mobile-web-app-capable" content="yes">
+-  <meta name="apple-mobile-web-app-title" content="GD Brief">
++  <meta name="apple-mobile-web-app-title" content="The Brief">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+@@ -28,19 +28,21 @@
+   </script>
+ </head>
+ <body>
+-  <header class="topbar">
+-    <div class="topbar-inner">
+-      <a class="masthead" href="./" aria-label="Daily GD Brief home">Daily GD Brief</a>
++  <header class="masthead">
++    <div class="masthead-inner">
++      <div class="kicker" id="day-kicker">Morning edition</div>
+       <div class="topbar-controls">
+         <label class="sr-only" for="date-select">Choose a day</label>
+         <select id="date-select" class="date-select" aria-label="Choose a day">
+           <option value="">Today</option>
+         </select>
+         <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch theme" title="Switch theme">
+-          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+-          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
++          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
++          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+         </button>
+       </div>
++      <h1 class="dateline" id="dateline">&nbsp;</h1>
++      <div class="day-meta" id="day-meta"></div>
+     </div>
+   </header>
+ 
+diff --git a/manifest.webmanifest b/manifest.webmanifest
+index f420c5a..52a4126 100644
+--- a/manifest.webmanifest
++++ b/manifest.webmanifest
+@@ -1,6 +1,6 @@
+ {
+-  "name": "Daily GD Brief",
+-  "short_name": "GD Brief",
++  "name": "The Brief",
++  "short_name": "The Brief",
+   "description": "A daily, curated news brief with GD angles for MBA placement preparation.",
+   "start_url": "./",
+   "scope": "./",
+diff --git a/scripts/build_brief.py b/scripts/build_brief.py
+index 8e2c147..e057482 100644
+--- a/scripts/build_brief.py
++++ b/scripts/build_brief.py
+@@ -25,6 +25,7 @@ import concurrent.futures as cf
+ import html
+ import json
+ import os
++import random
+ import re
+ import sys
+ import time
+@@ -61,17 +62,20 @@ REQUIRE_DATE = True             # drop entries with no usable publish date
+ # --- Gemini budget ---------------------------------------------------------
+ # The free tier is small and slow. Everything below exists so that a bad quota
+ # day costs a few minutes, not a cancelled job.
+-GEMINI_FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
++# Google's rolling aliases always point at a live model, so they are the safest fallbacks.
++GEMINI_FALLBACK_MODELS = ["gemini-flash-latest", "gemini-flash-lite-latest"]
+ GEMINI_DELAY_SECONDS = 6        # free tier allows ~10 requests/minute
+ GEMINI_MAX_RETRIES = 2
+ GEMINI_TIMEOUT = 60             # seconds per request
+-GEMINI_MAX_MODELS = 5           # candidates to try before giving up
++GEMINI_MAX_MODELS = 8           # candidates in the rotation
++MAX_5XX_PER_MODEL = 4           # consecutive overload/timeouts before a model is benched
++MAX_OVERLOAD_WAIT = 45          # longest single back-off after a 503 (seconds)
+ MAX_RATE_LIMIT_PER_MODEL = 2    # 429s on ONE model before dropping that model
+ MAX_RATE_LIMIT_HITS = 8         # 429s across all models before giving up on AI
+ MAX_RATE_WAIT = 75              # longest single wait for a per-minute limit
+ AI_DEADLINE_SECONDS = int(os.environ.get("AI_DEADLINE", "480"))  # 8 minutes
+ CURATION_SHORTLIST = 12         # stories per category sent to the AI curator
+-ENRICH_BATCH_SIZE = 9           # stories per enrichment call
++ENRICH_BATCH_SIZE = 5           # stories per enrichment call (small = partial wins on bad days)
+ 
+ BROWSER_HEADERS = {
+     "User-Agent": (
+@@ -777,6 +781,7 @@ class GeminiClient:
+         self.errors: list[str] = []
+         self.bad_models: dict[str, str] = {}     # model -> why it was dropped
+         self.model_429: dict[str, int] = {}
++        self.model_5xx: dict[str, int] = {}      # consecutive transient failures
+         self.deadline = time.monotonic() + AI_DEADLINE_SECONDS
+         self.stopped = False
+ 
+@@ -841,10 +846,21 @@ class GeminiClient:
+             )
+ 
+         available.sort(key=rank)
+-        ordered = ([forced] if forced else []) + available + GEMINI_FALLBACK_MODELS
++        # Interleave full and lite models. When the newest flash models are overloaded
++        # (HTTP 503, which happens most mornings IST), the lite tier usually still
++        # answers, and a lite answer beats no answer.
++        full = [m for m in available if "lite" not in m.lower()]
++        lite = [m for m in available if "lite" in m.lower()]
++        mixed: list[str] = []
++        while full or lite:
++            mixed += full[:2]
++            full = full[2:]
++            mixed += lite[:1]
++            lite = lite[1:]
++        ordered = ([forced] if forced else []) + mixed + GEMINI_FALLBACK_MODELS
+         ordered = list(dict.fromkeys(ordered))
+         if available:
+-            log(f"  Gemini models available: {', '.join(available[:6])}{' ...' if len(available) > 6 else ''}")
++            log(f"  Gemini models available: {', '.join(available[:8])}{' ...' if len(available) > 8 else ''}")
+         return ordered[:GEMINI_MAX_MODELS]
+ 
+     # -- the one call ------------------------------------------------------
+@@ -857,97 +873,124 @@ class GeminiClient:
+         if self.candidates is None:
+             self.candidates = self.discover_models()
+ 
+-        models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
+-        models = [m for m in models if m not in self.bad_models]
+-        if not models:
+-            self._stop("every candidate model is unavailable (" +
+-                       ", ".join(f"{m}: {why}" for m, why in list(self.bad_models.items())[:4]) + ")")
+-            return None
+-        for model in models:
+-            for attempt in range(GEMINI_MAX_RETRIES):
+-                if self.budget_left <= 10:
+-                    self._stop("time budget exhausted")
+-                    return None
+-                if self.rate_limited >= MAX_RATE_LIMIT_HITS:
+-                    self._stop(f"rate limited {self.rate_limited} times across models")
++        # Transient failures (503 overloaded, 500, timeouts) are the normal state of
++        # the free tier at peak hours. They are retried with back-off and the model
++        # stays in the rotation; only 400/403/404 and daily quotas bench a model.
++        overload_round = 0
++        for _pass in range(3):
++            models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
++            models = [m for m in models if m not in self.bad_models]
++            if not models:
++                self._stop("every candidate model is unavailable (" +
++                           ", ".join(f"{m}: {why}" for m, why in list(self.bad_models.items())[:4]) + ")")
++                return None
++            for model in models:
++                result, outcome = self._try_model(model, prompt, label)
++                if outcome == "ok":
++                    return result
++                if outcome == "stop":
+                     return None
+-                if self.calls:
+-                    time.sleep(min(GEMINI_DELAY_SECONDS, max(0.0, self.budget_left - 5)))
+-                self.calls += 1
++                if outcome == "transient":
++                    overload_round += 1
++                    wait = min(MAX_OVERLOAD_WAIT, 4 * (2 ** min(overload_round, 4))) + random.uniform(0, 3)
++                    wait = min(wait, max(0.0, self.budget_left - 30))
++                    if wait <= 0:
++                        self._stop("time budget exhausted while models were overloaded")
++                        return None
++                    log(f"  backing off {wait:.0f}s before the next model")
++                    time.sleep(wait)
++        self.errors.append(f"{label}: all models failed")
++        return None
++
++    def _try_model(self, model: str, prompt: str, label: str):
++        """One model, up to GEMINI_MAX_RETRIES attempts. Returns (result, outcome)
++        where outcome is ok | transient | next | stop."""
++        for attempt in range(GEMINI_MAX_RETRIES):
++            if self.budget_left <= 10:
++                self._stop("time budget exhausted")
++                return None, "stop"
++            if self.rate_limited >= MAX_RATE_LIMIT_HITS:
++                self._stop(f"rate limited {self.rate_limited} times across models")
++                return None, "stop"
++            if self.calls:
++                time.sleep(min(GEMINI_DELAY_SECONDS, max(0.0, self.budget_left - 5)))
++            self.calls += 1
++            try:
++                r = requests.post(
++                    f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
++                    headers={"x-goog-api-key": self.api_key or ""},
++                    json={
++                        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
++                        "generationConfig": {"responseMimeType": "application/json"},
++                    },
++                    timeout=GEMINI_TIMEOUT,
++                )
++            except Exception as exc:  # noqa: BLE001
++                log(f"  Gemini {model}: network error ({type(exc).__name__})")
++                self.errors.append(f"{label}: network {type(exc).__name__}")
++                return None, self._transient(model, f"network {type(exc).__name__}")
++
++            if r.status_code == 200:
+                 try:
+-                    r = requests.post(
+-                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+-                        headers={"x-goog-api-key": self.api_key or ""},
+-                        json={
+-                            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+-                            "generationConfig": {"responseMimeType": "application/json"},
+-                        },
+-                        timeout=GEMINI_TIMEOUT,
+-                    )
++                    parts = r.json()["candidates"][0]["content"]["parts"]
++                    text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
++                    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
++                    parsed = json.loads(text)
+                 except Exception as exc:  # noqa: BLE001
+-                    log(f"  Gemini {model}: network error ({type(exc).__name__})")
+-                    self.errors.append(f"{label}: network {type(exc).__name__}")
++                    log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
++                    self.errors.append(f"{label}: unparseable output")
+                     continue
++                self.model_used = model
++                self.model_5xx[model] = 0
++                return parsed, "ok"
++
++            if r.status_code == 429:
++                self.rate_limited += 1
++                self.model_429[model] = self.model_429.get(model, 0) + 1
++                message, retry_delay, per_day = parse_quota_error(r)
++                log(f"  Gemini rate limit on {model}: {message[:150]}")
++                self.errors.append(f"{label}: 429 on {model} ({message[:60]})")
++                if per_day:
++                    self.bad_models[model] = "daily quota exhausted"
++                    log(f"  {model} has hit its DAILY free-tier quota; switching model")
++                    return None, "next"
++                if self.model_429[model] >= MAX_RATE_LIMIT_PER_MODEL:
++                    log(f"  {model} keeps rate limiting; trying another model")
++                    return None, "next"
++                wait = retry_delay if retry_delay else 20 * (attempt + 1)
++                wait = min(wait, MAX_RATE_WAIT, max(0.0, self.budget_left - 25))
++                if wait <= 0:
++                    self._stop("no time left to wait out a rate limit")
++                    return None, "stop"
++                log(f"  waiting {wait:.0f}s for the per-minute limit to clear")
++                time.sleep(wait)
++                continue
+ 
+-                if r.status_code == 200:
+-                    try:
+-                        parts = r.json()["candidates"][0]["content"]["parts"]
+-                        text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+-                        text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+-                        self.model_used = model
+-                        return json.loads(text)
+-                    except Exception as exc:  # noqa: BLE001
+-                        log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
+-                        self.errors.append(f"{label}: unparseable output")
+-                        continue
++            if r.status_code >= 500:
++                log(f"  Gemini {model}: HTTP {r.status_code} (overloaded)")
++                self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
++                return None, self._transient(model, f"HTTP {r.status_code} (overloaded)")
+ 
+-                if r.status_code == 429:
+-                    self.rate_limited += 1
+-                    self.model_429[model] = self.model_429.get(model, 0) + 1
+-                    message, retry_delay, per_day = parse_quota_error(r)
+-                    log(f"  Gemini rate limit on {model}: {message[:150]}")
+-                    self.errors.append(f"{label}: 429 on {model} ({message[:60]})")
+-                    if per_day:
+-                        # A daily quota will not clear today. Drop this model for the run.
+-                        self.bad_models[model] = "daily quota exhausted"
+-                        log(f"  {model} has hit its DAILY free-tier quota; switching model")
+-                        break
+-                    if self.model_429[model] >= MAX_RATE_LIMIT_PER_MODEL:
+-                        self.bad_models[model] = "rate limited repeatedly"
+-                        log(f"  {model} keeps rate limiting; switching model")
+-                        break
+-                    # Per-minute limits clear on their own: honour Google's retryDelay.
+-                    wait = retry_delay if retry_delay else 20 * (attempt + 1)
+-                    wait = min(wait, MAX_RATE_WAIT, max(0.0, self.budget_left - 25))
+-                    if wait <= 0:
+-                        self._stop("no time left to wait out a rate limit")
+-                        return None
+-                    log(f"  waiting {wait:.0f}s for the per-minute limit to clear")
+-                    time.sleep(wait)
+-                    continue
++            if r.status_code in (400, 403, 404):
++                detail = ""
++                try:
++                    detail = ": " + r.json()["error"]["message"][:140]
++                except Exception:  # noqa: BLE001
++                    pass
++                self.bad_models[model] = f"HTTP {r.status_code}"
++                log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
++                self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
++                return None, "next"
+ 
+-                if r.status_code >= 500:
+-                    # Brand-new models are often overloaded for days. Stop paying
+-                    # the round-trip cost for them on every later call.
+-                    self.bad_models[model] = f"HTTP {r.status_code} (overloaded)"
+-                    log(f"  Gemini {model}: HTTP {r.status_code} (overloaded); dropping it for this run")
+-                    self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
+-                    break
+-
+-                if r.status_code in (400, 403, 404):
+-                    detail = ""
+-                    try:
+-                        detail = ": " + r.json()["error"]["message"][:140]
+-                    except Exception:  # noqa: BLE001
+-                        pass
+-                    self.bad_models[model] = f"HTTP {r.status_code}"
+-                    log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
+-                    self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
+-                    break
+-
+-                log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
+-        self.errors.append(f"{label}: all models failed")
+-        return None
++            log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
++        return None, "next"
++
++    def _transient(self, model: str, why: str) -> str:
++        self.model_5xx[model] = self.model_5xx.get(model, 0) + 1
++        if self.model_5xx[model] >= MAX_5XX_PER_MODEL:
++            self.bad_models[model] = f"{why} x{self.model_5xx[model]}"
++            log(f"  {model} failed {self.model_5xx[model]} times in a row; benching it for this run")
++        return "transient"
+ 
+ 
+ # ---------------------------------------------------------------------------
+@@ -1091,9 +1134,12 @@ def enrich_all(client: GeminiClient, stories: list[Story]) -> None:
+             break
+         enrich_batch(client, batch, f"batch {n}/{len(batches)}")
+     missing = [s for s in stories if not s.ai]
+-    if missing and not client.stopped and client.budget_left > 60:
+-        log(f"  Retrying {len(missing)} story(ies) that came back empty")
+-        enrich_batch(client, missing[:ENRICH_BATCH_SIZE], "retry")
++    for n in range(0, len(missing), ENRICH_BATCH_SIZE):
++        if client.stopped or client.budget_left < 60:
++            break
++        if n == 0:
++            log(f"  Retrying {len(missing)} story(ies) that came back empty")
++        enrich_batch(client, missing[n:n + ENRICH_BATCH_SIZE], f"retry {n // ENRICH_BATCH_SIZE + 1}")
+ 
+ 
+ def generate_topic_and_concept(client: GeminiClient, all_stories: list[Story], recent_concepts: list[str]):
+@@ -1160,8 +1206,7 @@ def fallback_topic(all_stories: list[Story]) -> dict:
+     return {
+         "topic": title,
+         "why_now": (
+-            "Chosen automatically from today's most-covered India-relevant stories, because AI "
+-            "commentary was unavailable for this brief."
++            "The most widely covered India-relevant story of the day."
+         ),
+         "opening_line": (
+             "Let me frame the discussion. This issue matters because it affects policy, industry "
+@@ -1288,6 +1333,123 @@ def write_files(brief: dict) -> None:
+     save_index(index)
+ 
+ 
++# ---------------------------------------------------------------------------
++# Backfill: re-run only the AI steps on briefs that already exist
++# ---------------------------------------------------------------------------
++
++BACKFILL_DAYS = int(os.environ.get("BACKFILL_DAYS", "7"))
++
++
++def story_from_json(d: dict, category: str) -> Story:
++    published = None
++    if d.get("published"):
++        try:
++            published = datetime.fromisoformat(d["published"])
++        except ValueError:
++            pass
++    s = Story(
++        title=d.get("title", ""), url=d.get("url", ""), source=d.get("source", ""),
++        category=category, published=published,
++        description="" if d.get("ai") else d.get("summary", ""),
++        weight=1, cluster_size=int(d.get("sources_count") or 1),
++    )
++    if d.get("ai"):
++        s.summary = d.get("summary", "")
++        s.why_it_matters = d.get("why_it_matters", "")
++        s.gd_for = list(d.get("gd_for") or [])
++        s.gd_against = list(d.get("gd_against") or [])
++        s.key_fact = d.get("key_fact", "")
++        s.ai = True
++    return s
++
++
++def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str]) -> bool:
++    """Fill in commentary, topic and concept that the morning run could not get.
++    Returns True if the file changed."""
++    brief = json.loads(path.read_text(encoding="utf-8"))
++    cats = brief.get("categories") or []
++    stories = {c["key"]: [story_from_json(d, c["key"]) for d in c.get("stories", [])] for c in cats}
++    everything = [s for c in cats for s in stories[c["key"]]]
++    missing = [s for s in everything if not s.ai]
++    need_topic = not brief.get("gd_topic") or (brief.get("gd_topic") or {}).get("fallback")
++    need_concept = not (brief.get("concept") or {}).get("name")
++    if not (missing or need_topic or need_concept):
++        return False
++    log(f"\n  {path.name}: {len(missing)} story(ies) without commentary"
++        f"{', topic missing' if need_topic else ''}{', concept missing' if need_concept else ''}")
++
++    changed = False
++    if need_topic or need_concept:
++        topic, concept = generate_topic_and_concept(client, everything, recent_concepts)
++        if topic and need_topic:
++            brief["gd_topic"], changed = topic, True
++        if concept and need_concept:
++            brief["concept"], changed = concept, True
++    if missing:
++        before = sum(1 for s in everything if s.ai)
++        enrich_all(client, missing)
++        changed = changed or sum(1 for s in everything if s.ai) > before
++    if not changed:
++        return False
++
++    for c in cats:
++        for s in stories[c["key"]]:
++            if not s.summary:
++                s.summary = s.description or "Open the source link to read the full story."
++        c["stories"] = [s.to_json() for s in stories[c["key"]]]
++    brief["ai_enabled"] = True
++    brief["ai_story_count"] = sum(1 for s in everything if s.ai)
++    brief["ai_model"] = client.model_used or brief.get("ai_model")
++    brief["ai_errors"] = sorted(set(client.errors))[:10]
++    brief["ai_models_dropped"] = [f"{m}: {why}" for m, why in client.bad_models.items()]
++    brief["ai_backfilled_at"] = datetime.now(IST).isoformat()
++    brief["reading_time_min"] = reading_time_minutes(brief)
++
++    payload = json.dumps(brief, indent=2, ensure_ascii=False)
++    path.write_text(payload, encoding="utf-8")
++    latest = DATA_DIR / "latest.json"
++    try:
++        if json.loads(latest.read_text(encoding="utf-8")).get("date") == brief.get("date"):
++            latest.write_text(payload, encoding="utf-8")
++    except Exception:  # noqa: BLE001
++        pass
++    index = load_index()
++    for e in index:
++        if e.get("date") == brief.get("date"):
++            e["gd_topic"] = (brief.get("gd_topic") or {}).get("topic", e.get("gd_topic", ""))
++            e["concept"] = (brief.get("concept") or {}).get("name", e.get("concept", ""))
++            e["ai"] = bool(brief["ai_story_count"])
++    save_index(index)
++    log(f"  {path.name}: now {brief['ai_story_count']}/{brief.get('story_count')} stories with commentary")
++    return True
++
++
++def backfill() -> int:
++    client = GeminiClient(os.environ.get("GEMINI_API_KEY", "").strip() or None)
++    if not client.enabled:
++        log("Backfill skipped: no GEMINI_API_KEY")
++        return 0
++    today = datetime.now(IST).date()
++    files = []
++    for n in range(BACKFILL_DAYS):
++        f = ARCHIVE_DIR / f"{(today - timedelta(days=n)).isoformat()}.json"
++        if f.exists():
++            files.append(f)          # newest first: today's brief gets the budget first
++    log(f"Backfill: checking {len(files)} brief(s) from the last {BACKFILL_DAYS} days, "
++        f"AI phase capped at {AI_DEADLINE_SECONDS}s")
++    recent_concepts = [e.get("concept") for e in load_index()[:14] if e.get("concept")]
++    updated = 0
++    for f in files:
++        if client.stopped:
++            break
++        try:
++            updated += backfill_brief(client, f, recent_concepts)
++        except Exception as exc:  # noqa: BLE001
++            log(f"  {f.name}: backfill failed ({type(exc).__name__}: {exc})")
++    log(f"\nBackfill done: {updated} brief(s) updated, {client.calls} Gemini call(s)")
++    return 0
++
++
+ # ---------------------------------------------------------------------------
+ # Main
+ # ---------------------------------------------------------------------------
+@@ -1382,4 +1544,6 @@ def main() -> int:
+ 
+ 
+ if __name__ == "__main__":
++    if "--backfill" in sys.argv or os.environ.get("BACKFILL") == "1":
++        sys.exit(backfill())
+     sys.exit(main())
+diff --git a/scripts/test_build_brief.py b/scripts/test_build_brief.py
+index ec84473..e85807e 100644
+--- a/scripts/test_build_brief.py
++++ b/scripts/test_build_brief.py
+@@ -165,9 +165,13 @@ class TestGeminiFailover(unittest.TestCase):
+         self.calls = []
+         bb.GEMINI_DELAY_SECONDS_ORIG = bb.GEMINI_DELAY_SECONDS
+         bb.GEMINI_DELAY_SECONDS = 0
++        self.sleeps = []
++        self._sleep = bb.time.sleep
++        bb.time.sleep = self.sleeps.append       # never actually wait in tests
+ 
+     def tearDown(self):
+         bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
++        bb.time.sleep = self._sleep
+ 
+     def client(self, responder):
+         client = bb.GeminiClient("fake-key")
+@@ -181,7 +185,8 @@ class TestGeminiFailover(unittest.TestCase):
+         bb.requests.post = fake_post
+         return client
+ 
+-    def test_overloaded_model_is_dropped_for_the_whole_run(self):
++    def test_one_503_does_not_bench_a_model(self):
++        """The Oct failure mode: one 503 per model used to wipe out the whole AI phase."""
+         def responder(model):
+             if model == "m-new":
+                 return FakeResponse(503, text="overloaded")
+@@ -190,7 +195,34 @@ class TestGeminiFailover(unittest.TestCase):
+         client = self.client(responder)
+         self.assertIsNotNone(client.generate_json("p", "one"))
+         self.assertIsNotNone(client.generate_json("p", "two"))
+-        self.assertEqual(self.calls.count("m-new"), 1, "503 model must not be retried")
++        self.assertNotIn("m-new", client.bad_models)
++        self.assertEqual(client.model_used, "m-mid", "the model that answered should be preferred")
++        self.assertEqual(self.calls.count("m-new"), 1, "second call should start with the working model")
++
++    def test_recovers_when_every_model_is_briefly_overloaded(self):
++        attempts = {"n": 0}
++
++        def responder(model):
++            attempts["n"] += 1
++            if attempts["n"] <= 4:                  # first sweep: everyone is overloaded
++                return FakeResponse(503, text="overloaded")
++            return FakeResponse(200, ok_payload({"ok": True}))
++
++        client = self.client(responder)
++        self.assertEqual(client.generate_json("p", "one"), {"ok": True})
++        self.assertFalse(client.stopped)
++        self.assertTrue(any(w > 0 for w in self.sleeps), "should back off between overloaded models")
++
++    def test_persistently_overloaded_model_is_eventually_benched(self):
++        def responder(model):
++            if model == "m-new":
++                return FakeResponse(503, text="overloaded")
++            return FakeResponse(200, ok_payload({"ok": True}))
++
++        client = self.client(responder)
++        for _ in range(bb.MAX_5XX_PER_MODEL):
++            client.model_used = None                 # force m-new to be tried first
++            client.generate_json("p", "x")
+         self.assertIn("m-new", client.bad_models)
+ 
+     def test_daily_quota_switches_model_instead_of_stopping(self):
+@@ -216,6 +248,48 @@ class TestGeminiFailover(unittest.TestCase):
+         self.assertFalse(per_day)
+ 
+ 
++class TestBackfill(unittest.TestCase):
++    def test_fills_only_missing_commentary(self):
++        import json, tempfile
++        tmp = Path(tempfile.mkdtemp())
++        orig = (bb.DATA_DIR, bb.ARCHIVE_DIR)
++        bb.DATA_DIR, bb.ARCHIVE_DIR = tmp, tmp / "archive"
++        bb.ARCHIVE_DIR.mkdir()
++        done = {"title": "Already done", "url": "https://e.com/1", "source": "X", "summary": "AI text",
++                "why_it_matters": "w", "gd_for": ["a"], "gd_against": ["b"], "key_fact": "k", "ai": True}
++        todo = {"title": "RBI holds repo rate", "url": "https://e.com/2", "source": "Mint",
++                "summary": "RSS text", "why_it_matters": "", "gd_for": [], "gd_against": [],
++                "key_fact": "", "ai": False}
++        brief = {"date": "2026-10-31", "story_count": 2, "gd_topic": {"topic": "t"},
++                 "concept": {"name": "c"}, "categories": [{"key": "economy", "title": "E",
++                                                           "stories": [done, todo]}]}
++        path = bb.ARCHIVE_DIR / "2026-10-31.json"
++        path.write_text(json.dumps(brief))
++        (tmp / "latest.json").write_text(json.dumps(brief))
++        prompts = []
++
++        class Fake:
++            stopped, budget_left, errors, bad_models, model_used, calls = False, 999, [], {}, "m", 1
++
++            def generate_json(self, prompt, label=""):
++                prompts.append(prompt)
++                return [{"index": 0, "summary": "New AI summary", "why_it_matters": "Because",
++                         "gd_for": ["p1", "p2"], "gd_against": ["c1", "c2"], "key_fact": "6.5%"}]
++        try:
++            self.assertTrue(bb.backfill_brief(Fake(), path, []))
++            out = json.loads((tmp / "latest.json").read_text())
++            s0, s1 = out["categories"][0]["stories"]
++            self.assertEqual(s0["summary"], "AI text", "existing commentary must be left alone")
++            self.assertTrue(s1["ai"])
++            self.assertEqual(s1["summary"], "New AI summary")
++            self.assertEqual(out["ai_story_count"], 2)
++            self.assertEqual(len(prompts), 1)
++            self.assertNotIn("Already done", prompts[0])
++            self.assertFalse(bb.backfill_brief(Fake(), path, []), "nothing left to do")
++        finally:
++            bb.DATA_DIR, bb.ARCHIVE_DIR = orig
++
++
+ class TestMisc(unittest.TestCase):
+     def test_safe_url(self):
+         self.assertTrue(bb.safe_url("https://example.com/a"))
+diff --git a/style.css b/style.css
+index fd49417..101c02a 100644
+--- a/style.css
++++ b/style.css
+@@ -90,64 +90,82 @@ ul { margin: 0; padding-left: 1.2rem; }
+ li + li { margin-top: .35rem; }
+ .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+ 
+-/* Top bar --------------------------------------------------------------- */
+-.topbar {
+-  position: sticky;
+-  top: 0;
+-  z-index: 10;
+-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+-  backdrop-filter: saturate(150%) blur(10px);
+-  -webkit-backdrop-filter: saturate(150%) blur(10px);
+-  border-bottom: 1px solid var(--rule);
+-  padding-top: env(safe-area-inset-top, 0);
+-}
+-.topbar-inner {
+-  max-width: 44rem;
++/* Masthead: the date is the headline ----------------------------------- */
++.masthead {
++  padding: env(safe-area-inset-top, 0) 1rem 0;
++}
++.masthead-inner {
++  max-width: 42rem;
+   margin: 0 auto;
+-  padding: .6rem 1rem;
+-  display: flex;
++  padding: 1.1rem 0 1.25rem;
++  display: grid;
++  grid-template-columns: 1fr auto;
++  grid-template-areas:
++    "kicker controls"
++    "title  title"
++    "meta   meta";
+   align-items: center;
+-  justify-content: space-between;
+-  gap: .75rem;
++  column-gap: .75rem;
++  border-bottom: 1px solid var(--ink);
+ }
+-.masthead {
++.masthead .kicker {
++  grid-area: kicker;
++  font-size: .72rem;
++  font-weight: 600;
++  letter-spacing: .14em;
++  text-transform: uppercase;
++  color: var(--accent);
++  white-space: pre;
++}
++.dateline {
++  grid-area: title;
+   font-family: var(--font-display);
+-  font-weight: 700;
+-  font-size: 1.25rem;
+-  color: var(--ink);
+-  text-decoration: none;
+-  letter-spacing: -.01em;
+-  white-space: nowrap;
++  font-weight: 600;
++  font-size: clamp(2.4rem, 11vw, 3.4rem);
++  line-height: 1;
++  letter-spacing: -.025em;
++  margin: .55rem 0 .6rem;
++  font-variation-settings: "opsz" 144;
++}
++.day-meta {
++  grid-area: meta;
++  display: flex; flex-wrap: wrap; gap: .2rem .9rem;
++  color: var(--muted);
++  font-size: .85rem;
+ }
+-.masthead::before {
++.day-meta span + span::before {
+   content: "";
+   display: inline-block;
+-  width: .7em; height: .7em;
+-  border-radius: 50%;
+-  background: var(--accent);
+-  margin-right: .45em;
+-  vertical-align: -.02em;
++  width: 3px; height: 3px; border-radius: 50%;
++  background: currentColor;
++  margin-right: .9rem;
++  vertical-align: .22em;
++  opacity: .7;
+ }
+-.topbar-controls { display: flex; align-items: center; gap: .5rem; flex: 1 1 auto; justify-content: flex-end; min-width: 0; }
++.topbar-controls { grid-area: controls; display: flex; align-items: center; gap: .35rem; min-width: 0; }
+ .date-select {
+   font: inherit;
+-  font-size: .9rem;
+-  color: var(--ink);
+-  background: var(--surface);
++  font-size: .82rem;
++  color: var(--ink-2);
++  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236B7785' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right .6rem center;
+   border: 1px solid var(--rule);
+-  border-radius: 8px;
+-  padding: .4rem .6rem;
++  border-radius: 999px;
++  padding: .32rem 1.7rem .32rem .8rem;
+   min-width: 0;
+-  max-width: 11rem;
+-  flex: 0 1 auto;
++  max-width: 10rem;
++  appearance: none;
++  -webkit-appearance: none;
++  cursor: pointer;
+ }
++.date-select:hover { border-color: var(--muted); }
+ .icon-btn {
+   display: inline-flex; align-items: center; justify-content: center;
+   flex: none;
+-  width: 2.4rem; height: 2.4rem;
++  width: 2.1rem; height: 2.1rem;
+   border: 1px solid var(--rule);
+-  border-radius: 8px;
+-  background: var(--surface);
++  border-radius: 50%;
++  background: transparent;
++  color: var(--ink-2);
+   cursor: pointer;
+ }
+ .icon-btn:hover { background: var(--surface-2); }
+@@ -160,7 +178,7 @@ li + li { margin-top: .35rem; }
+ }
+ 
+ /* Page ------------------------------------------------------------------ */
+-.page { max-width: 44rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
++.page { max-width: 44rem; margin: 0 auto; padding: 1.4rem 1rem 3rem; }
+ .footer {
+   max-width: 44rem; margin: 0 auto; padding: 0 1rem 2.5rem;
+   color: var(--muted); font-size: .85rem; line-height: 1.5;
+@@ -168,30 +186,20 @@ li + li { margin-top: .35rem; }
+ .status { color: var(--muted); padding: 2rem 0; }
+ .status.error { color: var(--against); }
+ 
+-/* Day header ------------------------------------------------------------ */
+-.day {
+-  display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem 1rem;
+-  margin-bottom: 1.25rem;
+-}
+-.day h1 {
+-  font-family: var(--font-display);
+-  font-weight: 600;
+-  font-size: 1.35rem;
+-  margin: 0;
+-  letter-spacing: -.01em;
++/* Pending-analysis note (today only) ----------------------------------- */
++.pending-note {
++  display: flex; align-items: center; gap: .55rem;
++  margin: 0 0 1.1rem;
++  font-size: .85rem;
++  color: var(--muted);
+ }
+-.day .meta { color: var(--muted); font-size: .9rem; }
+-.day .meta span + span::before { content: ", "; }
+-.badge {
+-  display: inline-block;
+-  font-size: .78rem;
+-  padding: .15rem .55rem;
+-  border-radius: 999px;
+-  background: var(--surface-2);
+-  color: var(--ink-2);
+-  margin-top: .35rem;
++.pending-note .dot {
++  width: 7px; height: 7px; border-radius: 50%; flex: none;
++  background: var(--accent);
++  animation: pulse 2.4s ease-in-out infinite;
+ }
+-.badge.warn { background: var(--accent-soft); color: var(--accent-ink); }
++@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
++@media (prefers-reduced-motion: reduce) { .pending-note .dot { animation: none; } }
+ 
+ /* The GD topic hero — the one loud element on the page ------------------ */
+ .hero {
+@@ -378,6 +386,14 @@ li + li { margin-top: .35rem; }
+ 
+ /* Category jump chips ---------------------------------------------------- */
+ .chips {
++  position: sticky;
++  top: 0;
++  z-index: 10;
++  background: color-mix(in srgb, var(--bg) 90%, transparent);
++  backdrop-filter: blur(10px);
++  -webkit-backdrop-filter: blur(10px);
++  margin-left: -1rem !important; margin-right: -1rem !important;
++  padding: .55rem 1rem !important;
+   display: flex;
+   gap: .45rem;
+   overflow-x: auto;
+@@ -486,9 +502,27 @@ li + li { margin-top: .35rem; }
+ 
+ /* Print: a clean one-pager for revision ---------------------------------- */
+ @media print {
+-  .topbar, .toolbar, .chips, .search, .story-actions, .sources, .footer { display: none !important; }
++  .masthead .topbar-controls, .toolbar, .chips, .search, .story-actions, .sources, .footer { display: none !important; }
+   body { background: #fff; color: #000; font-size: 11pt; }
+   .category { break-inside: avoid; border: 0; box-shadow: none; }
+   .category .body { display: block !important; }
+   .hero { border: 1px solid #ccc; }
+ }
++
++/* Read link + plain stories ---------------------------------------------- */
++.read-link {
++  margin-right: auto;
++  font-size: .85rem;
++  font-weight: 500;
++  color: var(--link);
++  text-decoration: none;
++  padding: .3rem 0;
++}
++.read-link:hover { text-decoration: underline; text-underline-offset: 3px; }
++.story-actions { align-items: center; }
++.story.is-plain .summary { color: var(--ink-2); }
++.story-actions { flex-wrap: nowrap; gap: .3rem; }
++.story-actions .chip-btn { font-size: .78rem; padding: .28rem .65rem; white-space: nowrap; }
++.read-link { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
++.pending-note { align-items: flex-start; }
++.pending-note .dot { margin-top: .45em; }
+diff --git a/sw.js b/sw.js
+index f3dca92..1a4d0d9 100644
+--- a/sw.js
++++ b/sw.js
+@@ -3,7 +3,7 @@
+    Today's brief: network-first, falling back to the cached copy.
+    Archived days: cache-first (they never change). */
+ 
+-var VERSION = "gd-brief-v2";
++var VERSION = "gd-brief-v3";
+ var SHELL = ["./", "index.html", "app.js", "style.css", "icon.svg", "manifest.webmanifest"];
+ 
+ self.addEventListener("install", function (e) {
+-- 
+2.43.0
+
+
+From 6e1a0f0cd21b5057a47f95d505f6c7d7465c07d6 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 31 Oct 2026 07:14:32 +0000
+Subject: [PATCH 2/2] UI pass: speaking-card GD topic, reading progress, icon
+ actions
+
+- GD topic styled as a cue card; opening and closing lines side by side on desktop
+- Stakeholder lenses split into name and view
+- Sticky bar with section chips plus reading progress; chips tick off when a section is read
+- Opening the full story marks it read; read stories dim instead of fading out
+- Save, read and share are icon buttons; saved stories move to a header button with a count
+- One Expand/Collapse toggle; masthead kicker in sentence case
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011ShgZog66qtteDXZduRQwJ
+---
+ app.js     | 174 +++++++++++++++++++++++++++++++++++++++--------------
+ index.html |   4 ++
+ style.css  | 144 +++++++++++++++++++++++++++++++-------------
+ 3 files changed, 237 insertions(+), 85 deletions(-)
+
+diff --git a/app.js b/app.js
+index 10d5d2a..4d5d41f 100644
+--- a/app.js
++++ b/app.js
+@@ -123,6 +123,52 @@
+     }
+   }
+ 
++  // ---------- icons ----------
++  var ICON = {
++    star: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
++    check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>',
++    share: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5M7.5 8L12 3.5 16.5 8"/><path d="M5 12v7.5h14V12"/></svg>',
++    copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>'
++  };
++
++  // ---------- reading progress ----------
++  function briefUrls(b) {
++    var out = [];
++    (b && b.categories || []).forEach(function (c) {
++      (c.stories || []).forEach(function (s) { if (s.url) out.push(s.url); });
++    });
++    return out;
++  }
++  function markRead(url) {
++    if (!isRead(url)) toggleRead(url);
++  }
++  function updateProgress() {
++    if (!currentBrief) return;
++    var urls = briefUrls(currentBrief);
++    var done = urls.filter(isRead).length;
++    var bar = app.querySelector(".progress-fill");
++    var label = app.querySelector(".progress-label");
++    if (bar) bar.style.transform = "scaleX(" + (urls.length ? done / urls.length : 0) + ")";
++    if (label) {
++      label.textContent = done === urls.length && urls.length
++        ? "All " + urls.length + " stories read"
++        : done + " of " + urls.length + " read";
++    }
++    (currentBrief.categories || []).forEach(function (c) {
++      var list = (c.stories || []).map(function (s) { return s.url; });
++      var left = list.filter(function (u) { return !isRead(u); }).length;
++      var chip = app.querySelector('[data-jump="' + c.key + '"]');
++      if (chip) {
++        chip.classList.toggle("is-done", left === 0 && list.length > 0);
++        var n = chip.querySelector("span");
++        if (n) n.innerHTML = left === 0 ? ICON.check : String(left);
++        chip.setAttribute("aria-label", c.title + ", " + (left === 0 ? "all read" : left + " unread"));
++      }
++      var count = app.querySelector('#cat-' + c.key + ' .count');
++      if (count) count.textContent = left === 0 && list.length ? "All read" : left + " of " + list.length + " unread";
++    });
++  }
++
+   // ---------- masthead ----------
+   function parseDay(iso) {
+     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+@@ -140,7 +186,7 @@
+     var d = parseDay(b.date);
+     var weekday = d ? d.toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }) : "";
+     var no = editionNumber(b.date);
+-    kickerEl.textContent = [weekday, no ? "No. " + no : ""].filter(Boolean).join("  \u00b7  ") || "Morning edition";
++    kickerEl.textContent = weekday ? weekday + (no ? ", edition " + no : "") : "Morning edition";
+     datelineEl.textContent = d
+       ? d.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: "UTC" })
+       : (b.date_label || b.date || "");
+@@ -148,7 +194,9 @@
+     if (b.reading_time_min) parts.push(b.reading_time_min + " min read");
+     if (b.story_count) parts.push(b.story_count + " stories");
+     if ((b.sources_ok || []).length) parts.push(b.sources_ok.length + " sources");
+-    metaEl.innerHTML = parts.map(function (p) { return "<span>" + esc(p) + "</span>"; }).join("");
++    metaEl.textContent = parts.join(", ");
++    var savedBtn = document.getElementById("saved-btn");
++    if (savedBtn) updateSavedCount();
+   }
+ 
+   // ---------- rendering pieces ----------
+@@ -156,12 +204,17 @@
+     if (!text) return "";
+     return (
+       '<div class="line">' +
+-        '<div class="label">' + esc(label) + "</div>" +
++        '<div class="line-head"><span class="label">' + esc(label) + "</span>" +
++          (copyable ? '<button class="copy" type="button" data-copy="' + esc(text) + '" aria-label="Copy ' + esc(label.toLowerCase()) + '">' + ICON.copy + "<span>Copy</span></button>" : "") +
++        "</div>" +
+         "<p>" + esc(text) + "</p>" +
+-        (copyable ? '<button class="copy" type="button" data-copy="' + esc(text) + '">Copy</button>' : "") +
+       "</div>"
+     );
+   }
++  function renderLens(p) {
++    var m = /^([^:]{3,40}):\s+(.+)$/.exec(p);
++    return m ? "<li><strong>" + esc(m[1]) + "</strong>" + esc(m[2]) + "</li>" : "<li>" + esc(p) + "</li>";
++  }
+ 
+   function renderStaleNotice(b) {
+     if (!b || !b.date) return "";
+@@ -179,19 +232,20 @@
+   function renderHero(t) {
+     if (!t) return "";
+     var perspectives = Array.isArray(t.perspectives) && t.perspectives.length
+-      ? '<div class="perspectives"><div class="label">Different lenses</div><ul>' +
+-          t.perspectives.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div>"
++      ? '<div class="perspectives"><div class="label">Who sees it how</div><ul>' +
++          t.perspectives.map(renderLens).join("") + "</ul></div>"
+       : "";
+     return (
+-      '<section class="hero" aria-labelledby="gd-topic">' +
+-        '<div class="kicker">' + (t.fallback ? "Most-covered story today" : "Today\'s likely GD topic") + "</div>" +
++      '<section class="hero' + (t.fallback ? " is-auto" : "") + '" aria-labelledby="gd-topic">' +
++        '<div class="kicker">' + (t.fallback ? "Most-covered story today" : "Likely GD topic") + "</div>" +
+         '<h2 id="gd-topic">' + esc(t.topic) + "</h2>" +
+         // Automatic topics carry template text (and older ones an apology); skip it.
+         (t.why_now && !t.fallback ? '<p class="why">' + esc(t.why_now) + "</p>" : "") +
+-        (t.fallback ? "" : renderLine("Suggested opening", t.opening_line, true)) +
+-        (t.fallback ? "" : renderLine("Strong closing", t.closing_line, true)) +
++        (t.fallback ? "" : '<div class="lines">' +
++          renderLine("Open with", t.opening_line, true) +
++          renderLine("Close with", t.closing_line, true) + "</div>") +
+         perspectives +
+-        '<div class="hero-actions"><button class="text-btn" type="button" data-share-topic="1">Share this topic</button></div>' +
++        '<div class="hero-actions"><button class="text-btn" type="button" data-share-topic="1">' + ICON.share + "<span>Share topic</span></button></div>" +
+       "</section>"
+     );
+   }
+@@ -254,9 +308,9 @@
+         fact +
+         '<div class="story-actions">' +
+           readLink +
+-          '<button class="chip-btn" type="button" data-act="save">' + (saved ? "★ Saved" : "☆ Save") + "</button>" +
+-          '<button class="chip-btn" type="button" data-act="read">' + (read ? "Mark unread" : "Mark read") + "</button>" +
+-          '<button class="chip-btn" type="button" data-act="share">Share</button>' +
++          '<button class="icon-act" type="button" data-act="save" aria-pressed="' + saved + '" aria-label="Save for revision" title="Save for revision">' + ICON.star + "</button>" +
++          '<button class="icon-act" type="button" data-act="read" aria-pressed="' + read + '" aria-label="Mark as read" title="Mark as read">' + ICON.check + "</button>" +
++          '<button class="icon-act" type="button" data-act="share" aria-label="Share story" title="Share story">' + ICON.share + "</button>" +
+         "</div>" +
+       "</article>"
+     );
+@@ -280,12 +334,19 @@
+     var cats = (b.categories || []).filter(function (c) { return (c.stories || []).length; });
+     if (!cats.length) return "";
+     return (
+-      '<nav class="chips" aria-label="Jump to a section">' +
+-        cats.map(function (c) {
+-          return '<button class="chip" type="button" data-jump="' + esc(c.key) + '">' +
+-            esc(c.title.split(/[,&:]/)[0].trim()) + " <span>" + (c.stories || []).length + "</span></button>";
+-        }).join("") +
+-      "</nav>"
++      '<div class="stickybar">' +
++        '<nav class="chips" aria-label="Jump to a section">' +
++          cats.map(function (c) {
++            return '<button class="chip" type="button" data-jump="' + esc(c.key) + '">' +
++              esc(c.title.split(/[,&:]/)[0].trim()) + " <span>" + (c.stories || []).length + "</span></button>";
++          }).join("") +
++        "</nav>" +
++        '<div class="progress">' +
++          '<div class="progress-track" aria-hidden="true"><div class="progress-fill"></div></div>' +
++          '<span class="progress-label" aria-live="polite"></span>' +
++          '<button class="link-btn" type="button" data-toggle-all="1">Expand all</button>' +
++        "</div>" +
++      "</div>"
+     );
+   }
+ 
+@@ -343,7 +404,6 @@
+         "</p>";
+     }
+     renderMasthead(b);
+-    var savedCount = Object.keys(savedMap()).length;
+ 
+     var html =
+       renderStaleNotice(b) +
+@@ -351,11 +411,7 @@
+       renderHero(b.gd_topic) +
+       renderConcept(b.concept) +
+       renderChips(b) +
+-      '<div class="toolbar">' +
+-        '<button class="text-btn" type="button" data-open-saved="1">Saved (' + savedCount + ")</button>" +
+-        '<button class="text-btn" type="button" data-toggle="open">Expand all</button>' +
+-        '<button class="text-btn" type="button" data-toggle="close">Collapse all</button>' +
+-      "</div>" +
++
+       (b.categories || []).map(renderCategory).join("") +
+       renderSearch();
+ 
+@@ -382,10 +438,33 @@
+     app.querySelectorAll("details.category").forEach(function (d) {
+       d.addEventListener("toggle", function () { openState[d.dataset.key] = d.open; });
+     });
+-    app.querySelectorAll("[data-toggle]").forEach(function (btn) {
+-      btn.addEventListener("click", function () {
+-        var open = btn.dataset.toggle === "open";
+-        app.querySelectorAll("details.category").forEach(function (d) { d.open = open; });
++    var toggleAll = app.querySelector("[data-toggle-all]");
++    function syncToggleAll() {
++      if (!toggleAll) return;
++      var all = app.querySelectorAll("details.category");
++      var allOpen = Array.prototype.every.call(all, function (d) { return d.open; });
++      toggleAll.textContent = allOpen ? "Collapse all" : "Expand all";
++    }
++    if (toggleAll) {
++      toggleAll.addEventListener("click", function () {
++        var all = app.querySelectorAll("details.category");
++        var open = !Array.prototype.every.call(all, function (d) { return d.open; });
++        all.forEach(function (d) { d.open = open; openState[d.dataset.key] = open; });
++        syncToggleAll();
++      });
++      app.querySelectorAll("details.category").forEach(function (d) { d.addEventListener("toggle", syncToggleAll); });
++      syncToggleAll();
++    }
++    // Opening the full story counts as reading it.
++    app.querySelectorAll(".story .read-link, .story h3 a").forEach(function (a) {
++      a.addEventListener("click", function () {
++        var article = a.closest(".story");
++        var url = article.getAttribute("data-url");
++        markRead(url);
++        article.classList.add("is-read");
++        var rb = article.querySelector('[data-act="read"]');
++        if (rb) rb.setAttribute("aria-pressed", "true");
++        updateProgress();
+       });
+     });
+     app.querySelectorAll("[data-jump]").forEach(function (btn) {
+@@ -402,8 +481,10 @@
+         var text = btn.getAttribute("data-copy");
+         if (navigator.clipboard && navigator.clipboard.writeText) {
+           navigator.clipboard.writeText(text).then(function () {
+-            btn.textContent = "Copied";
+-            setTimeout(function () { btn.textContent = "Copy"; }, 1500);
++            var lbl = btn.querySelector("span") || btn;
++            lbl.textContent = "Copied";
++            btn.classList.add("is-done");
++            setTimeout(function () { lbl.textContent = "Copy"; btn.classList.remove("is-done"); }, 1500);
+           });
+         }
+       });
+@@ -425,12 +506,13 @@
+         var act = btn.dataset.act;
+         if (act === "save" && story) {
+           var nowSaved = toggleSaved(story, b.date_label || b.date);
+-          btn.textContent = nowSaved ? "★ Saved" : "☆ Save";
++          btn.setAttribute("aria-pressed", String(nowSaved));
+           updateSavedCount();
+         } else if (act === "read") {
+           var nowRead = toggleRead(url);
+           article.classList.toggle("is-read", nowRead);
+-          btn.textContent = nowRead ? "Mark unread" : "Mark read";
++          btn.setAttribute("aria-pressed", String(nowRead));
++          updateProgress();
+         } else if (act === "share" && story) {
+           var text = story.title + (story.key_fact ? "\n\n" + story.key_fact : "");
+           shareOrCopy(story.title, text, safeUrl(story.url), btn);
+@@ -444,15 +526,8 @@
+       });
+     });
+ 
+-    var openSaved = app.querySelector("[data-open-saved]");
+-    if (openSaved) {
+-      openSaved.addEventListener("click", function () {
+-        app.innerHTML = renderSavedView();
+-        wireSavedView();
+-        window.scrollTo({ top: 0 });
+-      });
+-    }
+     wireSearch();
++    updateProgress();
+   }
+ 
+   function wireSavedView() {
+@@ -476,8 +551,19 @@
+   }
+ 
+   function updateSavedCount() {
+-    var btn = app.querySelector("[data-open-saved]");
+-    if (btn) btn.textContent = "Saved (" + Object.keys(savedMap()).length + ")";
++    var n = Object.keys(savedMap()).length;
++    var badge = document.getElementById("saved-count");
++    if (badge) { badge.textContent = n ? String(n) : ""; badge.hidden = !n; }
++    var btn = document.getElementById("saved-btn");
++    if (btn) btn.setAttribute("aria-label", "Saved stories" + (n ? ", " + n : ""));
++  }
++  var savedBtnEl = document.getElementById("saved-btn");
++  if (savedBtnEl) {
++    savedBtnEl.addEventListener("click", function () {
++      app.innerHTML = renderSavedView();
++      wireSavedView();
++      window.scrollTo({ top: 0 });
++    });
+   }
+ 
+   function findStory(b, url) {
+diff --git a/index.html b/index.html
+index 80c3494..7610c53 100644
+--- a/index.html
++++ b/index.html
+@@ -36,6 +36,10 @@
+         <select id="date-select" class="date-select" aria-label="Choose a day">
+           <option value="">Today</option>
+         </select>
++        <button id="saved-btn" class="icon-btn" type="button" aria-label="Saved stories" title="Saved stories">
++          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>
++          <span id="saved-count" class="badge-count" hidden></span>
++        </button>
+         <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch theme" title="Switch theme">
+           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+           <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+diff --git a/style.css b/style.css
+index 101c02a..9e2ad3e 100644
+--- a/style.css
++++ b/style.css
+@@ -110,12 +110,9 @@ li + li { margin-top: .35rem; }
+ }
+ .masthead .kicker {
+   grid-area: kicker;
+-  font-size: .72rem;
+-  font-weight: 600;
+-  letter-spacing: .14em;
+-  text-transform: uppercase;
+-  color: var(--accent);
+-  white-space: pre;
++  font-size: .9rem;
++  font-weight: 500;
++  color: var(--accent-ink);
+ }
+ .dateline {
+   grid-area: title;
+@@ -133,15 +130,6 @@ li + li { margin-top: .35rem; }
+   color: var(--muted);
+   font-size: .85rem;
+ }
+-.day-meta span + span::before {
+-  content: "";
+-  display: inline-block;
+-  width: 3px; height: 3px; border-radius: 50%;
+-  background: currentColor;
+-  margin-right: .9rem;
+-  vertical-align: .22em;
+-  opacity: .7;
+-}
+ .topbar-controls { grid-area: controls; display: flex; align-items: center; gap: .35rem; min-width: 0; }
+ .date-select {
+   font: inherit;
+@@ -203,44 +191,59 @@ li + li { margin-top: .35rem; }
+ 
+ /* The GD topic hero — the one loud element on the page ------------------ */
+ .hero {
++  position: relative;
+   background: var(--surface);
+   border: 1px solid var(--rule);
+-  border-top: 5px solid var(--accent);
+-  border-radius: var(--radius);
++  border-radius: 14px;
+   box-shadow: var(--shadow);
+-  padding: 1.25rem 1.15rem 1rem;
++  padding: 1.4rem 1.25rem 1.1rem 1.25rem;
+   margin-bottom: 1.5rem;
++  overflow: hidden;
+ }
+-.hero .kicker { color: var(--muted); font-size: .9rem; margin-bottom: .35rem; }
++/* The speaking card: a marigold spine, like the edge of a cue card. */
++.hero::before {
++  content: "";
++  position: absolute; inset: 0 auto 0 0;
++  width: 6px;
++  background: var(--accent);
++}
++.hero .kicker { color: var(--accent-ink); font-size: .9rem; font-weight: 500; margin-bottom: .5rem; }
+ .hero h2 {
+   font-family: var(--font-display);
+   font-weight: 600;
+-  font-size: clamp(1.6rem, 6.2vw, 2.2rem);
+-  line-height: 1.15;
+-  letter-spacing: -.015em;
+-  margin: 0 0 .75rem;
++  font-size: clamp(1.75rem, 7vw, 2.5rem);
++  line-height: 1.1;
++  letter-spacing: -.02em;
++  margin: 0 0 .85rem;
+   text-wrap: balance;
++  font-variation-settings: "opsz" 144;
+ }
+-.hero .why { color: var(--ink-2); margin-bottom: 1rem; }
++.hero.is-auto h2 { font-size: clamp(1.45rem, 5.6vw, 1.95rem); }
++.hero .why { color: var(--ink-2); margin: 0 0 1.15rem; max-width: 36em; }
++.lines { display: grid; gap: .7rem; }
++@media (min-width: 640px) { .lines { grid-template-columns: 1fr 1fr; } }
+ .line {
+-  position: relative;
+-  padding: .75rem .9rem .75rem 1.1rem;
+-  border-left: 3px solid var(--accent);
+   background: var(--accent-soft);
+-  border-radius: 0 8px 8px 0;
+-  margin-bottom: .75rem;
++  border-radius: 10px;
++  padding: .8rem .95rem .9rem;
+ }
+-.line .label { color: var(--accent-ink); font-size: .85rem; font-weight: 600; margin-bottom: .2rem; }
+-.line p { margin: 0; font-family: var(--font-display); font-size: 1.1rem; line-height: 1.45; }
++.line-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; }
++.line .label { color: var(--accent-ink); font-size: .82rem; font-weight: 600; }
++.line p { margin: 0; font-family: var(--font-display); font-size: 1.06rem; line-height: 1.5; }
+ .line .copy {
+-  position: absolute; top: .55rem; right: .55rem;
++  display: inline-flex; align-items: center; gap: .3rem;
+   border: 0; background: transparent; color: var(--accent-ink);
+-  font-size: .8rem; cursor: pointer; padding: .2rem .4rem; border-radius: 6px;
++  font: inherit; font-size: .78rem; cursor: pointer;
++  padding: .2rem .45rem; margin: -.2rem -.45rem -.2rem 0; border-radius: 6px;
+ }
+ .line .copy:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+-.perspectives { margin-top: 1rem; }
+-.perspectives .label { font-weight: 600; margin-bottom: .3rem; }
+-.perspectives ul { color: var(--ink-2); }
++.line .copy.is-done { color: var(--for); }
++.perspectives { margin-top: 1.15rem; }
++.perspectives .label { font-weight: 600; font-size: .9rem; margin-bottom: .4rem; }
++.perspectives ul { list-style: none; padding: 0; margin: 0; color: var(--ink-2); font-size: .97rem; }
++.perspectives li { padding: .55rem 0; border-top: 1px solid var(--rule); }
++.perspectives li + li { margin-top: 0; }
++.perspectives li strong { display: block; color: var(--ink); font-weight: 600; font-size: .9rem; margin-bottom: .1rem; }
+ 
+ /* Concept of the day ---------------------------------------------------- */
+ .concept {
+@@ -252,6 +255,8 @@ li + li { margin-top: .35rem; }
+   margin-bottom: 1.5rem;
+ }
+ .concept .kicker { color: var(--muted); font-size: .9rem; margin-bottom: .2rem; }
++.concept { border-radius: 14px; }
++.concept p { max-width: 38em; }
+ .concept h2 {
+   font-family: var(--font-display);
+   font-weight: 600;
+@@ -383,17 +388,21 @@ li + li { margin-top: .35rem; }
+ 
+ /* Hero actions ----------------------------------------------------------- */
+ .hero-actions { margin-top: 1rem; }
++.text-btn { display: inline-flex; align-items: center; gap: .4rem; color: var(--ink-2); font: inherit; font-size: .85rem; }
+ 
+ /* Category jump chips ---------------------------------------------------- */
+-.chips {
++.stickybar {
+   position: sticky;
+   top: 0;
+   z-index: 10;
++  margin: 0 -1rem .9rem;
++  padding: .6rem 1rem .55rem;
+   background: color-mix(in srgb, var(--bg) 90%, transparent);
+-  backdrop-filter: blur(10px);
+-  -webkit-backdrop-filter: blur(10px);
+-  margin-left: -1rem !important; margin-right: -1rem !important;
+-  padding: .55rem 1rem !important;
++  backdrop-filter: blur(12px);
++  -webkit-backdrop-filter: blur(12px);
++  border-bottom: 1px solid transparent;
++}
++.chips {
+   display: flex;
+   gap: .45rem;
+   overflow-x: auto;
+@@ -526,3 +535,56 @@ li + li { margin-top: .35rem; }
+ .read-link { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+ .pending-note { align-items: flex-start; }
+ .pending-note .dot { margin-top: .45em; }
++
++/* v3.1 ------------------------------------------------------------------ */
++.stickybar .chips { margin: 0; padding-bottom: .5rem; }
++.chip { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-size: .85rem; }
++.chip span { color: var(--muted); font-variant-numeric: tabular-nums; display: inline-flex; }
++.chip.is-done { border-color: color-mix(in srgb, var(--for) 45%, var(--rule)); }
++.chip.is-done span { color: var(--for); }
++.progress { display: flex; align-items: center; gap: .75rem; font-size: .8rem; color: var(--muted); }
++.progress-track { flex: 1 1 auto; height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
++.progress-fill {
++  height: 100%; background: var(--accent);
++  transform: scaleX(0); transform-origin: left;
++  transition: transform .45s cubic-bezier(.2,.7,.2,1);
++}
++.progress-label { white-space: nowrap; font-variant-numeric: tabular-nums; }
++.link-btn {
++  border: 0; background: none; padding: .2rem 0; cursor: pointer;
++  font: inherit; font-size: .8rem; color: var(--link); white-space: nowrap;
++}
++.link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
++
++.category { border-radius: 14px; }
++.category summary .count { font-variant-numeric: tabular-nums; }
++
++.story-actions { gap: .15rem; margin-top: .65rem; }
++.icon-act {
++  display: inline-flex; align-items: center; justify-content: center;
++  width: 2.25rem; height: 2.25rem; flex: none;
++  border: 0; border-radius: 50%;
++  background: transparent; color: var(--muted);
++  cursor: pointer;
++  transition: background-color .15s, color .15s;
++}
++.icon-act:hover { background: var(--surface-2); color: var(--ink); }
++.icon-act[data-act="save"][aria-pressed="true"] { color: var(--accent); }
++.icon-act[data-act="save"][aria-pressed="true"] svg { fill: currentColor; }
++.icon-act[data-act="read"][aria-pressed="true"] { color: var(--for); background: var(--for-soft); }
++.story.is-read { opacity: 1; }
++.story.is-read h3 a, .story.is-read h3 { color: var(--muted); }
++.story.is-read .summary, .story.is-read .matters, .story.is-read .angles, .story.is-read .fact { opacity: .6; }
++
++.icon-btn { position: relative; }
++.badge-count {
++  position: absolute; top: -3px; right: -3px;
++  min-width: 1.05rem; height: 1.05rem; padding: 0 .25rem;
++  border-radius: 999px;
++  background: var(--accent); color: #fff;
++  font-size: .65rem; font-weight: 600; line-height: 1.05rem; text-align: center;
++}
++:root[data-theme="dark"] .badge-count { color: #1a1206; }
++@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .badge-count { color: #1a1206; } }
++@media (prefers-reduced-motion: reduce) { .progress-fill, .icon-act { transition: none; } }
++@media print { .stickybar, .masthead .topbar-controls { display: none !important; } }
+-- 
+2.43.0
+

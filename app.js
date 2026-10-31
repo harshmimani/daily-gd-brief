@@ -9,6 +9,9 @@
   var app = document.getElementById("app");
   var dateSelect = document.getElementById("date-select");
   var themeToggle = document.getElementById("theme-toggle");
+  var kickerEl = document.getElementById("day-kicker");
+  var datelineEl = document.getElementById("dateline");
+  var metaEl = document.getElementById("day-meta");
   var openState = {};          // which categories are expanded
   var archiveIndex = [];       // list of past briefs
   var currentBrief = null;
@@ -120,16 +123,97 @@
     }
   }
 
+  // ---------- icons ----------
+  var ICON = {
+    star: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
+    check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>',
+    share: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5M7.5 8L12 3.5 16.5 8"/><path d="M5 12v7.5h14V12"/></svg>',
+    copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>'
+  };
+
+  // ---------- reading progress ----------
+  function briefUrls(b) {
+    var out = [];
+    (b && b.categories || []).forEach(function (c) {
+      (c.stories || []).forEach(function (s) { if (s.url) out.push(s.url); });
+    });
+    return out;
+  }
+  function markRead(url) {
+    if (!isRead(url)) toggleRead(url);
+  }
+  function updateProgress() {
+    if (!currentBrief) return;
+    var urls = briefUrls(currentBrief);
+    var done = urls.filter(isRead).length;
+    var bar = app.querySelector(".progress-fill");
+    var label = app.querySelector(".progress-label");
+    if (bar) bar.style.transform = "scaleX(" + (urls.length ? done / urls.length : 0) + ")";
+    if (label) {
+      label.textContent = done === urls.length && urls.length
+        ? "All " + urls.length + " stories read"
+        : done + " of " + urls.length + " read";
+    }
+    (currentBrief.categories || []).forEach(function (c) {
+      var list = (c.stories || []).map(function (s) { return s.url; });
+      var left = list.filter(function (u) { return !isRead(u); }).length;
+      var chip = app.querySelector('[data-jump="' + c.key + '"]');
+      if (chip) {
+        chip.classList.toggle("is-done", left === 0 && list.length > 0);
+        var n = chip.querySelector("span");
+        if (n) n.innerHTML = left === 0 ? ICON.check : String(left);
+        chip.setAttribute("aria-label", c.title + ", " + (left === 0 ? "all read" : left + " unread"));
+      }
+      var count = app.querySelector('#cat-' + c.key + ' .count');
+      if (count) count.textContent = left === 0 && list.length ? "All read" : left + " of " + list.length + " unread";
+    });
+  }
+
+  // ---------- masthead ----------
+  function parseDay(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 6)) : null;
+  }
+  function shortDate(iso, label) {
+    var d = parseDay(iso);
+    return d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" }) : (label || "");
+  }
+  function editionNumber(iso) {
+    if (!archiveIndex.length || !iso) return 0;
+    return archiveIndex.filter(function (e) { return e.date <= iso; }).length;
+  }
+  function renderMasthead(b) {
+    var d = parseDay(b.date);
+    var weekday = d ? d.toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }) : "";
+    var no = editionNumber(b.date);
+    kickerEl.textContent = weekday ? weekday + (no ? ", edition " + no : "") : "Morning edition";
+    datelineEl.textContent = d
+      ? d.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: "UTC" })
+      : (b.date_label || b.date || "");
+    var parts = [];
+    if (b.reading_time_min) parts.push(b.reading_time_min + " min read");
+    if (b.story_count) parts.push(b.story_count + " stories");
+    if ((b.sources_ok || []).length) parts.push(b.sources_ok.length + " sources");
+    metaEl.textContent = parts.join(", ");
+    var savedBtn = document.getElementById("saved-btn");
+    if (savedBtn) updateSavedCount();
+  }
+
   // ---------- rendering pieces ----------
   function renderLine(label, text, copyable) {
     if (!text) return "";
     return (
       '<div class="line">' +
-        '<div class="label">' + esc(label) + "</div>" +
+        '<div class="line-head"><span class="label">' + esc(label) + "</span>" +
+          (copyable ? '<button class="copy" type="button" data-copy="' + esc(text) + '" aria-label="Copy ' + esc(label.toLowerCase()) + '">' + ICON.copy + "<span>Copy</span></button>" : "") +
+        "</div>" +
         "<p>" + esc(text) + "</p>" +
-        (copyable ? '<button class="copy" type="button" data-copy="' + esc(text) + '">Copy</button>' : "") +
       "</div>"
     );
+  }
+  function renderLens(p) {
+    var m = /^([^:]{3,40}):\s+(.+)$/.exec(p);
+    return m ? "<li><strong>" + esc(m[1]) + "</strong>" + esc(m[2]) + "</li>" : "<li>" + esc(p) + "</li>";
   }
 
   function renderStaleNotice(b) {
@@ -148,18 +232,20 @@
   function renderHero(t) {
     if (!t) return "";
     var perspectives = Array.isArray(t.perspectives) && t.perspectives.length
-      ? '<div class="perspectives"><div class="label">Different lenses</div><ul>' +
-          t.perspectives.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div>"
+      ? '<div class="perspectives"><div class="label">Who sees it how</div><ul>' +
+          t.perspectives.map(renderLens).join("") + "</ul></div>"
       : "";
     return (
-      '<section class="hero" aria-labelledby="gd-topic">' +
-        '<div class="kicker">Today\'s likely GD topic' + (t.fallback ? " (picked automatically)" : "") + "</div>" +
+      '<section class="hero' + (t.fallback ? " is-auto" : "") + '" aria-labelledby="gd-topic">' +
+        '<div class="kicker">' + (t.fallback ? "Most-covered story today" : "Likely GD topic") + "</div>" +
         '<h2 id="gd-topic">' + esc(t.topic) + "</h2>" +
-        (t.why_now ? '<p class="why">' + esc(t.why_now) + "</p>" : "") +
-        renderLine("Suggested opening", t.opening_line, true) +
-        renderLine("Strong closing", t.closing_line, true) +
+        // Automatic topics carry template text (and older ones an apology); skip it.
+        (t.why_now && !t.fallback ? '<p class="why">' + esc(t.why_now) + "</p>" : "") +
+        (t.fallback ? "" : '<div class="lines">' +
+          renderLine("Open with", t.opening_line, true) +
+          renderLine("Close with", t.closing_line, true) + "</div>") +
         perspectives +
-        '<div class="hero-actions"><button class="text-btn" type="button" data-share-topic="1">Share this topic</button></div>' +
+        '<div class="hero-actions"><button class="text-btn" type="button" data-share-topic="1">' + ICON.share + "<span>Share topic</span></button></div>" +
       "</section>"
     );
   }
@@ -207,20 +293,24 @@
           "</strong> " + esc(s.key_fact) + "</div>" +
         "</div>";
     }
+    var summary = s.summary && !/^Open the source link/i.test(s.summary) ? s.summary : "";
+    var readLink = url
+      ? '<a class="read-link" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Read at ' + esc(s.source || host) + ' <span aria-hidden="true">&#8599;</span></a>'
+      : "";
     return (
-      '<article class="story' + (read ? " is-read" : "") + '" data-url="' + esc(s.url) + '">' +
+      '<article class="story' + (read ? " is-read" : "") + (s.ai ? "" : " is-plain") + '" data-url="' + esc(s.url) + '">' +
         "<h3>" + heading + "</h3>" +
         '<div class="src">' + esc(s.source) + (host ? " (" + esc(host) + ")" : "") +
           (when ? ", " + esc(when) : "") + " " + coverage + "</div>" +
-        (s.summary ? '<p class="summary">' + esc(s.summary) + "</p>" : "") +
+        (summary ? '<p class="summary">' + esc(summary) + "</p>" : "") +
         (s.why_it_matters ? '<p class="matters"><strong>Why it matters:</strong> ' + esc(s.why_it_matters) + "</p>" : "") +
         angles +
         fact +
-        (!s.ai && !s.why_it_matters ? '<p class="plain">AI commentary was not available for this story. Read the article and note one fact and one counter-argument.</p>' : "") +
         '<div class="story-actions">' +
-          '<button class="chip-btn" type="button" data-act="save">' + (saved ? "★ Saved" : "☆ Save") + "</button>" +
-          '<button class="chip-btn" type="button" data-act="read">' + (read ? "Mark unread" : "Mark read") + "</button>" +
-          '<button class="chip-btn" type="button" data-act="share">Share</button>' +
+          readLink +
+          '<button class="icon-act" type="button" data-act="save" aria-pressed="' + saved + '" aria-label="Save for revision" title="Save for revision">' + ICON.star + "</button>" +
+          '<button class="icon-act" type="button" data-act="read" aria-pressed="' + read + '" aria-label="Mark as read" title="Mark as read">' + ICON.check + "</button>" +
+          '<button class="icon-act" type="button" data-act="share" aria-label="Share story" title="Share story">' + ICON.share + "</button>" +
         "</div>" +
       "</article>"
     );
@@ -244,12 +334,19 @@
     var cats = (b.categories || []).filter(function (c) { return (c.stories || []).length; });
     if (!cats.length) return "";
     return (
-      '<nav class="chips" aria-label="Jump to a section">' +
-        cats.map(function (c) {
-          return '<button class="chip" type="button" data-jump="' + esc(c.key) + '">' +
-            esc(c.title.split(/[,&:]/)[0].trim()) + " <span>" + (c.stories || []).length + "</span></button>";
-        }).join("") +
-      "</nav>"
+      '<div class="stickybar">' +
+        '<nav class="chips" aria-label="Jump to a section">' +
+          cats.map(function (c) {
+            return '<button class="chip" type="button" data-jump="' + esc(c.key) + '">' +
+              esc(c.title.split(/[,&:]/)[0].trim()) + " <span>" + (c.stories || []).length + "</span></button>";
+          }).join("") +
+        "</nav>" +
+        '<div class="progress">' +
+          '<div class="progress-track" aria-hidden="true"><div class="progress-fill"></div></div>' +
+          '<span class="progress-label" aria-live="polite"></span>' +
+          '<button class="link-btn" type="button" data-toggle-all="1">Expand all</button>' +
+        "</div>" +
+      "</div>"
     );
   }
 
@@ -295,33 +392,26 @@
   // ---------- page ----------
   function renderBrief(b) {
     currentBrief = b;
-    var sourcesOk = (b.sources_ok || []).length;
     var aiNote = "";
-    if (!b.ai_enabled) {
-      aiNote = '<span class="badge warn">AI commentary off for this day (no API key)</span>';
-    } else if (!b.ai_story_count) {
-      aiNote = '<span class="badge warn">AI commentary unavailable for this day (quota or error)</span>';
-    } else if (b.ai_story_count < b.story_count) {
-      aiNote = '<span class="badge">AI commentary on ' + b.ai_story_count + " of " + b.story_count + " stories</span>";
+    // Commentary that the morning run missed is filled in by later runs (07:47 to
+    // 18:17 IST). Say so quietly on today's brief; say nothing on past days.
+    var pending = (b.story_count || 0) - (b.ai_story_count || 0);
+    var hourIST = Number(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata", hour: "numeric", hour12: false }));
+    if (b.ai_enabled && pending > 0 && b.date === todayIST() && hourIST < 19) {
+      aiNote = '<p class="pending-note"><span class="dot" aria-hidden="true"></span>' +
+        (b.ai_story_count ? "Analysis on " + pending + " more " + (pending === 1 ? "story" : "stories") + " lands later today."
+                          : "Today\'s analysis is still being written. Headlines first, notes later this morning.") +
+        "</p>";
     }
-    var savedCount = Object.keys(savedMap()).length;
+    renderMasthead(b);
 
     var html =
       renderStaleNotice(b) +
-      '<section class="day">' +
-        "<h1>" + esc(b.date_label || b.date) + "</h1>" +
-        '<div class="meta"><span>' + esc(b.reading_time_min) + " min read</span><span>" +
-          esc(b.story_count) + " stories</span><span>" + sourcesOk + " sources</span></div>" +
-        (aiNote ? "<div>" + aiNote + "</div>" : "") +
-      "</section>" +
+      aiNote +
       renderHero(b.gd_topic) +
       renderConcept(b.concept) +
       renderChips(b) +
-      '<div class="toolbar">' +
-        '<button class="text-btn" type="button" data-open-saved="1">Saved (' + savedCount + ")</button>" +
-        '<button class="text-btn" type="button" data-toggle="open">Expand all</button>' +
-        '<button class="text-btn" type="button" data-toggle="close">Collapse all</button>' +
-      "</div>" +
+
       (b.categories || []).map(renderCategory).join("") +
       renderSearch();
 
@@ -333,14 +423,14 @@
           "<p>Worked: " + esc((b.sources_ok || []).join(", ") || "none") + "</p>" +
           (failed.length ? "<p>Could not fetch: " + esc(failed.join(", ")) + "</p>" : "") +
           (b.ai_model ? "<p>Commentary model: " + esc(b.ai_model) + "</p>" : "") +
-          (aiErrors.length ? "<p>AI notes: " + esc(aiErrors.join("; ")) + "</p>" : "") +
+          (aiErrors.length ? "<p>Model log: " + esc(aiErrors.join("; ")) + "</p>" : "") +
           (b.story_cap ? "<p>Daily cap: " + esc(b.story_cap) + " stories</p>" : "") +
           "<p>Generated " + esc(new Date(b.generated_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })) + " IST</p>" +
         "</details>" +
       "</div>";
 
     app.innerHTML = html;
-    document.title = "Daily GD Brief, " + (b.date_label || b.date);
+    document.title = "The Brief \u00b7 " + shortDate(b.date, b.date_label);
     wireUp(b);
   }
 
@@ -348,10 +438,33 @@
     app.querySelectorAll("details.category").forEach(function (d) {
       d.addEventListener("toggle", function () { openState[d.dataset.key] = d.open; });
     });
-    app.querySelectorAll("[data-toggle]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var open = btn.dataset.toggle === "open";
-        app.querySelectorAll("details.category").forEach(function (d) { d.open = open; });
+    var toggleAll = app.querySelector("[data-toggle-all]");
+    function syncToggleAll() {
+      if (!toggleAll) return;
+      var all = app.querySelectorAll("details.category");
+      var allOpen = Array.prototype.every.call(all, function (d) { return d.open; });
+      toggleAll.textContent = allOpen ? "Collapse all" : "Expand all";
+    }
+    if (toggleAll) {
+      toggleAll.addEventListener("click", function () {
+        var all = app.querySelectorAll("details.category");
+        var open = !Array.prototype.every.call(all, function (d) { return d.open; });
+        all.forEach(function (d) { d.open = open; openState[d.dataset.key] = open; });
+        syncToggleAll();
+      });
+      app.querySelectorAll("details.category").forEach(function (d) { d.addEventListener("toggle", syncToggleAll); });
+      syncToggleAll();
+    }
+    // Opening the full story counts as reading it.
+    app.querySelectorAll(".story .read-link, .story h3 a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var article = a.closest(".story");
+        var url = article.getAttribute("data-url");
+        markRead(url);
+        article.classList.add("is-read");
+        var rb = article.querySelector('[data-act="read"]');
+        if (rb) rb.setAttribute("aria-pressed", "true");
+        updateProgress();
       });
     });
     app.querySelectorAll("[data-jump]").forEach(function (btn) {
@@ -368,8 +481,10 @@
         var text = btn.getAttribute("data-copy");
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(function () {
-            btn.textContent = "Copied";
-            setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+            var lbl = btn.querySelector("span") || btn;
+            lbl.textContent = "Copied";
+            btn.classList.add("is-done");
+            setTimeout(function () { lbl.textContent = "Copy"; btn.classList.remove("is-done"); }, 1500);
           });
         }
       });
@@ -391,12 +506,13 @@
         var act = btn.dataset.act;
         if (act === "save" && story) {
           var nowSaved = toggleSaved(story, b.date_label || b.date);
-          btn.textContent = nowSaved ? "★ Saved" : "☆ Save";
+          btn.setAttribute("aria-pressed", String(nowSaved));
           updateSavedCount();
         } else if (act === "read") {
           var nowRead = toggleRead(url);
           article.classList.toggle("is-read", nowRead);
-          btn.textContent = nowRead ? "Mark unread" : "Mark read";
+          btn.setAttribute("aria-pressed", String(nowRead));
+          updateProgress();
         } else if (act === "share" && story) {
           var text = story.title + (story.key_fact ? "\n\n" + story.key_fact : "");
           shareOrCopy(story.title, text, safeUrl(story.url), btn);
@@ -410,15 +526,8 @@
       });
     });
 
-    var openSaved = app.querySelector("[data-open-saved]");
-    if (openSaved) {
-      openSaved.addEventListener("click", function () {
-        app.innerHTML = renderSavedView();
-        wireSavedView();
-        window.scrollTo({ top: 0 });
-      });
-    }
     wireSearch();
+    updateProgress();
   }
 
   function wireSavedView() {
@@ -442,8 +551,19 @@
   }
 
   function updateSavedCount() {
-    var btn = app.querySelector("[data-open-saved]");
-    if (btn) btn.textContent = "Saved (" + Object.keys(savedMap()).length + ")";
+    var n = Object.keys(savedMap()).length;
+    var badge = document.getElementById("saved-count");
+    if (badge) { badge.textContent = n ? String(n) : ""; badge.hidden = !n; }
+    var btn = document.getElementById("saved-btn");
+    if (btn) btn.setAttribute("aria-label", "Saved stories" + (n ? ", " + n : ""));
+  }
+  var savedBtnEl = document.getElementById("saved-btn");
+  if (savedBtnEl) {
+    savedBtnEl.addEventListener("click", function () {
+      app.innerHTML = renderSavedView();
+      wireSavedView();
+      window.scrollTo({ top: 0 });
+    });
   }
 
   function findStory(b, url) {
@@ -503,7 +623,10 @@
       archiveIndex.forEach(function (entry) {
         var opt = document.createElement("option");
         opt.value = entry.date;
-        opt.textContent = entry.label || entry.date;
+        var d = parseDay(entry.date);
+        opt.textContent = d
+          ? d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })
+          : (entry.label || entry.date);
         if (entry.gd_topic) opt.title = entry.gd_topic;
         dateSelect.appendChild(opt);
       });

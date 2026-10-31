@@ -1,3 +1,24 @@
+# v3: commentary that actually arrives, and a cleaner masthead
+
+## The problem
+Between 18 and 31 Oct, 6 of 14 briefs shipped with zero AI commentary and most
+others were partial. Every failure had the same cause: Gemini's free tier
+returns HTTP 503 ("overloaded") around 05:47 IST, and v2 benched a model on its
+*first* 503. Four 503s plus the retired gemini-2.5-flash (404) emptied the
+rotation within about a minute, with 9 of the 10 budgeted minutes unused.
+
+## What changed
+| File | Change |
+|---|---|
+| `scripts/build_brief.py` | 503/500/timeouts are retried with back-off and the model stays in the rotation (benched only after 4 in a row). Lite models are interleaved with full ones. Retired 2.5-flash replaced by Google's `-latest` aliases. Batches of 5 instead of 9, and every empty story is retried, not just the first batch. New `--backfill` mode. |
+| `.github/workflows/daily-brief.yml` | Four backfill runs (07:47, 10:17, 13:47, 18:17 IST) fill in anything the morning run missed, today first, then the last 7 days. Manual runs get a build/backfill choice. |
+| `index.html`, `style.css`, `app.js` | "Daily GD Brief" masthead removed; the date is now the headline. No more "AI commentary was not available" text or warning badges. Plain stories show the RSS summary and a "Full story" link; today's brief shows one quiet line while analysis is pending. Category chips are sticky. |
+| `scripts/test_build_brief.py` | Tests for the new retry rules and backfill (24 total). |
+| `sw.js`, `manifest.webmanifest` | Cache bumped to v3 so phones pick up the new page; app renamed "The Brief". |
+
+No new secrets or dependencies. After merging, run the workflow once with
+mode = backfill to repair the last week's briefs.
+
 # Daily GD Brief — v2 upgrade
 
 Everything in this upgrade is drop-in. No new dependencies, no change to

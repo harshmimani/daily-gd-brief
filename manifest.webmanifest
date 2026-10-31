@@ -1,6 +1,6 @@
 {
-  "name": "Daily GD Brief",
-  "short_name": "GD Brief",
+  "name": "The Brief",
+  "short_name": "The Brief",
   "description": "A daily, curated news brief with GD angles for MBA placement preparation.",
   "start_url": "./",
   "scope": "./",

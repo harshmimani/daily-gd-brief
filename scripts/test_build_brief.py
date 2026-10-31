@@ -165,9 +165,13 @@ class TestGeminiFailover(unittest.TestCase):
         self.calls = []
         bb.GEMINI_DELAY_SECONDS_ORIG = bb.GEMINI_DELAY_SECONDS
         bb.GEMINI_DELAY_SECONDS = 0
+        self.sleeps = []
+        self._sleep = bb.time.sleep
+        bb.time.sleep = self.sleeps.append       # never actually wait in tests
 
     def tearDown(self):
         bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+        bb.time.sleep = self._sleep
 
     def client(self, responder):
         client = bb.GeminiClient("fake-key")
@@ -181,7 +185,8 @@ class TestGeminiFailover(unittest.TestCase):
         bb.requests.post = fake_post
         return client
 
-    def test_overloaded_model_is_dropped_for_the_whole_run(self):
+    def test_one_503_does_not_bench_a_model(self):
+        """The Oct failure mode: one 503 per model used to wipe out the whole AI phase."""
         def responder(model):
             if model == "m-new":
                 return FakeResponse(503, text="overloaded")
@@ -190,7 +195,34 @@ class TestGeminiFailover(unittest.TestCase):
         client = self.client(responder)
         self.assertIsNotNone(client.generate_json("p", "one"))
         self.assertIsNotNone(client.generate_json("p", "two"))
-        self.assertEqual(self.calls.count("m-new"), 1, "503 model must not be retried")
+        self.assertNotIn("m-new", client.bad_models)
+        self.assertEqual(client.model_used, "m-mid", "the model that answered should be preferred")
+        self.assertEqual(self.calls.count("m-new"), 1, "second call should start with the working model")
+
+    def test_recovers_when_every_model_is_briefly_overloaded(self):
+        attempts = {"n": 0}
+
+        def responder(model):
+            attempts["n"] += 1
+            if attempts["n"] <= 4:                  # first sweep: everyone is overloaded
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, ok_payload({"ok": True}))
+
+        client = self.client(responder)
+        self.assertEqual(client.generate_json("p", "one"), {"ok": True})
+        self.assertFalse(client.stopped)
+        self.assertTrue(any(w > 0 for w in self.sleeps), "should back off between overloaded models")
+
+    def test_persistently_overloaded_model_is_eventually_benched(self):
+        def responder(model):
+            if model == "m-new":
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, ok_payload({"ok": True}))
+
+        client = self.client(responder)
+        for _ in range(bb.MAX_5XX_PER_MODEL):
+            client.model_used = None                 # force m-new to be tried first
+            client.generate_json("p", "x")
         self.assertIn("m-new", client.bad_models)
 
     def test_daily_quota_switches_model_instead_of_stopping(self):
@@ -214,6 +246,48 @@ class TestGeminiFailover(unittest.TestCase):
         self.assertIn("Quota", msg)
         self.assertGreater(delay, 27)
         self.assertFalse(per_day)
+
+
+class TestBackfill(unittest.TestCase):
+    def test_fills_only_missing_commentary(self):
+        import json, tempfile
+        tmp = Path(tempfile.mkdtemp())
+        orig = (bb.DATA_DIR, bb.ARCHIVE_DIR)
+        bb.DATA_DIR, bb.ARCHIVE_DIR = tmp, tmp / "archive"
+        bb.ARCHIVE_DIR.mkdir()
+        done = {"title": "Already done", "url": "https://e.com/1", "source": "X", "summary": "AI text",
+                "why_it_matters": "w", "gd_for": ["a"], "gd_against": ["b"], "key_fact": "k", "ai": True}
+        todo = {"title": "RBI holds repo rate", "url": "https://e.com/2", "source": "Mint",
+                "summary": "RSS text", "why_it_matters": "", "gd_for": [], "gd_against": [],
+                "key_fact": "", "ai": False}
+        brief = {"date": "2026-10-31", "story_count": 2, "gd_topic": {"topic": "t"},
+                 "concept": {"name": "c"}, "categories": [{"key": "economy", "title": "E",
+                                                           "stories": [done, todo]}]}
+        path = bb.ARCHIVE_DIR / "2026-10-31.json"
+        path.write_text(json.dumps(brief))
+        (tmp / "latest.json").write_text(json.dumps(brief))
+        prompts = []
+
+        class Fake:
+            stopped, budget_left, errors, bad_models, model_used, calls = False, 999, [], {}, "m", 1
+
+            def generate_json(self, prompt, label=""):
+                prompts.append(prompt)
+                return [{"index": 0, "summary": "New AI summary", "why_it_matters": "Because",
+                         "gd_for": ["p1", "p2"], "gd_against": ["c1", "c2"], "key_fact": "6.5%"}]
+        try:
+            self.assertTrue(bb.backfill_brief(Fake(), path, []))
+            out = json.loads((tmp / "latest.json").read_text())
+            s0, s1 = out["categories"][0]["stories"]
+            self.assertEqual(s0["summary"], "AI text", "existing commentary must be left alone")
+            self.assertTrue(s1["ai"])
+            self.assertEqual(s1["summary"], "New AI summary")
+            self.assertEqual(out["ai_story_count"], 2)
+            self.assertEqual(len(prompts), 1)
+            self.assertNotIn("Already done", prompts[0])
+            self.assertFalse(bb.backfill_brief(Fake(), path, []), "nothing left to do")
+        finally:
+            bb.DATA_DIR, bb.ARCHIVE_DIR = orig
 
 
 class TestMisc(unittest.TestCase):

@@ -25,6 +25,7 @@ import concurrent.futures as cf
 import html
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -61,17 +62,20 @@ REQUIRE_DATE = True             # drop entries with no usable publish date
 # --- Gemini budget ---------------------------------------------------------
 # The free tier is small and slow. Everything below exists so that a bad quota
 # day costs a few minutes, not a cancelled job.
-GEMINI_FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
+# Google's rolling aliases always point at a live model, so they are the safest fallbacks.
+GEMINI_FALLBACK_MODELS = ["gemini-flash-latest", "gemini-flash-lite-latest"]
 GEMINI_DELAY_SECONDS = 6        # free tier allows ~10 requests/minute
 GEMINI_MAX_RETRIES = 2
 GEMINI_TIMEOUT = 60             # seconds per request
-GEMINI_MAX_MODELS = 5           # candidates to try before giving up
+GEMINI_MAX_MODELS = 8           # candidates in the rotation
+MAX_5XX_PER_MODEL = 4           # consecutive overload/timeouts before a model is benched
+MAX_OVERLOAD_WAIT = 45          # longest single back-off after a 503 (seconds)
 MAX_RATE_LIMIT_PER_MODEL = 2    # 429s on ONE model before dropping that model
 MAX_RATE_LIMIT_HITS = 8         # 429s across all models before giving up on AI
 MAX_RATE_WAIT = 75              # longest single wait for a per-minute limit
 AI_DEADLINE_SECONDS = int(os.environ.get("AI_DEADLINE", "480"))  # 8 minutes
 CURATION_SHORTLIST = 12         # stories per category sent to the AI curator
-ENRICH_BATCH_SIZE = 9           # stories per enrichment call
+ENRICH_BATCH_SIZE = 5           # stories per enrichment call (small = partial wins on bad days)
 
 BROWSER_HEADERS = {
     "User-Agent": (
@@ -777,6 +781,7 @@ class GeminiClient:
         self.errors: list[str] = []
         self.bad_models: dict[str, str] = {}     # model -> why it was dropped
         self.model_429: dict[str, int] = {}
+        self.model_5xx: dict[str, int] = {}      # consecutive transient failures
         self.deadline = time.monotonic() + AI_DEADLINE_SECONDS
         self.stopped = False
 
@@ -841,10 +846,21 @@ class GeminiClient:
             )
 
         available.sort(key=rank)
-        ordered = ([forced] if forced else []) + available + GEMINI_FALLBACK_MODELS
+        # Interleave full and lite models. When the newest flash models are overloaded
+        # (HTTP 503, which happens most mornings IST), the lite tier usually still
+        # answers, and a lite answer beats no answer.
+        full = [m for m in available if "lite" not in m.lower()]
+        lite = [m for m in available if "lite" in m.lower()]
+        mixed: list[str] = []
+        while full or lite:
+            mixed += full[:2]
+            full = full[2:]
+            mixed += lite[:1]
+            lite = lite[1:]
+        ordered = ([forced] if forced else []) + mixed + GEMINI_FALLBACK_MODELS
         ordered = list(dict.fromkeys(ordered))
         if available:
-            log(f"  Gemini models available: {', '.join(available[:6])}{' ...' if len(available) > 6 else ''}")
+            log(f"  Gemini models available: {', '.join(available[:8])}{' ...' if len(available) > 8 else ''}")
         return ordered[:GEMINI_MAX_MODELS]
 
     # -- the one call ------------------------------------------------------
@@ -857,97 +873,124 @@ class GeminiClient:
         if self.candidates is None:
             self.candidates = self.discover_models()
 
-        models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
-        models = [m for m in models if m not in self.bad_models]
-        if not models:
-            self._stop("every candidate model is unavailable (" +
-                       ", ".join(f"{m}: {why}" for m, why in list(self.bad_models.items())[:4]) + ")")
-            return None
-        for model in models:
-            for attempt in range(GEMINI_MAX_RETRIES):
-                if self.budget_left <= 10:
-                    self._stop("time budget exhausted")
+        # Transient failures (503 overloaded, 500, timeouts) are the normal state of
+        # the free tier at peak hours. They are retried with back-off and the model
+        # stays in the rotation; only 400/403/404 and daily quotas bench a model.
+        overload_round = 0
+        for _pass in range(3):
+            models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
+            models = [m for m in models if m not in self.bad_models]
+            if not models:
+                self._stop("every candidate model is unavailable (" +
+                           ", ".join(f"{m}: {why}" for m, why in list(self.bad_models.items())[:4]) + ")")
+                return None
+            for model in models:
+                result, outcome = self._try_model(model, prompt, label)
+                if outcome == "ok":
+                    return result
+                if outcome == "stop":
                     return None
-                if self.rate_limited >= MAX_RATE_LIMIT_HITS:
-                    self._stop(f"rate limited {self.rate_limited} times across models")
-                    return None
-                if self.calls:
-                    time.sleep(min(GEMINI_DELAY_SECONDS, max(0.0, self.budget_left - 5)))
-                self.calls += 1
-                try:
-                    r = requests.post(
-                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-                        headers={"x-goog-api-key": self.api_key or ""},
-                        json={
-                            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                            "generationConfig": {"responseMimeType": "application/json"},
-                        },
-                        timeout=GEMINI_TIMEOUT,
-                    )
-                except Exception as exc:  # noqa: BLE001
-                    log(f"  Gemini {model}: network error ({type(exc).__name__})")
-                    self.errors.append(f"{label}: network {type(exc).__name__}")
-                    continue
-
-                if r.status_code == 200:
-                    try:
-                        parts = r.json()["candidates"][0]["content"]["parts"]
-                        text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
-                        text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
-                        self.model_used = model
-                        return json.loads(text)
-                    except Exception as exc:  # noqa: BLE001
-                        log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
-                        self.errors.append(f"{label}: unparseable output")
-                        continue
-
-                if r.status_code == 429:
-                    self.rate_limited += 1
-                    self.model_429[model] = self.model_429.get(model, 0) + 1
-                    message, retry_delay, per_day = parse_quota_error(r)
-                    log(f"  Gemini rate limit on {model}: {message[:150]}")
-                    self.errors.append(f"{label}: 429 on {model} ({message[:60]})")
-                    if per_day:
-                        # A daily quota will not clear today. Drop this model for the run.
-                        self.bad_models[model] = "daily quota exhausted"
-                        log(f"  {model} has hit its DAILY free-tier quota; switching model")
-                        break
-                    if self.model_429[model] >= MAX_RATE_LIMIT_PER_MODEL:
-                        self.bad_models[model] = "rate limited repeatedly"
-                        log(f"  {model} keeps rate limiting; switching model")
-                        break
-                    # Per-minute limits clear on their own: honour Google's retryDelay.
-                    wait = retry_delay if retry_delay else 20 * (attempt + 1)
-                    wait = min(wait, MAX_RATE_WAIT, max(0.0, self.budget_left - 25))
+                if outcome == "transient":
+                    overload_round += 1
+                    wait = min(MAX_OVERLOAD_WAIT, 4 * (2 ** min(overload_round, 4))) + random.uniform(0, 3)
+                    wait = min(wait, max(0.0, self.budget_left - 30))
                     if wait <= 0:
-                        self._stop("no time left to wait out a rate limit")
+                        self._stop("time budget exhausted while models were overloaded")
                         return None
-                    log(f"  waiting {wait:.0f}s for the per-minute limit to clear")
+                    log(f"  backing off {wait:.0f}s before the next model")
                     time.sleep(wait)
-                    continue
-
-                if r.status_code >= 500:
-                    # Brand-new models are often overloaded for days. Stop paying
-                    # the round-trip cost for them on every later call.
-                    self.bad_models[model] = f"HTTP {r.status_code} (overloaded)"
-                    log(f"  Gemini {model}: HTTP {r.status_code} (overloaded); dropping it for this run")
-                    self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
-                    break
-
-                if r.status_code in (400, 403, 404):
-                    detail = ""
-                    try:
-                        detail = ": " + r.json()["error"]["message"][:140]
-                    except Exception:  # noqa: BLE001
-                        pass
-                    self.bad_models[model] = f"HTTP {r.status_code}"
-                    log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
-                    self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
-                    break
-
-                log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
         self.errors.append(f"{label}: all models failed")
         return None
+
+    def _try_model(self, model: str, prompt: str, label: str):
+        """One model, up to GEMINI_MAX_RETRIES attempts. Returns (result, outcome)
+        where outcome is ok | transient | next | stop."""
+        for attempt in range(GEMINI_MAX_RETRIES):
+            if self.budget_left <= 10:
+                self._stop("time budget exhausted")
+                return None, "stop"
+            if self.rate_limited >= MAX_RATE_LIMIT_HITS:
+                self._stop(f"rate limited {self.rate_limited} times across models")
+                return None, "stop"
+            if self.calls:
+                time.sleep(min(GEMINI_DELAY_SECONDS, max(0.0, self.budget_left - 5)))
+            self.calls += 1
+            try:
+                r = requests.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                    headers={"x-goog-api-key": self.api_key or ""},
+                    json={
+                        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                        "generationConfig": {"responseMimeType": "application/json"},
+                    },
+                    timeout=GEMINI_TIMEOUT,
+                )
+            except Exception as exc:  # noqa: BLE001
+                log(f"  Gemini {model}: network error ({type(exc).__name__})")
+                self.errors.append(f"{label}: network {type(exc).__name__}")
+                return None, self._transient(model, f"network {type(exc).__name__}")
+
+            if r.status_code == 200:
+                try:
+                    parts = r.json()["candidates"][0]["content"]["parts"]
+                    text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+                    parsed = json.loads(text)
+                except Exception as exc:  # noqa: BLE001
+                    log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
+                    self.errors.append(f"{label}: unparseable output")
+                    continue
+                self.model_used = model
+                self.model_5xx[model] = 0
+                return parsed, "ok"
+
+            if r.status_code == 429:
+                self.rate_limited += 1
+                self.model_429[model] = self.model_429.get(model, 0) + 1
+                message, retry_delay, per_day = parse_quota_error(r)
+                log(f"  Gemini rate limit on {model}: {message[:150]}")
+                self.errors.append(f"{label}: 429 on {model} ({message[:60]})")
+                if per_day:
+                    self.bad_models[model] = "daily quota exhausted"
+                    log(f"  {model} has hit its DAILY free-tier quota; switching model")
+                    return None, "next"
+                if self.model_429[model] >= MAX_RATE_LIMIT_PER_MODEL:
+                    log(f"  {model} keeps rate limiting; trying another model")
+                    return None, "next"
+                wait = retry_delay if retry_delay else 20 * (attempt + 1)
+                wait = min(wait, MAX_RATE_WAIT, max(0.0, self.budget_left - 25))
+                if wait <= 0:
+                    self._stop("no time left to wait out a rate limit")
+                    return None, "stop"
+                log(f"  waiting {wait:.0f}s for the per-minute limit to clear")
+                time.sleep(wait)
+                continue
+
+            if r.status_code >= 500:
+                log(f"  Gemini {model}: HTTP {r.status_code} (overloaded)")
+                self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
+                return None, self._transient(model, f"HTTP {r.status_code} (overloaded)")
+
+            if r.status_code in (400, 403, 404):
+                detail = ""
+                try:
+                    detail = ": " + r.json()["error"]["message"][:140]
+                except Exception:  # noqa: BLE001
+                    pass
+                self.bad_models[model] = f"HTTP {r.status_code}"
+                log(f"  Gemini {model} unavailable (HTTP {r.status_code}){detail}; trying next model")
+                self.errors.append(f"{label}: HTTP {r.status_code} on {model}")
+                return None, "next"
+
+            log(f"  Gemini {model}: HTTP {r.status_code}; retrying")
+        return None, "next"
+
+    def _transient(self, model: str, why: str) -> str:
+        self.model_5xx[model] = self.model_5xx.get(model, 0) + 1
+        if self.model_5xx[model] >= MAX_5XX_PER_MODEL:
+            self.bad_models[model] = f"{why} x{self.model_5xx[model]}"
+            log(f"  {model} failed {self.model_5xx[model]} times in a row; benching it for this run")
+        return "transient"
 
 
 # ---------------------------------------------------------------------------
@@ -1091,9 +1134,12 @@ def enrich_all(client: GeminiClient, stories: list[Story]) -> None:
             break
         enrich_batch(client, batch, f"batch {n}/{len(batches)}")
     missing = [s for s in stories if not s.ai]
-    if missing and not client.stopped and client.budget_left > 60:
-        log(f"  Retrying {len(missing)} story(ies) that came back empty")
-        enrich_batch(client, missing[:ENRICH_BATCH_SIZE], "retry")
+    for n in range(0, len(missing), ENRICH_BATCH_SIZE):
+        if client.stopped or client.budget_left < 60:
+            break
+        if n == 0:
+            log(f"  Retrying {len(missing)} story(ies) that came back empty")
+        enrich_batch(client, missing[n:n + ENRICH_BATCH_SIZE], f"retry {n // ENRICH_BATCH_SIZE + 1}")
 
 
 def generate_topic_and_concept(client: GeminiClient, all_stories: list[Story], recent_concepts: list[str]):
@@ -1160,8 +1206,7 @@ def fallback_topic(all_stories: list[Story]) -> dict:
     return {
         "topic": title,
         "why_now": (
-            "Chosen automatically from today's most-covered India-relevant stories, because AI "
-            "commentary was unavailable for this brief."
+            "The most widely covered India-relevant story of the day."
         ),
         "opening_line": (
             "Let me frame the discussion. This issue matters because it affects policy, industry "
@@ -1289,6 +1334,123 @@ def write_files(brief: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Backfill: re-run only the AI steps on briefs that already exist
+# ---------------------------------------------------------------------------
+
+BACKFILL_DAYS = int(os.environ.get("BACKFILL_DAYS", "7"))
+
+
+def story_from_json(d: dict, category: str) -> Story:
+    published = None
+    if d.get("published"):
+        try:
+            published = datetime.fromisoformat(d["published"])
+        except ValueError:
+            pass
+    s = Story(
+        title=d.get("title", ""), url=d.get("url", ""), source=d.get("source", ""),
+        category=category, published=published,
+        description="" if d.get("ai") else d.get("summary", ""),
+        weight=1, cluster_size=int(d.get("sources_count") or 1),
+    )
+    if d.get("ai"):
+        s.summary = d.get("summary", "")
+        s.why_it_matters = d.get("why_it_matters", "")
+        s.gd_for = list(d.get("gd_for") or [])
+        s.gd_against = list(d.get("gd_against") or [])
+        s.key_fact = d.get("key_fact", "")
+        s.ai = True
+    return s
+
+
+def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str]) -> bool:
+    """Fill in commentary, topic and concept that the morning run could not get.
+    Returns True if the file changed."""
+    brief = json.loads(path.read_text(encoding="utf-8"))
+    cats = brief.get("categories") or []
+    stories = {c["key"]: [story_from_json(d, c["key"]) for d in c.get("stories", [])] for c in cats}
+    everything = [s for c in cats for s in stories[c["key"]]]
+    missing = [s for s in everything if not s.ai]
+    need_topic = not brief.get("gd_topic") or (brief.get("gd_topic") or {}).get("fallback")
+    need_concept = not (brief.get("concept") or {}).get("name")
+    if not (missing or need_topic or need_concept):
+        return False
+    log(f"\n  {path.name}: {len(missing)} story(ies) without commentary"
+        f"{', topic missing' if need_topic else ''}{', concept missing' if need_concept else ''}")
+
+    changed = False
+    if need_topic or need_concept:
+        topic, concept = generate_topic_and_concept(client, everything, recent_concepts)
+        if topic and need_topic:
+            brief["gd_topic"], changed = topic, True
+        if concept and need_concept:
+            brief["concept"], changed = concept, True
+    if missing:
+        before = sum(1 for s in everything if s.ai)
+        enrich_all(client, missing)
+        changed = changed or sum(1 for s in everything if s.ai) > before
+    if not changed:
+        return False
+
+    for c in cats:
+        for s in stories[c["key"]]:
+            if not s.summary:
+                s.summary = s.description or "Open the source link to read the full story."
+        c["stories"] = [s.to_json() for s in stories[c["key"]]]
+    brief["ai_enabled"] = True
+    brief["ai_story_count"] = sum(1 for s in everything if s.ai)
+    brief["ai_model"] = client.model_used or brief.get("ai_model")
+    brief["ai_errors"] = sorted(set(client.errors))[:10]
+    brief["ai_models_dropped"] = [f"{m}: {why}" for m, why in client.bad_models.items()]
+    brief["ai_backfilled_at"] = datetime.now(IST).isoformat()
+    brief["reading_time_min"] = reading_time_minutes(brief)
+
+    payload = json.dumps(brief, indent=2, ensure_ascii=False)
+    path.write_text(payload, encoding="utf-8")
+    latest = DATA_DIR / "latest.json"
+    try:
+        if json.loads(latest.read_text(encoding="utf-8")).get("date") == brief.get("date"):
+            latest.write_text(payload, encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
+    index = load_index()
+    for e in index:
+        if e.get("date") == brief.get("date"):
+            e["gd_topic"] = (brief.get("gd_topic") or {}).get("topic", e.get("gd_topic", ""))
+            e["concept"] = (brief.get("concept") or {}).get("name", e.get("concept", ""))
+            e["ai"] = bool(brief["ai_story_count"])
+    save_index(index)
+    log(f"  {path.name}: now {brief['ai_story_count']}/{brief.get('story_count')} stories with commentary")
+    return True
+
+
+def backfill() -> int:
+    client = GeminiClient(os.environ.get("GEMINI_API_KEY", "").strip() or None)
+    if not client.enabled:
+        log("Backfill skipped: no GEMINI_API_KEY")
+        return 0
+    today = datetime.now(IST).date()
+    files = []
+    for n in range(BACKFILL_DAYS):
+        f = ARCHIVE_DIR / f"{(today - timedelta(days=n)).isoformat()}.json"
+        if f.exists():
+            files.append(f)          # newest first: today's brief gets the budget first
+    log(f"Backfill: checking {len(files)} brief(s) from the last {BACKFILL_DAYS} days, "
+        f"AI phase capped at {AI_DEADLINE_SECONDS}s")
+    recent_concepts = [e.get("concept") for e in load_index()[:14] if e.get("concept")]
+    updated = 0
+    for f in files:
+        if client.stopped:
+            break
+        try:
+            updated += backfill_brief(client, f, recent_concepts)
+        except Exception as exc:  # noqa: BLE001
+            log(f"  {f.name}: backfill failed ({type(exc).__name__}: {exc})")
+    log(f"\nBackfill done: {updated} brief(s) updated, {client.calls} Gemini call(s)")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -1382,4 +1544,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if "--backfill" in sys.argv or os.environ.get("BACKFILL") == "1":
+        sys.exit(backfill())
     sys.exit(main())
