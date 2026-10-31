@@ -1,3 +1,13 @@
+# v8: slicing and free fallbacks
+
+Why notes went missing (40 days of logs): Gemini's free tier was overloaded (HTTP 503) on 34 days, a retired model (404) wasted a slot on 27, and 9-story requests timed out on 14. Only 12 of 40 days had full notes.
+
+- **Slicing.** A slice of 5 stories that fails is split in half and retried, down to single stories. Small requests get through busy servers and finish well inside the 90-second timeout.
+- **Gemma fallback (no new key).** `gemma-4-31b-it` and `gemma-4-26b-a4b-it` run on the existing Gemini key and are tried after the Gemini flash models. They have no JSON mode, so their output is parsed leniently.
+- **Groq fallback (free key, optional).** Add a repository secret `GROQ_API_KEY` from console.groq.com. Its free tier (about 30 requests a minute, 8,000 tokens a minute, 1,000 requests a day) is far above the brief's ~10 calls a day; the client paces itself under the per-minute token limit. When Groq is present, Gemini gets one quick pass per call so its back-offs cannot use up the time budget. Default model `openai/gpt-oss-120b`; override with the `GROQ_MODEL` variable.
+- All fallbacks pass through the same fact check, so a different model never means looser standards.
+- 4 new tests (37 total).
+
 # v7: the week in review, a stricter editor, and Claude support
 
 - **This week** (button in the header, or add `#week` to the link): the last seven briefs on one page. Threads that ran on several days, every GD topic with its opening and closing lines, the week's concepts as recall cards, and an 8-question quiz. The quiz is built only from verified quotes in the briefs, and every answer choice shares the correct answer's currency and unit. Nothing on the page is generated; it is all computed from the archive in the browser.

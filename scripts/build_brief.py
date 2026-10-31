@@ -63,10 +63,13 @@ REQUIRE_DATE = True             # drop entries with no usable publish date
 # The free tier is small and slow. Everything below exists so that a bad quota
 # day costs a few minutes, not a cancelled job.
 # Google's rolling aliases always point at a live model, so they are the safest fallbacks.
-GEMINI_FALLBACK_MODELS = ["gemini-flash-latest", "gemini-flash-lite-latest"]
+# Gemma runs on the same Gemini key and is usually far less loaded at peak hours.
+GEMINI_FALLBACK_MODELS = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemma-4-31b-it", "gemma-4-26b-a4b-it"]
 GEMINI_DELAY_SECONDS = 6        # free tier allows ~10 requests/minute
 GEMINI_MAX_RETRIES = 2
-GEMINI_TIMEOUT = 60             # seconds per request
+GEMINI_TIMEOUT = 90             # seconds per request (small slices finish well inside this)
+GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"    # free tier: 30 req/min, 8k tokens/min, 1,000 req/day
+GROQ_TPM_BUDGET = 7000          # stay under Groq's 8,000 tokens/minute free limit
 GEMINI_MAX_MODELS = 8           # candidates in the rotation
 MAX_5XX_PER_MODEL = 4           # consecutive overload/timeouts before a model is benched
 MAX_OVERLOAD_WAIT = 45          # longest single back-off after a 503 (seconds)
@@ -822,6 +825,30 @@ def parse_quota_error(response) -> tuple[str, float, bool]:
     return message, retry_delay, per_day
 
 
+def parse_json_text(text: str):
+    """Parse model output as JSON, tolerating code fences or a sentence around it."""
+    text = re.sub(r"^```(?:json)?|```$", "", (text or "").strip(), flags=re.M).strip()
+    try:
+        return json.loads(text)
+    except Exception:  # noqa: BLE001
+        pass
+    starts = [i for i in (text.find("["), text.find("{")) if i != -1]
+    if not starts:
+        raise ValueError("no JSON found")
+    start = min(starts)
+    end = max(text.rfind("]"), text.rfind("}"))
+    return json.loads(text[start:end + 1])
+
+
+def unwrap_items(parsed):
+    """Providers in JSON-object mode wrap arrays as {"items": [...]}; undo that."""
+    if isinstance(parsed, dict) and len(parsed) == 1:
+        only = next(iter(parsed.values()))
+        if isinstance(only, list):
+            return only
+    return parsed
+
+
 class GeminiClient:
     def __init__(self, api_key: str | None):
         self.api_key = api_key
@@ -835,6 +862,7 @@ class GeminiClient:
         self.model_5xx: dict[str, int] = {}      # consecutive transient failures
         self.deadline = time.monotonic() + AI_DEADLINE_SECONDS
         self.stopped = False
+        self.gemini_passes = 3
 
     @property
     def enabled(self) -> bool:
@@ -928,7 +956,7 @@ class GeminiClient:
         # the free tier at peak hours. They are retried with back-off and the model
         # stays in the rotation; only 400/403/404 and daily quotas bench a model.
         overload_round = 0
-        for _pass in range(3):
+        for _pass in range(self.gemini_passes):
             models = list(dict.fromkeys(([self.model_used] if self.model_used else []) + self.candidates))
             models = [m for m in models if m not in self.bad_models]
             if not models:
@@ -972,7 +1000,8 @@ class GeminiClient:
                     headers={"x-goog-api-key": self.api_key or ""},
                     json={
                         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                        "generationConfig": {"responseMimeType": "application/json"},
+                        # Gemma models do not accept JSON mode; their output is parsed leniently.
+                        "generationConfig": {} if model.startswith("gemma") else {"responseMimeType": "application/json"},
                     },
                     timeout=GEMINI_TIMEOUT,
                 )
@@ -985,8 +1014,7 @@ class GeminiClient:
                 try:
                     parts = r.json()["candidates"][0]["content"]["parts"]
                     text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
-                    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
-                    parsed = json.loads(text)
+                    parsed = parse_json_text(text)
                 except Exception as exc:  # noqa: BLE001
                     log(f"  Gemini returned unparseable output ({type(exc).__name__}), retrying")
                     self.errors.append(f"{label}: unparseable output")
@@ -1044,32 +1072,126 @@ class GeminiClient:
         return "transient"
 
 
-class ClaudeClient(GeminiClient):
-    """Claude via the Messages API, with Gemini as a fallback when it fails.
-    Exposes the same interface the rest of the pipeline uses."""
+class MultiClient(GeminiClient):
+    """Provider chain with one interface: Claude (if a key is set), then Gemini and
+    Gemma on the Gemini key, then Groq's free tier. When another provider is
+    available, Gemini gets a single pass so its overload back-offs cannot eat
+    the whole time budget."""
 
-    def __init__(self, anthropic_key: str | None, gemini_key: str | None):
+    def __init__(self, gemini_key: str | None, groq_key: str | None = None, anthropic_key: str | None = None):
         super().__init__(gemini_key)
+        self.groq_key = groq_key
+        self.groq_model = os.environ.get("GROQ_MODEL", "").strip() or GROQ_DEFAULT_MODEL
+        self.groq_failures = 0
+        self.groq_window: list[tuple[float, int]] = []   # (time, tokens) for the per-minute budget
+        self.groq_reasoning = True
         self.anthropic_key = anthropic_key
         self.claude_model = os.environ.get("CLAUDE_MODEL", "").strip() or CLAUDE_DEFAULT_MODEL
         self.claude_failures = 0
+        self.gemini_out = False
+        if groq_key or anthropic_key:
+            self.gemini_passes = 1
 
     @property
     def enabled(self) -> bool:
-        return bool(self.anthropic_key or self.api_key) and os.environ.get("SKIP_AI") != "1"
+        return bool(self.anthropic_key or self.api_key or self.groq_key) and os.environ.get("SKIP_AI") != "1"
+
+    def _stop(self, reason: str) -> None:
+        # Gemini giving up should hand over to Groq, not end the AI phase.
+        if "time" not in reason and self.groq_key and self.groq_failures < 3 and not self.gemini_out:
+            self.gemini_out = True
+            self.errors.append(f"Gemini: {reason}")
+            log(f"  Gemini out for this run ({reason}); continuing with Groq")
+            return
+        super()._stop(reason)
 
     def generate_json(self, prompt: str, label: str = "call"):
         if self.stopped or not self.enabled:
             return None
         if self.anthropic_key and self.claude_failures < 3:
-            result = self._claude(prompt, label)
-            if result is not None:
-                return result
-        if self.api_key:
-            log(f"  {label}: falling back to Gemini")
-            return super().generate_json(prompt, label)
+            r = self._claude(prompt, label)
+            if r is not None:
+                return r
+        if self.api_key and not self.gemini_out:
+            r = super().generate_json(prompt, label)
+            if r is not None:
+                return r
+        if self.groq_key and self.groq_failures < 3 and not self.stopped:
+            return self._groq(prompt, label)
         return None
 
+    # -- Groq (OpenAI-compatible) -------------------------------------------
+    def _groq_wait(self, estimate: int) -> None:
+        now = time.monotonic()
+        self.groq_window = [(t, n) for t, n in self.groq_window if now - t < 60]
+        used = sum(n for _, n in self.groq_window)
+        if used + estimate > GROQ_TPM_BUDGET and self.groq_window:
+            wait = 61 - (now - self.groq_window[0][0])
+            wait = min(wait, max(0.0, self.budget_left - 20))
+            if wait > 0:
+                log(f"  Groq: pausing {wait:.0f}s to stay inside the free per-minute limit")
+                time.sleep(wait)
+
+    def _groq(self, prompt: str, label: str):
+        estimate = len(prompt) // 4 + 1500
+        for attempt in range(3):
+            if self.budget_left <= 15:
+                self._stop("time budget exhausted")
+                return None
+            self._groq_wait(estimate)
+            body = {
+                "model": self.groq_model,
+                "messages": [
+                    {"role": "system", "content": "Return only valid JSON. If the task asks for a JSON array, "
+                                                  "return an object of the form {\"items\": [ ... ]}."},
+                    {"role": "user", "content": prompt},
+                ],
+                "response_format": {"type": "json_object"},
+                "temperature": 0.3,
+                "max_tokens": 4000,
+            }
+            if self.groq_reasoning and "gpt-oss" in self.groq_model:
+                body["reasoning_effort"] = "low"
+            self.calls += 1
+            try:
+                r = requests.post("https://api.groq.com/openai/v1/chat/completions",
+                                  headers={"Authorization": f"Bearer {self.groq_key}",
+                                           "Content-Type": "application/json"},
+                                  json=body, timeout=90)
+            except Exception as exc:  # noqa: BLE001
+                self.errors.append(f"{label}: Groq network {type(exc).__name__}")
+                time.sleep(min(5 * (attempt + 1), max(0.0, self.budget_left - 20)))
+                continue
+            if r.status_code == 200:
+                try:
+                    data = r.json()
+                    used = int((data.get("usage") or {}).get("total_tokens") or estimate)
+                    self.groq_window.append((time.monotonic(), used))
+                    parsed = unwrap_items(parse_json_text(data["choices"][0]["message"]["content"]))
+                    self.model_used = f"{self.groq_model} (Groq)"
+                    return parsed
+                except Exception:  # noqa: BLE001
+                    self.errors.append(f"{label}: Groq returned unparseable output")
+                    continue
+            msg = ""
+            try:
+                msg = str(r.json().get("error", {}).get("message", ""))[:140]
+            except Exception:  # noqa: BLE001
+                pass
+            log(f"  Groq {self.groq_model}: HTTP {r.status_code} {msg}")
+            self.errors.append(f"{label}: Groq HTTP {r.status_code}")
+            if r.status_code == 400 and "reasoning" in msg.lower() and self.groq_reasoning:
+                self.groq_reasoning = False
+                continue
+            if r.status_code in (401, 403, 404):
+                self.groq_failures = 99
+                return None
+            wait = float(r.headers.get("retry-after", 0) or 0) or 10 * (attempt + 1)
+            time.sleep(min(wait, 60, max(0.0, self.budget_left - 20)))
+        self.groq_failures += 1
+        return None
+
+    # -- Claude (optional, off unless ANTHROPIC_API_KEY is set) -------------
     def _claude(self, prompt: str, label: str):
         for attempt in range(3):
             if self.budget_left <= 15:
@@ -1093,22 +1215,15 @@ class ClaudeClient(GeminiClient):
             if r.status_code == 200:
                 try:
                     text = "".join(b.get("text", "") for b in r.json().get("content", []) if b.get("type") == "text")
-                    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
-                    parsed = json.loads(text)
+                    parsed = parse_json_text(text)
                     self.model_used = self.claude_model
                     return parsed
                 except Exception:  # noqa: BLE001
                     self.errors.append(f"{label}: Claude returned unparseable output")
                     continue
-            msg = ""
-            try:
-                msg = r.json().get("error", {}).get("message", "")[:120]
-            except Exception:  # noqa: BLE001
-                pass
-            self.errors.append(f"{label}: Claude HTTP {r.status_code} {msg}".strip())
-            log(f"  Claude {self.claude_model}: HTTP {r.status_code} {msg}")
+            self.errors.append(f"{label}: Claude HTTP {r.status_code}")
             if r.status_code in (400, 401, 403, 404):
-                self.claude_failures = 99        # bad key, model or request: stop trying Claude
+                self.claude_failures = 99
                 return None
             wait = float(r.headers.get("retry-after", 0) or 0) or 8 * (attempt + 1)
             time.sleep(min(wait, 45, max(0.0, self.budget_left - 20)))
@@ -1116,13 +1231,17 @@ class ClaudeClient(GeminiClient):
         return None
 
 
+ClaudeClient = MultiClient     # kept for older references
+
+
 def make_client() -> GeminiClient:
-    anthropic = os.environ.get("ANTHROPIC_API_KEY", "").strip() or None
     gemini = os.environ.get("GEMINI_API_KEY", "").strip() or None
-    if anthropic:
-        log(f"  Commentary: Claude ({os.environ.get('CLAUDE_MODEL', '').strip() or CLAUDE_DEFAULT_MODEL})"
-            + (", Gemini as fallback" if gemini else ""))
-        return ClaudeClient(anthropic, gemini)
+    groq = os.environ.get("GROQ_API_KEY", "").strip() or None
+    anthropic = os.environ.get("ANTHROPIC_API_KEY", "").strip() or None
+    chain = [n for n, k in (("Claude", anthropic), ("Gemini + Gemma", gemini), ("Groq", groq)) if k]
+    log("  Commentary providers: " + (" -> ".join(chain) or "none"))
+    if groq or anthropic:
+        return MultiClient(gemini, groq, anthropic)
     return GeminiClient(gemini)
 
 
@@ -1388,13 +1507,29 @@ Stories:
     return done
 
 
+def enrich_slice(client: GeminiClient, stories: list[Story], label: str, depth: int = 0) -> int:
+    """Try a slice; if it comes back empty, split it in half and try each half,
+    down to single stories. Small requests get through busy servers and never
+    time out."""
+    if not stories or client.stopped:
+        return 0
+    done = enrich_batch(client, stories, label)
+    left = [s for s in stories if not s.ai]
+    if left and len(stories) > 1 and depth < 3 and not client.stopped and client.budget_left > 45:
+        mid = (len(left) + 1) // 2
+        log(f"  {label}: splitting {len(left)} story(ies) into smaller slices")
+        done += enrich_slice(client, left[:mid], f"{label}.a", depth + 1)
+        done += enrich_slice(client, left[mid:], f"{label}.b", depth + 1)
+    return done
+
+
 def enrich_all(client: GeminiClient, stories: list[Story]) -> None:
-    """Enrich every chosen story in batches, then one retry pass for the gaps."""
+    """Enrich every chosen story in slices, then one retry pass for the gaps."""
     batches = [stories[i:i + ENRICH_BATCH_SIZE] for i in range(0, len(stories), ENRICH_BATCH_SIZE)]
     for n, batch in enumerate(batches, 1):
         if client.stopped:
             break
-        enrich_batch(client, batch, f"batch {n}/{len(batches)}")
+        enrich_slice(client, batch, f"batch {n}/{len(batches)}")
     missing = [s for s in stories if not s.ai]
     for n in range(0, len(missing), ENRICH_BATCH_SIZE):
         if client.stopped or client.budget_left < 60:

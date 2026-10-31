@@ -349,7 +349,7 @@ class TestClaudeClient(unittest.TestCase):
             calls.append(url)
             return FakeResponse(200, {"content": [{"type": "text", "text": '```json\n{"ok": 1}\n```'}]})
         bb.requests.post = post
-        c = bb.ClaudeClient("sk-test", None)
+        c = bb.MultiClient(None, None, "sk-test")
         self.assertEqual(c.generate_json("p"), {"ok": 1})
         self.assertIn("api.anthropic.com", calls[0])
         self.assertEqual(c.model_used, bb.CLAUDE_DEFAULT_MODEL)
@@ -360,7 +360,7 @@ class TestClaudeClient(unittest.TestCase):
                 return FakeResponse(401, {"error": {"message": "invalid x-api-key"}})
             return FakeResponse(200, ok_payload({"from": "gemini"}))
         bb.requests.post = post
-        c = bb.ClaudeClient("sk-bad", "gem-key")
+        c = bb.MultiClient("gem-key", None, "sk-bad")
         c.candidates = ["m1"]
         self.assertEqual(c.generate_json("p"), {"from": "gemini"})
         self.assertEqual(c.claude_failures, 99, "a bad key must not be retried all morning")
@@ -372,6 +372,73 @@ class TestClaudeClient(unittest.TestCase):
         s.key_term = {"term": "Repo rate", "meaning": "The rate at which the RBI lends to banks, now 5.5%."}
         bb.ground_story(s)
         self.assertIsNone(s.key_term)
+
+
+class TestFreeFallbacks(unittest.TestCase):
+    def setUp(self):
+        self._post, self._sleep = bb.requests.post, bb.time.sleep
+        bb.time.sleep = lambda *_: None
+        bb.GEMINI_DELAY_SECONDS_ORIG, bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS, 0
+
+    def tearDown(self):
+        bb.requests.post, bb.time.sleep = self._post, self._sleep
+        bb.GEMINI_DELAY_SECONDS = bb.GEMINI_DELAY_SECONDS_ORIG
+
+    def test_groq_takes_over_when_gemini_is_overloaded(self):
+        hits = []
+
+        def post(url, **kw):
+            hits.append(url)
+            if "googleapis" in url:
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, {"choices": [{"message": {"content": '{"items": [{"index": 0}]}'}}],
+                                      "usage": {"total_tokens": 900}})
+        bb.requests.post = post
+        c = bb.MultiClient("gem", "groq-key")
+        c.candidates = ["m1", "m2"]
+        self.assertEqual(c.generate_json("p"), [{"index": 0}], "Groq's {items:[...]} is unwrapped")
+        self.assertTrue(any("groq.com" in h for h in hits))
+        self.assertLessEqual(sum("googleapis" in h for h in hits), 2, "only one quick pass on Gemini")
+        self.assertIn("Groq", c.model_used)
+
+    def test_gemma_is_called_without_json_mode(self):
+        bodies = {}
+
+        def post(url, json=None, **kw):
+            model = url.split("/models/")[1].split(":")[0]
+            bodies[model] = json
+            if model.startswith("gemini"):
+                return FakeResponse(503, text="overloaded")
+            return FakeResponse(200, {"candidates": [{"content": {"parts": [{"text": 'Here you go:\n```json\n[{"index": 0}]\n```'}]}}]})
+        bb.requests.post = post
+        c = bb.GeminiClient("gem")
+        c.candidates = ["gemini-x", "gemma-4-31b-it"]
+        self.assertEqual(c.generate_json("p"), [{"index": 0}])
+        self.assertEqual(bodies["gemma-4-31b-it"]["generationConfig"], {})
+        self.assertIn("responseMimeType", bodies["gemini-x"]["generationConfig"])
+
+    def test_failed_slice_is_split_down(self):
+        sizes = []
+
+        class Fake:
+            stopped, budget_left, errors, bad_models, model_used, calls = False, 999, [], {}, "m", 0
+
+            def generate_json(self, prompt, label=""):
+                n = prompt.count("\n[")
+                sizes.append(n)
+                if n > 2:
+                    return None                       # big slices fail, like a busy server
+                return [{"index": i, "summary": "Short summary."} for i in range(n)]
+        stories = [make(f"Story number {i} about trade and growth") for i in range(5)]
+        bb.enrich_slice(Fake(), stories, "batch 1/1")
+        self.assertTrue(all(s.ai for s in stories))
+        self.assertEqual(sizes[0], 5)
+        self.assertLessEqual(max(sizes[1:]), 3)
+
+    def test_parse_json_text_tolerates_prose(self):
+        self.assertEqual(bb.parse_json_text('Sure! {"a": 1} Hope this helps.'), {"a": 1})
+        self.assertEqual(bb.unwrap_items({"items": [1, 2]}), [1, 2])
+        self.assertEqual(bb.unwrap_items({"gd_topic": {}, "concept": {}}), {"gd_topic": {}, "concept": {}})
 
 
 class TestMisc(unittest.TestCase):
