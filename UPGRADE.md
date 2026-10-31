@@ -1,3 +1,11 @@
+# v9: a real desktop layout
+
+- **Cover as a spread on wide screens:** date and GD topic on the left, "Open with" and "Close with" on the right, the four stakeholder views across the bottom.
+- **Three columns below it:** sections and reading progress on the left, stories in the middle, the concept of the day and a "week in review" card on the right (sticky).
+- **In 60 seconds as headline numbers:** six tiles, one per section, each leading with its figure in large type. Clock times are skipped and figures with units are preferred. On phones the tiles become a swipeable row.
+- **A colour per section,** used in the nav, the tiles and the section headings, in both light and dark themes.
+- The concept card keeps its Indian example and GD usage behind a disclosure so the rail fits on one screen.
+
 # v8: slicing and free fallbacks
 
 Why notes went missing (40 days of logs): Gemini's free tier was overloaded (HTTP 503) on 34 days, a retired model (404) wasted a slot on 27, and 9-story requests timed out on 14. Only 12 of 40 days had full notes.

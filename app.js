@@ -259,21 +259,36 @@
     var items = [];
     (b.categories || []).forEach(function (c) {
       var pool = (c.stories || []).filter(function (x) { return x.ai && x.key_fact && !x.fact_is_context; });
-      var money = /%|\$|₹|Rs\b|crore|billion|trillion|lakh|\bbn\b/i;
-      var s = pool.filter(function (x) { return money.test(x.key_fact); })[0] || pool[0];
-      if (s) items.push({ cat: c.title.split(/[,&:]/)[0].trim(), s: s });
+      var withNum = pool.filter(function (x) { return pickNumber(x.key_fact); });
+      var unitRx = /[%$₹€£]|Rs|bn|billion|crore|lakh|million|trillion|hours|days|months|years/i;
+      var withUnit = withNum.filter(function (x) { return unitRx.test(pickNumber(x.key_fact)); });
+      var s = withUnit[0] || withNum[0] || pool[0];
+      if (s) items.push({ key: c.key, cat: c.title.split(/[,&:]/)[0].trim(), s: s, num: pickNumber(s.key_fact) });
     });
     if (items.length < 3) return "";
     return (
       '<section class="quick" aria-labelledby="quick-h">' +
-        '<h2 id="quick-h">In 60 seconds</h2>' +
-        '<p class="quick-sub">One number from each section worth carrying into the room.</p>' +
-        "<ul>" + items.map(function (it) {
-          return '<li><button type="button" class="quick-item" data-goto="' + esc(it.s.url) + '">' +
-            '<span class="quick-cat">' + esc(it.cat) + "</span>" +
-            '<span class="quick-fact">' + esc(it.s.key_fact) + "</span>" +
+        '<div class="quick-head"><h2 id="quick-h">In 60 seconds</h2>' +
+        '<p class="quick-sub">One number from each section worth carrying into the room. Tap one to read the story.</p></div>' +
+        '<ul class="tiles">' + items.map(function (it) {
+          return '<li><button type="button" class="tile" data-cat="' + esc(it.key) + '" data-goto="' + esc(it.s.url) + '">' +
+            '<span class="tile-cat">' + esc(it.cat) + "</span>" +
+            (it.num ? '<span class="tile-num">' + esc(it.num) + "</span>" : "") +
+            '<span class="tile-fact">' + esc(it.s.key_fact) + "</span>" +
             "</button></li>";
         }).join("") + "</ul>" +
+      "</section>"
+    );
+  }
+
+  function renderWeekTeaser() {
+    if (archiveIndex.length < 3) return "";
+    return (
+      '<section class="teaser">' +
+        '<div class="kicker">The week in review</div>' +
+        "<h2>Threads, topics and an 8-question quiz</h2>" +
+        "<p>Everything from the last seven briefs on one page, so the week's news actually sticks.</p>" +
+        '<button class="text-btn" type="button" data-open-week="1">Open this week</button>' +
       "</section>"
     );
   }
@@ -285,8 +300,12 @@
         '<div class="kicker">Concept of the day</div>' +
         '<h2 id="concept-name">' + esc(c.name) + "</h2>" +
         "<p>" + esc(c.explanation) + "</p>" +
-        (c.indian_example ? '<div class="sub">Indian example</div><p>' + esc(c.indian_example) + "</p>" : "") +
-        (c.use_in_gd ? '<div class="sub">How to use it in a GD</div><p>' + esc(c.use_in_gd) + "</p>" : "") +
+        (c.indian_example || c.use_in_gd
+          ? '<details class="concept-more"><summary>Indian example and how to use it</summary>' +
+              (c.indian_example ? '<div class="sub">Indian example</div><p>' + esc(c.indian_example) + "</p>" : "") +
+              (c.use_in_gd ? '<div class="sub">How to use it in a GD</div><p>' + esc(c.use_in_gd) + "</p>" : "") +
+            "</details>"
+          : "") +
       "</section>"
     );
   }
@@ -354,7 +373,7 @@
     if (!stories) stories = '<p class="plain" style="padding:1rem 0">No fresh stories were found in this category today.</p>';
     return (
       '<details class="category" id="cat-' + esc(c.key) + '" data-key="' + esc(c.key) + '"' + (open ? " open" : "") + ">" +
-        '<summary><span class="chev" aria-hidden="true"></span>' + esc(c.title) +
+        '<summary><span class="chev" aria-hidden="true"></span><span class="cat-dot" aria-hidden="true"></span>' + esc(c.title) +
           '<span class="count">' + list.length + " stories</span></summary>" +
         '<div class="body">' + stories + "</div>" +
       "</details>"
@@ -368,7 +387,7 @@
       '<div class="stickybar">' +
         '<nav class="chips" aria-label="Jump to a section">' +
           cats.map(function (c) {
-            return '<button class="chip" type="button" data-jump="' + esc(c.key) + '">' +
+            return '<button class="chip" type="button" data-cat="' + esc(c.key) + '" data-jump="' + esc(c.key) + '">' +
               esc(c.title.split(/[,&:]/)[0].trim()) + " <span>" + (c.stories || []).length + "</span></button>";
           }).join("") +
         "</nav>" +
@@ -439,13 +458,16 @@
     // The cover (inside the indigo band) carries the notices and the GD topic.
     if (coverEl) coverEl.innerHTML = renderStaleNotice(b) + aiNote + renderHero(b.gd_topic);
 
+    // Desktop: section rail | stories | concept and weekly card. On phones the
+    // rails fold into the flow (see .layout in style.css).
     var html =
-      renderChips(b) +
       renderQuick(b) +
-      renderConcept(b.concept) +
-
-      (b.categories || []).map(renderCategory).join("") +
-      renderSearch();
+      '<div class="layout">' +
+        '<aside class="rail-left" aria-label="Sections">' + renderChips(b) + "</aside>" +
+        '<aside class="rail-right">' + renderConcept(b.concept) + renderWeekTeaser() + "</aside>" +
+        '<div class="main">' +
+          (b.categories || []).map(renderCategory).join("") +
+          renderSearch();
 
     var failed = b.sources_failed || [];
     var aiErrors = b.ai_errors || [];
@@ -463,7 +485,8 @@
           (b.story_cap ? "<p>Daily cap: " + esc(b.story_cap) + " stories</p>" : "") +
           "<p>Generated " + esc(new Date(b.generated_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })) + " IST</p>" +
         "</details>" +
-      "</div>";
+      "</div>" +
+      "</div></div>";
 
     app.innerHTML = html;
     document.title = "The Brief \u00b7 " + shortDate(b.date, b.date_label);
@@ -596,6 +619,8 @@
         }
       });
     });
+    var teaser = app.querySelector("[data-open-week]");
+    if (teaser) teaser.addEventListener("click", function () { openWeek(); });
     wireSearch();
     updateProgress();
   }
@@ -786,7 +811,7 @@
   }
 
   // ---- quiz -------------------------------------------------------------
-  var NUM_RX = /(?:[$₹€£]\s?|Rs\.?\s?)?\d[\d,]*(?:\.\d+)?(?:\s?(?:%|per cent|bn|billion|crore|lakh|million|trillion|tonnes|km)\b|B\b|%)?/g;
+  var NUM_RX = /(?:[$₹€£]\s?|Rs\.?\s?)?\d[\d,]*(?:\.\d+)?(?:\s?(?:%|per cent|bn|billion|crore|lakh|million|trillion|tonnes|km|hours|days|months|years)\b|B\b|%)?/g;
   var MONTH_BEFORE = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*$/i;
   function pickNumber(fact) {
     var best = null, m;
@@ -794,8 +819,10 @@
     while ((m = NUM_RX.exec(fact))) {
       var tok = m[0].replace(/[,.]+$/, "").trim();
       var before = fact.slice(0, m.index);
+      var after = fact.slice(m.index + m[0].length, m.index + m[0].length + 4);
+      if (/^\s?(am|pm|a\.m|p\.m)\b/i.test(after)) continue;   // a clock time
       var plain = tok.replace(/[^\d.]/g, "");
-      var hasUnit = /[%$₹€£]|Rs|bn|billion|crore|lakh|million|trillion|B$/i.test(tok);
+      var hasUnit = /[%$₹€£]|Rs|bn|billion|crore|lakh|million|trillion|hours|days|months|years|B$/i.test(tok);
       if (/^(19|20)\d\d$/.test(plain) && !hasUnit) continue;     // a year
       if (MONTH_BEFORE.test(before)) continue;                    // "October 24"
       if (!hasUnit && !(parseFloat(plain) > 12) && plain.indexOf(".") === -1) continue;
