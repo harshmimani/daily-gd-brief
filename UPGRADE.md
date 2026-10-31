@@ -1,3 +1,11 @@
+# v6: sources you can trust, numbers you can quote
+
+- **Approved publishers only.** `TRUSTED_DOMAINS` lists every outlet the brief may use. Links are checked after Google News decoding and redirects; anything else, and sponsored or "brand" posts, is dropped.
+- **No outside facts.** The commentary prompt no longer asks for "background statistics". The model may only quote what the article says, and leaves the quote empty when there is nothing concrete.
+- **Automatic number check.** After the model writes, every number and code (G20, COP17) in summaries, debate points, quotes, the GD topic and the concept is compared with the article text. Sentences with anything unsupported are removed. The result is recorded in each brief's `grounding` field and shown under "How this brief was built".
+- **More source text.** Snippets now include the article's opening paragraphs (up to about 1,800 characters), so the model has real material and the checker has more to compare against.
+- 6 new tests (30 total).
+
 # v5: evergreen palette and a living cover
 
 - Palette moves to deep evergreen and mint (consulting-style greens; no firm's branding is used). Brick red stays for the "against" side of each debate.

@@ -106,6 +106,34 @@ JUNK_URL = re.compile(
     re.I,
 )
 
+# Only these publishers may appear in the brief. A story whose link (after
+# Google News decoding and redirects) lands anywhere else is dropped.
+TRUSTED_DOMAINS = (
+    "bbc.co.uk", "bbc.com", "aljazeera.com", "reuters.com", "thehindu.com",
+    "indianexpress.com", "thediplomat.com", "livemint.com", "economictimes.indiatimes.com",
+    "business-standard.com", "pib.gov.in", "rbi.org.in", "inc42.com", "yourstory.com",
+    "techcrunch.com", "technologyreview.com", "downtoearth.org.in", "carbonbrief.org",
+    "mongabay.com", "sciencedaily.com", "nature.com", "theprint.in", "scroll.in",
+)
+# Paid or promotional placements that some publisher feeds mix in.
+SPONSORED_URL = re.compile(
+    r"/(brand-?solutions?|brand-?stor(?:y|ies)|brand-?post|sponsored|partner-?content|"
+    r"partnered|advertorial|spotlight|press-?releases?|impact-?feature|ettech-?spotlight)/",
+    re.I,
+)
+SPONSORED_TITLE = re.compile(r"\b(sponsored|advertorial|partner content|brand story|in association with)\b", re.I)
+
+
+def host_of(url: str) -> str:
+    m = re.match(r"https?://([^/:?#]+)", (url or "").strip(), re.I)
+    return m.group(1).lower() if m else ""
+
+
+def is_trusted(url: str) -> bool:
+    h = host_of(url)
+    return any(h == d or h.endswith("." + d) for d in TRUSTED_DOMAINS)
+
+
 # Headlines that suggest a genuinely NEW development, so it is fine to run a
 # story again even if we covered the same subject a day or two ago.
 DEVELOPMENT_RE = re.compile(
@@ -326,7 +354,7 @@ class Story:
         parts = [self.description]
         if self.snippet and self.snippet[:60].lower() not in self.description.lower():
             parts.append(self.snippet)
-        return " ".join(p for p in parts if p)[:700]
+        return " ".join(p for p in parts if p)[:1400]
 
     def to_json(self) -> dict:
         return {
@@ -465,22 +493,38 @@ META_DESC_ALT = re.compile(
 )
 
 
+PARA = re.compile(r"<p[^>]*>(.*?)</p>", re.I | re.S)
+
+
 def fetch_snippet(url: str) -> str:
-    if not safe_url(url):
+    """Meta description plus the article's opening paragraphs: the text the
+    commentary is written from and checked against."""
+    if not safe_url(url) or not is_trusted(url):
         return ""
     try:
         r = requests.get(url, headers=BROWSER_HEADERS, timeout=SNIPPET_TIMEOUT, stream=True)
-        if r.status_code != 200:
+        if r.status_code != 200 or not is_trusted(r.url):
             return ""
-        chunk = r.raw.read(180_000, decode_content=True) or b""
+        chunk = r.raw.read(400_000, decode_content=True) or b""
         text = chunk.decode("utf-8", errors="ignore")
+        parts: list[str] = []
         for rx in (META_DESC, META_DESC_ALT):
             m = rx.search(text)
             if m:
-                return strip_html(m.group(1))[:400]
+                parts.append(strip_html(m.group(1)))
+                break
+        body = 0
+        for m in PARA.finditer(text):
+            ptxt = strip_html(m.group(1))
+            if len(ptxt) < 80 or re.search(r"(subscribe|sign up|cookie|newsletter|copyright|all rights reserved)", ptxt, re.I):
+                continue
+            parts.append(ptxt)
+            body += len(ptxt)
+            if body > 1400:
+                break
+        return " ".join(parts)[:1800]
     except Exception:  # noqa: BLE001
         return ""
-    return ""
 
 
 def add_snippets(stories: list[Story]) -> int:
@@ -538,6 +582,10 @@ def fetch_feed(cat_key: str, feed: dict) -> tuple[list[Story], str, str | None]:
             continue
         if JUNK_PATTERNS.search(title) or JUNK_URL.search(link):
             continue
+        if SPONSORED_URL.search(link) or SPONSORED_TITLE.search(title):
+            continue
+        if not via_gnews and not is_trusted(link):
+            continue          # e.g. a feed linking out to a partner or aggregator site
         published = entry_datetime(e)
         if published is None and REQUIRE_DATE:
             continue
@@ -1074,6 +1122,108 @@ def story_block(stories: list[Story], with_category: bool = False) -> str:
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# Grounding check: every number the model writes must appear in the source
+# ---------------------------------------------------------------------------
+
+NUM_TOKEN = re.compile(r"(?<![\w.])[$₹€£]?\d[\d,]*(?:\.\d+)?")
+# Codes like G20, Q2, COP17, NVS-03, 5G. Lower-case units ("500bn", "16km") are
+# left to the number check, which already compares their digits.
+CODE_TOKEN = re.compile(r"\b(?:[A-Za-z][A-Za-z-]*\d[\w-]*|\d+[A-Z]{1,3})\b")
+
+
+def _norm_num(tok: str) -> str:
+    t = re.sub(r"[$₹€£,]", "", tok)
+    if "." in t:
+        t = t.rstrip("0").rstrip(".")
+    return t
+
+
+def numbers_in(text: str) -> set[str]:
+    return {_norm_num(t) for t in NUM_TOKEN.findall(text or "")}
+
+
+def unsupported_numbers(text: str, source: str, allowed: set[str] | None = None) -> list[str]:
+    """Numbers/codes in `text` that do not occur in `source`."""
+    src_nums = numbers_in(source) | (allowed or set())
+    src_low = (source or "").lower()
+    bad = []
+    for n in numbers_in(text):
+        if n in src_nums:
+            continue
+        if n.isdigit() and int(n) <= 12:
+            continue                       # "two points", "Q3", small counts
+        bad.append(n)
+    for code in CODE_TOKEN.findall(text or ""):
+        if code.lower() not in src_low and not re.fullmatch(r"\d+(st|nd|rd|th|s)", code, re.I):
+            bad.append(code)
+    return bad
+
+
+def _year_allow() -> set[str]:
+    y = datetime.now(IST).year
+    return {str(y), str(y - 1)}
+
+
+SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'])")
+
+
+def keep_grounded(text: str, source: str, counter: list[int]) -> str:
+    """Drop any sentence that carries a number the source does not contain."""
+    if not text:
+        return text
+    kept = []
+    for sent in SENT_SPLIT.split(text.strip()):
+        if unsupported_numbers(sent, source, _year_allow()):
+            counter[0] += 1
+            continue
+        kept.append(sent)
+    return " ".join(kept).strip()
+
+
+def ground_story(s: "Story") -> int:
+    """Strip unsupported numbers from one story's commentary. Returns removals."""
+    source = " ".join([s.title, s.description, s.snippet])
+    removed = [0]
+    summary = keep_grounded(s.summary, source, removed)
+    if not summary:
+        summary = s.description or s.snippet[:300]
+    s.summary = summary
+    s.why_it_matters = keep_grounded(s.why_it_matters, source, removed)
+    s.gd_for = [p for p in (keep_grounded(x, source, removed) for x in s.gd_for) if p]
+    s.gd_against = [p for p in (keep_grounded(x, source, removed) for x in s.gd_against) if p]
+    if s.key_fact:
+        fact = re.sub(r"^context:\s*", "", s.key_fact, flags=re.I)
+        if s.key_fact.lower().startswith("context") or unsupported_numbers(fact, source, _year_allow()):
+            s.key_fact = ""
+            removed[0] += 1
+    return removed[0]
+
+
+def ground_topic(topic: dict | None, concept: dict | None, stories: list["Story"]) -> int:
+    source = " ".join(" ".join([s.title, s.description, s.snippet]) for s in stories)
+    removed = [0]
+    for obj, keys in ((topic, ("topic", "why_now", "opening_line", "closing_line")),
+                      (concept, ("explanation", "indian_example", "use_in_gd"))):
+        if not isinstance(obj, dict):
+            continue
+        for k in keys:
+            if isinstance(obj.get(k), str):
+                if k == "topic":
+                    if unsupported_numbers(obj[k], source, _year_allow()):
+                        obj[k] = re.sub(r"\s*[$₹€£]?\d[\d,.]*%?", "", obj[k]).strip()
+                        removed[0] += 1
+                else:
+                    obj[k] = keep_grounded(obj[k], source, removed)
+        if isinstance(obj.get("perspectives"), list):
+            obj["perspectives"] = [p for p in (keep_grounded(str(x), source, removed)
+                                               for x in obj["perspectives"]) if p]
+    return removed[0]
+
+
+GROUNDING = {"removed": 0}
+
+
 def enrich_batch(client: GeminiClient, stories: list[Story], label: str) -> int:
     if not stories:
         return 0
@@ -1081,14 +1231,18 @@ def enrich_batch(client: GeminiClient, stories: list[Story], label: str) -> int:
 Today's date: {datetime.now(IST).strftime('%d %B %Y')}.
 
 For EACH story below, write:
-- "summary": 2-3 short sentences in simple English explaining what happened. Use ONLY the
-  information given. Never invent numbers, dates or names.
+- "summary": 2-3 short sentences in simple English explaining what happened.
 - "why_it_matters": 1-2 sentences, with an India angle where relevant.
 - "gd_for": exactly 2 short points supporting the development / the "pro" side.
 - "gd_against": exactly 2 short points opposing it, or alternative perspectives / risks.
-- "key_fact": ONE quotable fact or number taken from the story text above. If the story text
-  contains no usable number, give a well-known background statistic and START the string with
-  "Context: " so the student knows to verify it.
+- "key_fact": ONE quotable fact or number copied from the story text. If the story text has
+  no concrete fact worth quoting, return an empty string.
+
+STRICT RULES (every output is checked automatically against the story text):
+- Use ONLY the headline and Details given for that story. Do not add outside knowledge.
+- Never write a number, percentage, amount, date, name or quotation that is not in the
+  story text. Arguments in gd_for / gd_against must be reasoning, not new statistics.
+- If the Details are thin, write a shorter summary rather than filling gaps.
 
 Return ONLY a JSON array with one object per story, in the same order, each with an "index"
 field matching the story number.
@@ -1120,6 +1274,7 @@ Stories:
         s.gd_for = [str(x).strip() for x in item.get("gd_for", []) if str(x).strip()][:2]
         s.gd_against = [str(x).strip() for x in item.get("gd_against", []) if str(x).strip()][:2]
         s.key_fact = str(item.get("key_fact", "")).strip()
+        GROUNDING["removed"] += ground_story(s)
         s.ai = True
         done += 1
     log(f"  {label}: {done}/{len(stories)} stories enriched")
@@ -1166,8 +1321,12 @@ in GDs and interviews, ideally connected to today's news. Do NOT use these recen
 concepts: {avoid}. Provide:
 - "name": concept name
 - "explanation": 3-4 simple sentences explaining it as if to a smart friend
-- "indian_example": a concrete Indian company, policy or market example (2-3 sentences)
+- "indian_example": a concrete Indian company, policy or market example (2-3 sentences);
+  describe it qualitatively and do not quote figures you cannot be sure of
 - "use_in_gd": 1-2 sentences on how to drop this concept into a GD or interview answer
+
+Do not use any number in the topic, opening or closing lines that is not in today's headlines
+or story details; every number is checked automatically and unsupported ones are removed.
 
 Return ONLY JSON: {{"gd_topic": {{...}}, "concept": {{...}}}}
 """
@@ -1309,6 +1468,7 @@ def build_payload(
         ],
         "sources_ok": ok_sources,
         "sources_failed": failed_sources,
+        "grounding": {"checked": ai_stories, "removed": GROUNDING["removed"]},
     }
     brief["reading_time_min"] = reading_time_minutes(brief)
     return brief
@@ -1367,7 +1527,11 @@ def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str])
     """Fill in commentary, topic and concept that the morning run could not get.
     Returns True if the file changed."""
     brief = json.loads(path.read_text(encoding="utf-8"))
+    GROUNDING["removed"] = 0
     cats = brief.get("categories") or []
+    for c in cats:     # never re-publish a story from outside the trusted list
+        c["stories"] = [d for d in c.get("stories", [])
+                        if is_trusted(d.get("url", "")) or str(d.get("url", "")).startswith("https://news.google.com/")]
     stories = {c["key"]: [story_from_json(d, c["key"]) for d in c.get("stories", [])] for c in cats}
     everything = [s for c in cats for s in stories[c["key"]]]
     missing = [s for s in everything if not s.ai]
@@ -1381,6 +1545,7 @@ def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str])
     changed = False
     if need_topic or need_concept:
         topic, concept = generate_topic_and_concept(client, everything, recent_concepts)
+        GROUNDING["removed"] += ground_topic(topic, concept, everything)
         if topic and need_topic:
             brief["gd_topic"], changed = topic, True
         if concept and need_concept:
@@ -1403,6 +1568,9 @@ def backfill_brief(client: GeminiClient, path: Path, recent_concepts: list[str])
     brief["ai_errors"] = sorted(set(client.errors))[:10]
     brief["ai_models_dropped"] = [f"{m}: {why}" for m, why in client.bad_models.items()]
     brief["ai_backfilled_at"] = datetime.now(IST).isoformat()
+    prev = brief.get("grounding") or {}
+    brief["grounding"] = {"checked": brief["ai_story_count"],
+                          "removed": int(prev.get("removed", 0)) + GROUNDING["removed"]}
     brief["reading_time_min"] = reading_time_minutes(brief)
 
     payload = json.dumps(brief, indent=2, ensure_ascii=False)
@@ -1497,6 +1665,16 @@ def main() -> int:
             for s, url in zip(gnews_stories, ex.map(lambda x: decode_gnews_link(x.url), gnews_stories)):
                 if safe_url(url):
                     s.url = url
+    untrusted = [s for s in chosen_all
+                 if not s.url.startswith("https://news.google.com/")
+                 and (not is_trusted(s.url) or SPONSORED_URL.search(s.url))]
+    if untrusted:
+        for s in untrusted:
+            log(f"  Dropped (untrusted source): {s.title[:70]} -> {host_of(s.url)}")
+        bad = {id(s) for s in untrusted}
+        for k in selected:
+            selected[k] = [s for s in selected[k] if id(s) not in bad]
+        chosen_all = [s for s in chosen_all if id(s) not in bad]
     log(f"  {len(gnews_stories)} Google News link(s) resolved; "
         f"{add_snippets(chosen_all)} article snippet(s) fetched")
 
@@ -1514,6 +1692,7 @@ def main() -> int:
         log("\n6) Writing the GD topic and concept of the day")
         recent_concepts = [e.get("concept") for e in load_index()[:14] if e.get("concept")]
         topic, concept = generate_topic_and_concept(client, chosen_all, recent_concepts)
+        GROUNDING["removed"] += ground_topic(topic, concept, chosen_all)
         if topic:
             log(f"  Topic: {topic.get('topic', '')[:90]}")
         else:

@@ -195,7 +195,7 @@
     if (no) parts.push("Edition " + no);
     if (b.reading_time_min) parts.push(b.reading_time_min + " min read");
     if (b.story_count) parts.push(b.story_count + " stories");
-    if ((b.sources_ok || []).length) parts.push(b.sources_ok.length + " sources");
+    if ((b.sources_ok || []).length) parts.push(b.sources_ok.length + " vetted sources");
     metaEl.textContent = parts.join(", ");
     var savedBtn = document.getElementById("saved-btn");
     if (savedBtn) updateSavedCount();
@@ -452,6 +452,10 @@
           "<p>Worked: " + esc((b.sources_ok || []).join(", ") || "none") + "</p>" +
           (failed.length ? "<p>Could not fetch: " + esc(failed.join(", ")) + "</p>" : "") +
           (b.ai_model ? "<p>Commentary model: " + esc(b.ai_model) + "</p>" : "") +
+          (b.grounding
+            ? "<p>Fact check: every number in the notes was compared with the article text" +
+              (b.grounding.removed ? "; " + esc(b.grounding.removed) + " unsupported line" + (b.grounding.removed === 1 ? " was" : "s were") + " removed." : "; nothing needed removing.") + "</p>"
+            : "") +
           (aiErrors.length ? "<p>Model log: " + esc(aiErrors.join("; ")) + "</p>" : "") +
           (b.story_cap ? "<p>Daily cap: " + esc(b.story_cap) + " stories</p>" : "") +
           "<p>Generated " + esc(new Date(b.generated_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })) + " IST</p>" +

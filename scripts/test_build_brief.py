@@ -255,9 +255,9 @@ class TestBackfill(unittest.TestCase):
         orig = (bb.DATA_DIR, bb.ARCHIVE_DIR)
         bb.DATA_DIR, bb.ARCHIVE_DIR = tmp, tmp / "archive"
         bb.ARCHIVE_DIR.mkdir()
-        done = {"title": "Already done", "url": "https://e.com/1", "source": "X", "summary": "AI text",
+        done = {"title": "Already done", "url": "https://www.thehindu.com/a1", "source": "X", "summary": "AI text",
                 "why_it_matters": "w", "gd_for": ["a"], "gd_against": ["b"], "key_fact": "k", "ai": True}
-        todo = {"title": "RBI holds repo rate", "url": "https://e.com/2", "source": "Mint",
+        todo = {"title": "RBI holds repo rate", "url": "https://www.livemint.com/a2", "source": "Mint",
                 "summary": "RSS text", "why_it_matters": "", "gd_for": [], "gd_against": [],
                 "key_fact": "", "ai": False}
         brief = {"date": "2026-10-31", "story_count": 2, "gd_topic": {"topic": "t"},
@@ -288,6 +288,48 @@ class TestBackfill(unittest.TestCase):
             self.assertFalse(bb.backfill_brief(Fake(), path, []), "nothing left to do")
         finally:
             bb.DATA_DIR, bb.ARCHIVE_DIR = orig
+
+
+class TestGrounding(unittest.TestCase):
+    SRC = ("India's forex reserves fell $1.2 billion to $719.74 billion in the week ended October 24, "
+           "according to the RBI. Poverty fell from 27.1% to 2.6% (World Bank). Rs 8,387 crore profit. G20 talks.")
+
+    def test_supported_numbers_pass(self):
+        self.assertEqual(bb.unsupported_numbers("Reserves fell $1.2 billion to $719.74 billion.", self.SRC), [])
+        self.assertEqual(bb.unsupported_numbers("Profit was ₹8,387 crore at the G20.", self.SRC), [])
+        self.assertEqual(bb.unsupported_numbers("Poverty is now 2.60%.", self.SRC), [])
+
+    def test_invented_numbers_are_caught(self):
+        self.assertIn("650", bb.unsupported_numbers("Reserves peaked at $650 billion.", self.SRC))
+        self.assertIn("COP29", bb.unsupported_numbers("As agreed at COP29.", self.SRC))
+
+    def test_unit_suffix_is_not_a_code(self):
+        self.assertEqual(bb.unsupported_numbers("A $1.2bn fall.", self.SRC), [])
+
+    def test_sentence_with_invented_number_is_dropped(self):
+        n = [0]
+        out = bb.keep_grounded("Reserves fell $1.2 billion. Analysts expect $800 billion by March.", self.SRC, n)
+        self.assertEqual(out, "Reserves fell $1.2 billion.")
+        self.assertEqual(n[0], 1)
+
+    def test_story_grounding(self):
+        s = make("India forex reserves fall $1.2 billion to $719.74 billion")
+        s.description = self.SRC
+        s.summary = "Reserves fell to $719.74 billion. This is the lowest since 2019 at $600 billion."
+        s.gd_for = ["Reserves are still large.", "Imports are covered for 11.5 months."]
+        s.key_fact = "Context: India holds the 4th largest reserves globally at $700bn."
+        removed = bb.ground_story(s)
+        self.assertEqual(s.summary, "Reserves fell to $719.74 billion.")
+        self.assertEqual(s.gd_for, ["Reserves are still large."])
+        self.assertEqual(s.key_fact, "", "background 'Context:' facts are no longer allowed")
+        self.assertEqual(removed, 3)
+
+    def test_trusted_domains(self):
+        self.assertTrue(bb.is_trusted("https://www.thehindu.com/news/x"))
+        self.assertTrue(bb.is_trusted("https://economictimes.indiatimes.com/news/x"))
+        self.assertFalse(bb.is_trusted("https://randomnews.example.com/x"))
+        self.assertFalse(bb.is_trusted("https://thehindu.com.evil.io/x"))
+        self.assertTrue(bb.SPONSORED_URL.search("https://economictimes.indiatimes.com/brand-solutions/x/123.cms"))
 
 
 class TestMisc(unittest.TestCase):
